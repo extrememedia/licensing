@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Foursquare Licensing Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
@@ -18,7 +19,6 @@
     .quiz-option.selected { border-color: #3b82f6 !important; background: #eff6ff !important; }
     .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
     .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
-    .saving { opacity: 0.7; pointer-events: none; }
   </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -35,43 +35,40 @@
           <p class="text-slate-500 mt-2">Study & prepare for your licensing interview</p>
         </div>
 
-        <!-- GitHub Token Login -->
-        <div id="token-login">
-          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h3 class="font-medium text-blue-800 mb-2">☁️ Cloud Save with GitHub</h3>
-            <p class="text-blue-700 text-sm">Your progress saves to GitHub and syncs across all your devices. Create a free Personal Access Token to get started.</p>
-          </div>
-          
+        <div id="login-form">
           <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Your Name</label>
-            <input type="text" id="user-name" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="John Smith">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" id="login-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
           </div>
-          
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">GitHub Personal Access Token</label>
-            <input type="password" id="github-token" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="ghp_xxxxxxxxxxxx">
-            <p class="text-xs text-slate-500 mt-1">Needs "gist" scope only. <a href="https://github.com/settings/tokens/new?description=Foursquare%20Tracker&scopes=gist" target="_blank" class="text-blue-600 hover:underline">Create token →</a></p>
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <input type="password" id="login-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
           </div>
-
-          <button onclick="handleGitHubLogin()" id="btn-login" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90 flex items-center justify-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-            Connect with GitHub
-          </button>
-          
-          <div class="relative my-6">
-            <div class="absolute inset-0 flex items-center"><div class="w-full border-t"></div></div>
-            <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-slate-500">or continue offline</span></div>
-          </div>
-          
-          <button onclick="handleOfflineLogin()" class="w-full border py-3 rounded-lg text-slate-600 hover:bg-slate-50">
-            Use Local Storage Only
-          </button>
-          <p class="text-xs text-slate-500 text-center mt-2">Progress won't sync across devices</p>
+          <button onclick="handleLogin()" id="btn-login" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
+          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <button onclick="showRegister()" class="text-blue-600 hover:underline">Create one</button></p>
         </div>
 
-        <div id="login-status" class="hidden text-center py-8">
-          <div class="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p class="text-slate-600">Connecting to GitHub...</p>
+        <div id="register-form" class="hidden">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+            <input type="text" id="reg-name" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="John Smith">
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" id="reg-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
+          </div>
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Password (min 6 characters)</label>
+            <input type="password" id="reg-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+          </div>
+          <button onclick="handleRegister()" id="btn-register" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
+          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <button onclick="showLogin()" class="text-blue-600 hover:underline">Sign in</button></p>
+        </div>
+
+        <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
+        <div id="login-loading" class="hidden mt-4 text-center text-slate-500">
+          <div class="inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+          Loading...
         </div>
       </div>
     </div>
@@ -91,7 +88,7 @@
           </div>
         </div>
         <div class="flex items-center gap-4">
-          <span id="save-status" class="text-xs text-blue-200 hidden">✓ Saved</span>
+          <span id="save-status" class="text-xs text-green-300 hidden">✓ Saved</span>
           <button onclick="handleLogout()" class="text-blue-200 hover:text-white text-sm">Sign Out</button>
         </div>
       </div>
@@ -101,7 +98,7 @@
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="text-xl font-bold text-slate-800">Your Learning Journey</h2>
-            <p class="text-sm text-slate-500" id="storage-indicator">☁️ Synced with GitHub</p>
+            <p class="text-sm text-slate-500">☁️ Progress saved to cloud</p>
           </div>
           <div class="text-right">
             <div class="text-2xl font-bold text-blue-600" id="overall-progress">0%</div>
@@ -121,9 +118,7 @@
   <div id="screen-lesson" class="screen">
     <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
       <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <button onclick="backToApp()" class="flex items-center gap-2 text-blue-200 hover:text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back
-        </button>
+        <button onclick="backToApp()" class="flex items-center gap-2 text-blue-200 hover:text-white">← Back</button>
         <div class="text-center">
           <div class="text-sm text-blue-200" id="lesson-domain-label"></div>
           <div class="font-bold" id="lesson-title"></div>
@@ -146,9 +141,7 @@
   <div id="screen-quiz" class="screen">
     <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
       <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <button onclick="backToApp()" class="flex items-center gap-2 text-blue-200 hover:text-white">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Exit
-        </button>
+        <button onclick="backToApp()" class="flex items-center gap-2 text-blue-200 hover:text-white">← Exit</button>
         <div class="text-center">
           <div class="text-sm text-blue-200" id="quiz-domain-label"></div>
           <div class="font-bold">Knowledge Check</div>
@@ -193,6 +186,12 @@
   </div>
 
 <script>
+// SUPABASE CONFIG - EMBEDDED
+const SUPABASE_URL = 'https://mvuvgecqxwuqfshqbtjf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXZnZWNxeHd1cWZzaHFidGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODQ4MTUsImV4cCI6MjA4MzY2MDgxNX0.6OezNuwN5Ip2a_Xw_SsuxoB80nn3WP7D5dnhAEE9A9o';
+
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // COURSE DATA
 const DOMAINS = [
   {
@@ -218,264 +217,219 @@ const DOMAINS = [
     description: 'Understand Foursquare distinctives and global mission.',
     lessons: [
       { title: 'The Four Corners of Our Gospel', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Jesus Christ: The Same Yesterday, Today, and Forever</h3><p><strong>The Four Corners:</strong></p><p><strong>1. Jesus Christ the Savior</strong> - Jesus saves us from sin through His death and resurrection.</p><p><strong>2. Jesus Christ the Baptizer with the Holy Spirit</strong> - Jesus fills believers with power for service.</p><p><strong>3. Jesus Christ the Healer</strong> - Jesus heals in answer to believing prayer.</p><p><strong>4. Jesus Christ the Soon-Coming King</strong> - Jesus will return personally and imminently.</p><div class="scripture"><strong>Hebrews 13:8:</strong> "Jesus Christ is the same yesterday, today, and forever." This verse is inscribed behind the pulpit at Angelus Temple.</div>` },
-      { title: 'Our Mission and Values', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Foursquare's Mission</h3><p>The Foursquare Church exists to glorify God by proclaiming the Gospel and making disciples of all nations.</p><p><strong>Core Values:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li><strong>Spirit Empowerment</strong> - Depend on the Holy Spirit</li><li><strong>Kingdom Partnership</strong> - Work together as one body</li><li><strong>Healthy Multiplication</strong> - Plant churches and develop leaders</li><li><strong>Sound Doctrine</strong> - Hold firmly to biblical truth</li></ul><div class="scripture"><strong>Matthew 28:19-20:</strong> "Go therefore and make disciples of all the nations, baptizing them in the name of the Father and of the Son and of the Holy Spirit."</div>` },
-      { title: 'Women in Ministry Leadership', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">A Founding Distinctive</h3><p>From its beginning, Foursquare has affirmed women in ministry leadership - flowing directly from our founding by a woman evangelist.</p><p><strong>Biblical Foundation:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Acts 2:17 - "Your sons AND your daughters shall prophesy"</li><li>Galatians 3:28 - "There is neither male nor female, for you are all one in Christ"</li><li>Examples: Deborah, Priscilla, Phoebe, Junia</li></ul><div class="scripture"><strong>Foursquare Position:</strong> God calls and gifts both men and women for all forms of ministry leadership, including senior pastoral roles.</div>` },
-      { title: 'A Global Family', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">From Echo Park to Every Nation</h3><p>What began in Los Angeles has grown into a global movement.</p><p><strong>Global Presence:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Over 90,000 churches worldwide</li><li>Present in more than 150 nations</li><li>Millions of members globally</li><li>Headquarters remain in Los Angeles</li></ul><div class="scripture"><strong>Revelation 7:9:</strong> "A great multitude which no one could number, of all nations, tribes, peoples, and tongues, standing before the throne."</div>` }
+      { title: 'Our Mission and Values', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Foursquare's Mission</h3><p>The Foursquare Church exists to glorify God by proclaiming the Gospel and making disciples of all nations.</p><p><strong>Core Values:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li><strong>Spirit Empowerment</strong> - Depend on the Holy Spirit</li><li><strong>Kingdom Partnership</strong> - Work together as one body</li><li><strong>Healthy Multiplication</strong> - Plant churches and develop leaders</li><li><strong>Sound Doctrine</strong> - Hold firmly to biblical truth</li></ul><div class="scripture"><strong>Matthew 28:19-20:</strong> "Go therefore and make disciples of all the nations."</div>` },
+      { title: 'Women in Ministry Leadership', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">A Founding Distinctive</h3><p>From its beginning, Foursquare has affirmed women in ministry leadership.</p><p><strong>Biblical Foundation:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Acts 2:17 - "Your sons AND your daughters shall prophesy"</li><li>Galatians 3:28 - "There is neither male nor female, for you are all one in Christ"</li></ul><div class="scripture"><strong>Foursquare Position:</strong> God calls and gifts both men and women for all forms of ministry leadership, including senior pastoral roles.</div>` },
+      { title: 'A Global Family', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">From Echo Park to Every Nation</h3><p><strong>Global Presence:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Over 90,000 churches worldwide</li><li>Present in more than 150 nations</li><li>Millions of members globally</li></ul><div class="scripture"><strong>Revelation 7:9:</strong> "A great multitude of all nations, tribes, peoples, and tongues."</div>` }
     ],
     quizzes: [
-      { question: "Which is NOT one of the four aspects of the Foursquare Gospel?", options: ["Jesus the Savior", "Jesus the Teacher", "Jesus the Healer", "Jesus the Coming King"], correct: 1, explanation: "The four aspects are: Savior, Baptizer with the Holy Spirit, Healer, and Coming King." },
-      { question: "What is Foursquare's position on women in ministry?", options: ["Women can serve in support roles only", "Women are affirmed in all ministry leadership", "This is a local church decision", "Women lead only children's ministry"], correct: 1, explanation: "Foursquare affirms women in all forms of ministry leadership." },
-      { question: "In how many countries does Foursquare have a presence?", options: ["50", "100", "150+", "200+"], correct: 2, explanation: "Foursquare is present in more than 150 nations." },
-      { question: "What verse is inscribed behind the pulpit at Angelus Temple?", options: ["John 3:16", "Hebrews 13:8", "Matthew 28:19", "Acts 1:8"], correct: 1, explanation: "Hebrews 13:8 is inscribed there." },
-      { question: "What institution did Aimee found to train ministers?", options: ["Fuller Seminary", "L.I.F.E. Bible College", "Angelus Academy", "Foursquare University"], correct: 1, explanation: "L.I.F.E. Bible College (now Life Pacific University) was founded in 1923." }
+      { question: "Which is NOT one of the four aspects of the Foursquare Gospel?", options: ["Jesus the Savior", "Jesus the Teacher", "Jesus the Healer", "Jesus the Coming King"], correct: 1, explanation: "The four are: Savior, Baptizer, Healer, Coming King." },
+      { question: "What is Foursquare's position on women in ministry?", options: ["Support roles only", "Affirmed in all ministry leadership", "Local church decision", "Children's ministry only"], correct: 1, explanation: "Foursquare affirms women in all ministry leadership." },
+      { question: "In how many countries is Foursquare present?", options: ["50", "100", "150+", "200+"], correct: 2, explanation: "Foursquare is in more than 150 nations." },
+      { question: "What verse is behind the Angelus Temple pulpit?", options: ["John 3:16", "Hebrews 13:8", "Matthew 28:19", "Acts 1:8"], correct: 1, explanation: "Hebrews 13:8 is inscribed there." },
+      { question: "What school did Aimee found?", options: ["Fuller Seminary", "L.I.F.E. Bible College", "Angelus Academy", "Foursquare University"], correct: 1, explanation: "L.I.F.E. Bible College (now Life Pacific University)." }
     ]
   },
   {
     id: 'doctrine', name: 'Doctrine', icon: '📖', color: 'from-purple-500 to-violet-600',
-    description: 'Study the 22 tenets of the Declaration of Faith.',
+    description: 'Study the Declaration of Faith.',
     lessons: [
-      { title: 'The Holy Scriptures', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article I: The Holy Scriptures</h3><p><strong>We believe that the Holy Bible is the Word of the living God;</strong> true, immutable, steadfast, unchangeable.</p><p>Scripture is described as:</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>A <strong>lighted lamp</strong> to guide feet</li><li>An <strong>unclouded mirror</strong> revealing Christ</li><li>A <strong>plumb line</strong> to make straight the life</li><li>A <strong>sharp two-edged sword</strong> to convict of sin</li><li>A <strong>cord of love</strong> to draw to Christ</li></ul><div class="scripture"><strong>2 Timothy 3:16-17:</strong> "All Scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness."</div>` },
-      { title: 'The Eternal Godhead', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article II: The Trinity</h3><p><strong>We believe there is but one true and living God;</strong> maker of heaven and earth, the Alpha and Omega.</p><p>In the Godhead there are <strong>three, equal in every divine perfection:</strong></p><p><strong>The Father</strong> — Whose heart was so filled with love that He gave His only Son.</p><p><strong>The Son</strong> — Co-eternal with the Father, conceived by the Holy Spirit, born of the Virgin Mary, who purchased redemption by His blood.</p><p><strong>The Holy Spirit</strong> — The third person, convicting of sin, drawing sinners to the Savior, baptizing and enduing with power.</p><div class="scripture"><strong>1 John 5:7:</strong> "For there are three that bear witness in heaven: the Father, the Word, and the Holy Spirit; and these three are one."</div>` },
-      { title: 'Salvation Through Grace', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Articles III-VII: Fall, Redemption, New Birth</h3><p><strong>The Fall:</strong> Man was created in God's image but fell through disobedience. All are sinners, guilty, deserving condemnation.</p><p><strong>Redemption:</strong> While we were yet sinners, Christ died for us, fully paying sin's penalty.</p><p><strong>Salvation by Grace:</strong> We have no righteousness of our own. We must throw ourselves upon God's mercy.</p><div class="scripture"><strong>Ephesians 2:8-9:</strong> "For by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not of works."</div><p><strong>The New Birth:</strong> The change at conversion is very real - old things pass away; all things become new.</p>` },
-      { title: 'The Baptism of the Holy Spirit', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article X: The Baptism of the Holy Spirit</h3><p><strong>We believe that the baptism of the Holy Spirit is the incoming of the promised Comforter</strong> to endue with power from on high.</p><p><strong>Purposes:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>To glorify the Lord Jesus</li><li>To give inspired utterance in witnessing</li><li>To foster prayer, holiness, sobriety</li><li>To equip for Spirit-filled soul-winning</li></ul><div class="scripture"><strong>Acts 1:8:</strong> "But you shall receive power when the Holy Spirit has come upon you; and you shall be witnesses to Me."</div><p><strong>Gifts and Fruit:</strong> The Spirit bestows gifts: wisdom, knowledge, faith, healing, miracles, prophecy, discernment, tongues, interpretation.</p>` },
-      { title: 'Divine Healing and Second Coming', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Articles XIV-XV</h3><p><strong>Divine Healing:</strong> We believe divine healing is the power of Christ to heal the sick in answer to believing prayer. He is the same yesterday, today, and forever.</p><div class="scripture"><strong>James 5:14-15:</strong> "Is anyone among you sick? Let him call for the elders of the church, and let them pray over him, anointing him with oil in the name of the Lord."</div><p><strong>The Second Coming:</strong> We believe Christ's return is personal and imminent. He will descend from Heaven in clouds of glory. The dead in Christ shall rise, and the living shall be caught up to meet the Lord.</p><div class="scripture"><strong>1 Thessalonians 4:16-17:</strong> "For the Lord Himself will descend from heaven with a shout, with the voice of an archangel, and with the trumpet of God."</div>` }
+      { title: 'The Holy Scriptures', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article I: The Holy Scriptures</h3><p><strong>We believe the Holy Bible is the Word of the living God;</strong> true, immutable, steadfast, unchangeable.</p><p>Scripture is described as:</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>A <strong>lighted lamp</strong> to guide feet</li><li>An <strong>unclouded mirror</strong> revealing Christ</li><li>A <strong>plumb line</strong> to make straight the life</li><li>A <strong>sharp two-edged sword</strong> to convict of sin</li><li>A <strong>cord of love</strong> to draw to Christ</li></ul><div class="scripture"><strong>2 Timothy 3:16-17:</strong> "All Scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness."</div>` },
+      { title: 'The Eternal Godhead', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article II: The Trinity</h3><p><strong>We believe there is but one true and living God</strong> - In the Godhead there are three, equal in every divine perfection:</p><p><strong>The Father</strong> — Gave His only Son.<br><strong>The Son</strong> — Purchased redemption by His blood.<br><strong>The Holy Spirit</strong> — Convicts, draws, baptizes with power.</p><div class="scripture"><strong>1 John 5:7:</strong> "The Father, the Word, and the Holy Spirit; and these three are one."</div>` },
+      { title: 'Salvation Through Grace', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Fall, Redemption, New Birth</h3><p><strong>The Fall:</strong> Man fell through disobedience. All are sinners.</p><p><strong>Redemption:</strong> Christ died for us, fully paying sin's penalty.</p><p><strong>Salvation by Grace:</strong> We must throw ourselves upon God's mercy.</p><div class="scripture"><strong>Ephesians 2:8-9:</strong> "For by grace you have been saved through faith... not of works."</div><p><strong>The New Birth:</strong> The change at conversion is very real - old things pass away; all things become new.</p>` },
+      { title: 'The Baptism of the Holy Spirit', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article X</h3><p><strong>The baptism of the Holy Spirit</strong> is the incoming of the promised Comforter to endue the believer with power from on high.</p><p><strong>Purposes:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>To glorify the Lord Jesus</li><li>To give inspired utterance in witnessing</li><li>To foster prayer, holiness, sobriety</li><li>To equip for Spirit-filled soul-winning</li></ul><div class="scripture"><strong>Acts 1:8:</strong> "You shall receive power when the Holy Spirit has come upon you."</div>` },
+      { title: 'Divine Healing and Second Coming', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Articles XIV-XV</h3><p><strong>Divine Healing:</strong> We believe divine healing is the power of Christ to heal the sick in answer to believing prayer. He is the same yesterday, today, and forever.</p><div class="scripture"><strong>James 5:14-15:</strong> "Is anyone among you sick? Let him call for the elders of the church, and let them pray over him, anointing him with oil in the name of the Lord."</div><p><strong>Second Coming:</strong> We believe Christ's return is personal and imminent. He will descend from Heaven in clouds of glory. The dead in Christ shall rise, and the living shall be caught up to meet the Lord.</p><div class="scripture"><strong>1 Thessalonians 4:16-17:</strong> "The Lord Himself will descend from heaven with a shout."</div>` }
     ],
     quizzes: [
-      { question: "How many persons are in the Godhead?", options: ["One", "Two", "Three", "Four"], correct: 2, explanation: "The Trinity: Father, Son, and Holy Spirit - three persons, one God." },
-      { question: "How is salvation received?", options: ["Through good works", "Through grace by faith", "Through church membership", "Through baptism alone"], correct: 1, explanation: "Salvation is wholly through grace, received by faith." },
-      { question: "What is the purpose of Spirit Baptism?", options: ["To guarantee salvation", "To replace water baptism", "To endue with power from on high", "To eliminate need for Scripture"], correct: 2, explanation: "Spirit Baptism endues believers with power for witnessing and service." },
-      { question: "What does Foursquare believe about divine healing?", options: ["Healing ended with apostles", "Healing replaces medical care", "Jesus still heals in answer to prayer", "Healing is guaranteed for all"], correct: 2, explanation: "Divine healing is Christ's power to heal in answer to believing prayer." },
-      { question: "How does Foursquare describe Christ's second coming?", options: ["Symbolic only", "Already fulfilled", "Personal and imminent", "Uncertain"], correct: 2, explanation: "The second coming is personal and imminent." }
+      { question: "How many persons in the Godhead?", options: ["One", "Two", "Three", "Four"], correct: 2, explanation: "Three: Father, Son, Holy Spirit." },
+      { question: "How is salvation received?", options: ["Good works", "Grace by faith", "Church membership", "Baptism alone"], correct: 1, explanation: "Through grace by faith." },
+      { question: "Purpose of Spirit Baptism?", options: ["Guarantee salvation", "Replace water baptism", "Endue with power", "Eliminate Scripture need"], correct: 2, explanation: "To endue with power from on high." },
+      { question: "Foursquare belief on divine healing?", options: ["Ended with apostles", "Replaces medical care", "Jesus still heals in answer to prayer", "Guaranteed for all"], correct: 2, explanation: "Jesus heals in answer to believing prayer." },
+      { question: "Christ's second coming is?", options: ["Symbolic only", "Already fulfilled", "Personal and imminent", "Uncertain"], correct: 2, explanation: "Personal and imminent." }
     ]
   },
   {
     id: 'polity', name: 'Polity', icon: '⚖️', color: 'from-emerald-500 to-teal-600',
-    description: 'Learn about Foursquare governance and structure.',
+    description: 'Learn Foursquare governance.',
     lessons: [
-      { title: 'Foursquare Governance', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Understanding Church Government</h3><p>Foursquare has an "episcopal character" - governance flows through designated leaders with accountability.</p><p><strong>Key Structures:</strong></p><p><strong>The Foursquare Convention:</strong> Chief decision-making body, meeting annually. Voting includes officers and licensed ministers. Each church may send one delegate per 50 members.</p><p><strong>Board of Directors:</strong> 12-24 directors managing the Church, appointing officers, licensing and ordaining ministers.</p><p><strong>The President:</strong> Provides overall leadership and vision.</p><div class="scripture"><strong>Key Principle:</strong> Foursquare balances connectional accountability with local church empowerment.</div>` },
-      { title: 'Districts and Local Churches', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">District and Local Structure</h3><p><strong>Districts:</strong> The U.S. is divided into districts, each overseen by a District Supervisor who provides pastoral care and accountability.</p><p><strong>District Supervisor Responsibilities:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Pastoral oversight of ministers and churches</li><li>Coaching and developing leaders</li><li>Church planting encouragement</li><li>Credential oversight</li></ul><p><strong>Local Church:</strong> Each church has a Church Council working with the senior pastor. The pastor is appointed and accountable to Foursquare leadership.</p><div class="scripture"><strong>Property:</strong> Churches hold property in trust for ICFG, protecting continuity of Gospel ministry.</div>` },
-      { title: 'Licensing and Ordination', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">The Credentialing Process</h3><p><strong>Why Licensing Matters:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li><strong>Endorsement</strong> - Represents ICFG as licensed minister</li><li><strong>Authorization</strong> - Legal authority for weddings, ministerial duties</li><li><strong>Tax Benefits</strong> - Housing allowance available only to licensed ministers</li></ul><p><strong>Licensing and Appointment:</strong> They are mutually dependent - you need a license for an appointment, and an appointment to maintain a license.</p><p><strong>Responsibilities:</strong> Licensed ministers must be in good standing, compliant with articles, bylaws, Declaration of Faith, and Minister's Code of Ethics.</p><div class="scripture"><strong>Ordination:</strong> After two years of faithful service maintaining credential in good standing, ministers become eligible for ordination.</div>` },
-      { title: 'Financial Accountability', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Stewardship Obligations</h3><p><strong>Church Financial Responsibilities:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Pay to ICFG a tithe of tithes and general offerings</li><li>Give to Foursquare missions</li><li>File monthly financial reports</li><li>Use funds with integrity for the Gospel</li><li>Fulfill financial obligations timely</li></ul><p>These funds support corporate and district offices, missions, and movement ministries.</p><div class="scripture"><strong>Malachi 3:10:</strong> "Bring all the tithes into the storehouse... and try Me now in this, says the LORD... if I will not open for you the windows of heaven."</div>` }
+      { title: 'Foursquare Governance', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Church Government</h3><p>Foursquare has an "episcopal character" - governance flows through designated leaders with accountability.</p><p><strong>The Foursquare Convention:</strong> Chief decision-making body, meeting annually.</p><p><strong>Board of Directors:</strong> 12-24 directors managing the Church.</p><p><strong>The President:</strong> Provides overall leadership and vision.</p><div class="scripture"><strong>Key Principle:</strong> Balance connectional accountability with local church empowerment.</div>` },
+      { title: 'Districts and Local Churches', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Structure</h3><p><strong>Districts:</strong> The U.S. is divided into districts, each overseen by a District Supervisor who provides pastoral care and accountability.</p><p><strong>District Supervisor Responsibilities:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Pastoral oversight of ministers and churches</li><li>Coaching and developing leaders</li><li>Church planting encouragement</li><li>Credential oversight</li></ul><p><strong>Local Church:</strong> Each church has a Church Council working with the senior pastor.</p><div class="scripture"><strong>Property:</strong> Churches hold property in trust for ICFG.</div>` },
+      { title: 'Licensing and Ordination', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Credentialing</h3><p><strong>Why Licensing Matters:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li><strong>Endorsement</strong> - Represents ICFG as licensed minister</li><li><strong>Authorization</strong> - Legal authority for weddings, ministerial duties</li><li><strong>Tax Benefits</strong> - Housing allowance available only to licensed ministers</li></ul><p><strong>Licensing and Appointment:</strong> Mutually dependent - you need a license for an appointment, and an appointment to maintain a license.</p><div class="scripture"><strong>Ordination:</strong> After two years of faithful service maintaining credential in good standing.</div>` },
+      { title: 'Financial Accountability', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Stewardship</h3><p><strong>Church Financial Responsibilities:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Pay to ICFG a tithe of tithes and general offerings</li><li>Give to Foursquare missions</li><li>File monthly financial reports</li><li>Use funds with integrity for the Gospel</li></ul><div class="scripture"><strong>Malachi 3:10:</strong> "Bring all the tithes into the storehouse."</div>` }
     ],
     quizzes: [
-      { question: "What is the chief decision-making body of Foursquare?", options: ["Board of Directors", "The President", "The Foursquare Convention", "District Supervisors"], correct: 2, explanation: "The Convention is the chief decision-making body." },
-      { question: "What is the relationship between licensing and appointment?", options: ["Unrelated", "Licensing comes first", "Mutually dependent", "Appointment replaces licensing"], correct: 2, explanation: "They are mutually dependent - each requires the other." },
-      { question: "What financial obligation do churches have to ICFG?", options: ["None", "A tithe of tithes and offerings", "50% of income", "Only missions giving"], correct: 1, explanation: "Churches pay a tithe of tithes and general offerings." },
-      { question: "Who provides regional oversight for ministers?", options: ["The President", "Board of Directors", "District Supervisor", "The Convention"], correct: 2, explanation: "District Supervisors provide regional pastoral oversight." },
-      { question: "After how many years can a minister be considered for ordination?", options: ["One year", "Two years", "Five years", "Ten years"], correct: 1, explanation: "After two years of faithful service." }
+      { question: "Chief decision-making body?", options: ["Board of Directors", "The President", "The Foursquare Convention", "District Supervisors"], correct: 2, explanation: "The Convention." },
+      { question: "Licensing and appointment relationship?", options: ["Unrelated", "Licensing first", "Mutually dependent", "Appointment replaces"], correct: 2, explanation: "Mutually dependent." },
+      { question: "Church financial obligation to ICFG?", options: ["None", "Tithe of tithes", "50% of income", "Missions only"], correct: 1, explanation: "Tithe of tithes and offerings." },
+      { question: "Who provides regional oversight?", options: ["President", "Board", "District Supervisor", "Convention"], correct: 2, explanation: "District Supervisors." },
+      { question: "Years before ordination eligibility?", options: ["One", "Two", "Five", "Ten"], correct: 1, explanation: "Two years." }
     ]
   },
   {
     id: 'practice', name: 'Ministry Practice', icon: '🙏', color: 'from-rose-500 to-pink-600',
-    description: 'Apply practical ministry and pastoral care principles.',
+    description: 'Apply ministry principles.',
     lessons: [
-      { title: 'The Ordinances', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article IX: Water Baptism and Lord's Supper</h3><p><strong>Water Baptism:</strong> Baptism in the name of Father, Son, and Holy Ghost is a blessed outward sign of an inward work.</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>As Christ died, we reckon ourselves dead to sin</li><li>As He was buried, we are buried with Him</li><li>As He rose, we walk in newness of life</li></ul><div class="scripture"><strong>Romans 6:4:</strong> "We were buried with Him through baptism into death, that just as Christ was raised from the dead... we also should walk in newness of life."</div><p><strong>Lord's Supper:</strong> The broken bread (Christ's body) and juice of the vine (His blood) span the gulf between Calvary and His coming. Preceded by heart-searching and self-examination.</p>` },
-      { title: 'Spirit-Empowered Ministry', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">The Spirit-Filled Life</h3><p><strong>Article XI:</strong> The Holy Spirit is both a mighty rushing wind AND a gentle dove, easily grieved by impiety or actions dishonoring to Jesus.</p><p><strong>Living in the Spirit:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Moment by moment dependence on God</li><li>Under the blood of the Lamb</li><li>Treading softly in the King's presence</li><li>Patient, loving, truthful, sincere, prayerful</li><li>Serving the Lord in season and out</li></ul><div class="scripture"><strong>Galatians 5:16, 25:</strong> "Walk in the Spirit, and you shall not fulfill the lust of the flesh... If we live in the Spirit, let us also walk in the Spirit."</div>` },
-      { title: 'Evangelism and Pastoral Care', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Soul Winning is Our Business</h3><p><strong>Article XXI:</strong> Soul winning is the one big business of the Church. We should rise and shine as a light that cannot be hid, speeding forth the gospel to earth's ends.</p><p><strong>The Urgency:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>All these things shall be dissolved</li><li>The end of all things is at hand</li><li>Declare the whole counsel of God with burning zeal</li></ul><div class="scripture"><strong>Proverbs 11:30:</strong> "He who wins souls is wise."</div><p><strong>Pastoral Care:</strong> Following Sister Aimee, we combine proclamation with compassion - preach AND serve, baptize AND feed, teach AND counsel.</p><p><strong>Article XIII - Moderation:</strong> Our experience should be sober, balanced, forgiving, zealous, and Christ-like - never extreme or fanatical.</p>` },
-      { title: 'Church Life and Relationship', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article XVI: Church Relationship</h3><p>Having accepted Christ, it is our sacred duty to <strong>identify with and labor for the visible church</strong>.</p><p><strong>The Visible Church:</strong> Believers associated in fellowship and unity of the Spirit:</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Observing Christ's ordinances</li><li>Worshipping in holiness</li><li>Speaking in psalms, hymns, spiritual songs</li><li>Reading and proclaiming His Word</li><li>Laboring for souls</li><li>Giving to carry on His work</li><li>Edifying and establishing one another</li></ul><div class="scripture"><strong>Hebrews 10:24-25:</strong> "Let us consider one another to stir up love and good works, not forsaking the assembling of ourselves together."</div>` }
+      { title: 'The Ordinances', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Baptism and Lord's Supper</h3><p><strong>Water Baptism:</strong> Baptism in the name of Father, Son, and Holy Ghost is a blessed outward sign of an inward work.</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>As Christ died, we reckon ourselves dead to sin</li><li>As He was buried, we are buried with Him</li><li>As He rose, we walk in newness of life</li></ul><div class="scripture"><strong>Romans 6:4:</strong> "Buried with Him through baptism into death."</div><p><strong>Lord's Supper:</strong> The broken bread (Christ's body) and juice of the vine (His blood) - remembering Christ until He comes.</p>` },
+      { title: 'Spirit-Empowered Ministry', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">The Spirit-Filled Life</h3><p>The Holy Spirit is both a mighty rushing wind AND a gentle dove, easily grieved by impiety.</p><p><strong>Living in the Spirit:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Moment by moment dependence on God</li><li>Patient, loving, truthful, sincere, prayerful</li><li>Serving the Lord in season and out</li></ul><div class="scripture"><strong>Galatians 5:16:</strong> "Walk in the Spirit, and you shall not fulfill the lust of the flesh."</div>` },
+      { title: 'Evangelism and Pastoral Care', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Soul Winning</h3><p><strong>Article XXI:</strong> Soul winning is the one big business of the Church. We should rise and shine as a light that cannot be hid.</p><div class="scripture"><strong>Proverbs 11:30:</strong> "He who wins souls is wise."</div><p><strong>Pastoral Care:</strong> Following Sister Aimee, we combine proclamation with compassion - preach AND serve, baptize AND feed, teach AND counsel.</p><p><strong>Article XIII - Moderation:</strong> Our experience should be sober, balanced, forgiving, zealous, and Christ-like - never extreme or fanatical.</p>` },
+      { title: 'Church Life', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article XVI: Church Relationship</h3><p>Having accepted Christ, it is our sacred duty to <strong>identify with and labor for the visible church</strong>.</p><p><strong>The Visible Church:</strong> Believers associated in fellowship:</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Observing Christ's ordinances</li><li>Worshipping in holiness</li><li>Reading and proclaiming His Word</li><li>Laboring for souls</li><li>Edifying one another</li></ul><div class="scripture"><strong>Hebrews 10:25:</strong> "Not forsaking the assembling of ourselves together."</div>` }
     ],
     quizzes: [
-      { question: "What ordinances do Foursquare churches practice?", options: ["Foot washing and anointing", "Water baptism and Lord's Supper", "Confession and penance", "Infant baptism and confirmation"], correct: 1, explanation: "Water baptism and the Lord's Supper are the two ordinances." },
-      { question: "According to Article XXI, what is the 'one big business' of the Church?", options: ["Building programs", "Soul winning", "Political activism", "Financial growth"], correct: 1, explanation: "Soul winning is the one big business of the Church." },
-      { question: "What does Article XIII teach about Christian experience?", options: ["Extremes encouraged", "Sober, balanced, Christ-like moderation", "Emotional experiences primary", "Doctrine doesn't matter"], correct: 1, explanation: "Our experience should be sober, balanced, and Christ-like." },
-      { question: "What is water baptism according to Article IX?", options: ["Necessary for salvation", "An outward sign of an inward work", "Only for infants", "Optional for believers"], correct: 1, explanation: "Baptism is a blessed outward sign of an inward work." },
-      { question: "Why should believers identify with the visible church?", options: ["For social status", "It's optional", "Sacred duty to labor together for Christ's Kingdom", "Only for ministers"], correct: 2, explanation: "It is our sacred duty to labor together for Christ's Kingdom." }
+      { question: "What ordinances does Foursquare practice?", options: ["Foot washing", "Water baptism and Lord's Supper", "Confession", "Infant baptism"], correct: 1, explanation: "Water baptism and Lord's Supper." },
+      { question: "'One big business' of the Church?", options: ["Building", "Soul winning", "Politics", "Finance"], correct: 1, explanation: "Soul winning." },
+      { question: "Article XIII teaches?", options: ["Extremes", "Sober, balanced moderation", "Emotion primary", "Doctrine unimportant"], correct: 1, explanation: "Sober, balanced, Christ-like." },
+      { question: "Water baptism is?", options: ["For salvation", "Outward sign of inward work", "For infants", "Optional"], correct: 1, explanation: "Outward sign of inward work." },
+      { question: "Why identify with visible church?", options: ["Status", "Optional", "Sacred duty for Christ's Kingdom", "Ministers only"], correct: 2, explanation: "Sacred duty." }
     ]
   }
 ];
 
-// APP STATE
+// STATE
 let currentUser = null;
-let githubToken = null;
-let gistId = null;
-let isOnlineMode = false;
+let userProgress = null;
 let currentDomain = null;
 let currentLessonIndex = 0;
 let currentQuizIndex = 0;
 let selectedAnswer = null;
 let quizScore = 0;
 
-const GIST_FILENAME = 'foursquare_tracker_progress.json';
-
-// GITHUB GIST API
-async function findOrCreateGist() {
-  // First, try to find existing gist
-  const listRes = await fetch('https://api.github.com/gists', {
-    headers: { 'Authorization': `token ${githubToken}` }
-  });
-  if (!listRes.ok) throw new Error('Failed to fetch gists');
-  
-  const gists = await listRes.json();
-  const existing = gists.find(g => g.files && g.files[GIST_FILENAME]);
-  
-  if (existing) {
-    gistId = existing.id;
-    const content = JSON.parse(existing.files[GIST_FILENAME].content);
-    return content;
-  }
-  
-  // Create new gist
-  const createRes = await fetch('https://api.github.com/gists', {
-    method: 'POST',
-    headers: {
-      'Authorization': `token ${githubToken}`,
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify({
-      description: 'Foursquare Licensing Tracker Progress',
-      public: false,
-      files: {
-        [GIST_FILENAME]: {
-          content: JSON.stringify(createDefaultProgress())
-        }
-      }
-    })
-  });
-  
-  if (!createRes.ok) throw new Error('Failed to create gist');
-  const newGist = await createRes.json();
-  gistId = newGist.id;
-  return createDefaultProgress();
-}
-
-async function saveToGist(data) {
-  if (!isOnlineMode || !gistId) return;
-  
-  showSaveStatus('Saving...');
-  
-  try {
-    await fetch(`https://api.github.com/gists/${gistId}`, {
-      method: 'PATCH',
-      headers: {
-        'Authorization': `token ${githubToken}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        files: {
-          [GIST_FILENAME]: {
-            content: JSON.stringify(data)
-          }
-        }
-      })
-    });
-    showSaveStatus('✓ Saved to GitHub');
-  } catch (e) {
-    showSaveStatus('⚠ Save failed');
-    console.error(e);
-  }
-}
-
-function showSaveStatus(msg) {
-  const el = document.getElementById('save-status');
-  el.textContent = msg;
-  el.classList.remove('hidden');
-  setTimeout(() => el.classList.add('hidden'), 2000);
-}
-
-function createDefaultProgress() {
-  const progress = {};
-  DOMAINS.forEach(d => {
-    progress[d.id] = { lessonsCompleted: [], quizScores: [], completed: false };
-  });
-  return { name: '', progress, createdAt: new Date().toISOString() };
-}
-
-// AUTH
-async function handleGitHubLogin() {
-  const name = document.getElementById('user-name').value.trim();
-  const token = document.getElementById('github-token').value.trim();
-  
-  if (!name) { alert('Please enter your name.'); return; }
-  if (!token) { alert('Please enter your GitHub token.'); return; }
-  
-  document.getElementById('token-login').classList.add('hidden');
-  document.getElementById('login-status').classList.remove('hidden');
-  
-  try {
-    githubToken = token;
-    isOnlineMode = true;
-    
-    // Verify token
-    const userRes = await fetch('https://api.github.com/user', {
-      headers: { 'Authorization': `token ${token}` }
-    });
-    if (!userRes.ok) throw new Error('Invalid token');
-    
-    // Find or create gist
-    const data = await findOrCreateGist();
-    data.name = name;
-    currentUser = data;
-    
-    // Save token locally for convenience
-    localStorage.setItem('fs_github_token', token);
-    localStorage.setItem('fs_user_data', JSON.stringify(currentUser));
-    
-    await saveToGist(currentUser);
-    showApp();
-  } catch (e) {
-    alert('Login failed: ' + e.message);
-    document.getElementById('token-login').classList.remove('hidden');
-    document.getElementById('login-status').classList.add('hidden');
-  }
-}
-
-function handleOfflineLogin() {
-  const name = document.getElementById('user-name').value.trim() || 'Student';
-  isOnlineMode = false;
-  
-  const saved = localStorage.getItem('fs_user_data');
-  if (saved) {
-    currentUser = JSON.parse(saved);
-    currentUser.name = name;
-  } else {
-    currentUser = createDefaultProgress();
-    currentUser.name = name;
-  }
-  
-  localStorage.setItem('fs_user_data', JSON.stringify(currentUser));
-  showApp();
-}
-
-function handleLogout() {
-  currentUser = null;
-  githubToken = null;
-  gistId = null;
-  isOnlineMode = false;
-  localStorage.removeItem('fs_github_token');
-  showScreen('login');
-  document.getElementById('token-login').classList.remove('hidden');
-  document.getElementById('login-status').classList.add('hidden');
-}
-
 // INIT
-document.addEventListener('DOMContentLoaded', async function() {
-  const savedToken = localStorage.getItem('fs_github_token');
-  const savedData = localStorage.getItem('fs_user_data');
-  
-  if (savedToken && savedData) {
-    githubToken = savedToken;
-    currentUser = JSON.parse(savedData);
-    isOnlineMode = true;
-    
-    // Try to sync with GitHub
-    try {
-      const data = await findOrCreateGist();
-      // Merge: use GitHub data if newer
-      if (data.lastUpdated > currentUser.lastUpdated) {
-        currentUser.progress = data.progress;
-      }
-      showApp();
-    } catch (e) {
-      // Offline fallback
-      isOnlineMode = false;
-      showApp();
-    }
-  } else if (savedData) {
-    currentUser = JSON.parse(savedData);
-    isOnlineMode = false;
+document.addEventListener('DOMContentLoaded', async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadProgress();
     showApp();
   }
 });
+
+// AUTH
+function showRegister() {
+  document.getElementById('login-form').classList.add('hidden');
+  document.getElementById('register-form').classList.remove('hidden');
+  hideError();
+}
+function showLogin() {
+  document.getElementById('register-form').classList.add('hidden');
+  document.getElementById('login-form').classList.remove('hidden');
+  hideError();
+}
+
+async function handleRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  if (!name || !email || !password) { showError('Please fill all fields'); return; }
+  if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
+  
+  showLoading(true);
+  try {
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: { data: { name } }
+    });
+    if (error) throw error;
+    if (data.user) {
+      currentUser = data.user;
+      userProgress = createDefaultProgress();
+      await saveProgress();
+      showApp();
+    }
+  } catch (e) {
+    showError(e.message);
+  }
+  showLoading(false);
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) { showError('Please fill all fields'); return; }
+  
+  showLoading(true);
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    currentUser = data.user;
+    await loadProgress();
+    showApp();
+  } catch (e) {
+    showError(e.message);
+  }
+  showLoading(false);
+}
+
+async function handleLogout() {
+  await supabase.auth.signOut();
+  currentUser = null;
+  userProgress = null;
+  showScreen('login');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+}
+
+function showError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+function hideError() {
+  document.getElementById('login-error').classList.add('hidden');
+}
+function showLoading(show) {
+  document.getElementById('login-loading').classList.toggle('hidden', !show);
+  document.getElementById('btn-login').disabled = show;
+  document.getElementById('btn-register').disabled = show;
+}
+
+// PROGRESS
+function createDefaultProgress() {
+  const p = {};
+  DOMAINS.forEach(d => { p[d.id] = { lessonsCompleted: [], quizScores: [], completed: false }; });
+  return p;
+}
+
+async function loadProgress() {
+  try {
+    const { data } = await supabase
+      .from('progress')
+      .select('data')
+      .eq('user_id', currentUser.id)
+      .single();
+    
+    if (data && data.data) {
+      userProgress = data.data;
+    } else {
+      userProgress = createDefaultProgress();
+      await saveProgress();
+    }
+  } catch (e) {
+    userProgress = createDefaultProgress();
+  }
+  // Ensure all domains exist
+  DOMAINS.forEach(d => {
+    if (!userProgress[d.id]) userProgress[d.id] = { lessonsCompleted: [], quizScores: [], completed: false };
+  });
+}
+
+async function saveProgress() {
+  try {
+    await supabase.from('progress').upsert({
+      user_id: currentUser.id,
+      data: userProgress,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    showSaveStatus();
+  } catch (e) {
+    console.error('Save failed:', e);
+  }
+}
+
+function showSaveStatus() {
+  const el = document.getElementById('save-status');
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 2000);
+}
 
 // NAV
 function showScreen(id) {
@@ -485,35 +439,23 @@ function showScreen(id) {
 
 function showApp() {
   showScreen('app');
-  document.getElementById('user-greeting').textContent = 'Welcome, ' + currentUser.name + '!';
-  document.getElementById('storage-indicator').textContent = isOnlineMode ? '☁️ Synced with GitHub' : '💾 Local storage only';
+  const name = currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || 'Student';
+  document.getElementById('user-greeting').textContent = 'Welcome, ' + name + '!';
   renderDomainCards();
   updateOverallProgress();
 }
 
 function backToApp() { showApp(); }
 
-// SAVE PROGRESS
-async function saveProgress() {
-  currentUser.lastUpdated = new Date().toISOString();
-  localStorage.setItem('fs_user_data', JSON.stringify(currentUser));
-  
-  if (isOnlineMode) {
-    await saveToGist(currentUser);
-  }
-  
-  updateOverallProgress();
-}
-
 // DOMAIN CARDS
 function renderDomainCards() {
   const c = document.getElementById('domain-cards');
   c.innerHTML = DOMAINS.map((d, i) => {
-    const p = currentUser.progress[d.id];
+    const p = userProgress[d.id];
     const done = p.lessonsCompleted.length;
     const total = d.lessons.length;
     const pct = Math.round((done/total)*100);
-    const locked = i > 0 && !currentUser.progress[DOMAINS[i-1].id].completed;
+    const locked = i > 0 && !userProgress[DOMAINS[i-1].id].completed;
     const complete = p.completed;
     return `<div class="bg-white rounded-xl shadow-sm border p-6 ${locked?'opacity-60':''}">
       <div class="flex items-center justify-between mb-4">
@@ -523,20 +465,20 @@ function renderDomainCards() {
       <h3 class="text-lg font-bold text-slate-800 mb-1">${d.name}</h3>
       <p class="text-slate-500 text-sm mb-4">${d.description}</p>
       <div class="mb-4">
-        <div class="flex justify-between text-sm mb-1"><span>Progress</span><span>${done}/${total} lessons</span></div>
+        <div class="flex justify-between text-sm mb-1"><span>Progress</span><span>${done}/${total}</span></div>
         <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-gradient-to-r ${d.color} h-2 rounded-full" style="width:${pct}%"></div></div>
       </div>
-      ${locked?`<button disabled class="w-full py-2 rounded-lg border text-slate-400 cursor-not-allowed">Complete previous domain</button>`:
-        complete?`<div class="flex gap-2"><button onclick="startLessons('${d.id}')" class="flex-1 py-2 rounded-lg border text-slate-600 hover:bg-slate-50">Review</button><button onclick="startQuiz('${d.id}')" class="flex-1 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">Retake Quiz</button></div>`:
+      ${locked?`<button disabled class="w-full py-2 rounded-lg border text-slate-400">Complete previous domain</button>`:
+        complete?`<div class="flex gap-2"><button onclick="startLessons('${d.id}')" class="flex-1 py-2 rounded-lg border hover:bg-slate-50">Review</button><button onclick="startQuiz('${d.id}')" class="flex-1 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">Retake</button></div>`:
         done===total?`<button onclick="startQuiz('${d.id}')" class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white">Take Quiz →</button>`:
-        `<button onclick="startLessons('${d.id}')" class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white">${done>0?'Continue':'Start'} Learning →</button>`}
+        `<button onclick="startLessons('${d.id}')" class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white">${done>0?'Continue':'Start'} →</button>`}
     </div>`;
   }).join('');
 }
 
 function updateOverallProgress() {
   let total=0, done=0;
-  DOMAINS.forEach(d => { total+=d.lessons.length; done+=currentUser.progress[d.id].lessonsCompleted.length; });
+  DOMAINS.forEach(d => { total+=d.lessons.length; done+=userProgress[d.id].lessonsCompleted.length; });
   const pct = Math.round((done/total)*100);
   document.getElementById('overall-progress').textContent = pct+'%';
   document.getElementById('progress-bar').style.width = pct+'%';
@@ -545,9 +487,15 @@ function updateOverallProgress() {
 // LESSONS
 function startLessons(id) {
   currentDomain = DOMAINS.find(d=>d.id===id);
-  const p = currentUser.progress[id];
+  const p = userProgress[id];
   currentLessonIndex = 0;
-  for(let i=0;i<currentDomain.lessons.length;i++) { if(!p.lessonsCompleted.includes(i)){currentLessonIndex=i;break;} currentLessonIndex=i; }
+  for(let i=0;i<currentDomain.lessons.length;i++) { 
+    if(!p.lessonsCompleted.includes(i)){
+      currentLessonIndex=i;
+      break;
+    } 
+    currentLessonIndex=i; 
+  }
   showLesson();
 }
 
@@ -556,28 +504,39 @@ function showLesson() {
   const l = currentDomain.lessons[currentLessonIndex];
   document.getElementById('lesson-domain-label').textContent = currentDomain.name;
   document.getElementById('lesson-title').textContent = l.title;
-  document.getElementById('lesson-progress').textContent = `Lesson ${currentLessonIndex+1} of ${currentDomain.lessons.length}`;
+  document.getElementById('lesson-progress').textContent = `${currentLessonIndex+1}/${currentDomain.lessons.length}`;
   document.getElementById('lesson-content').innerHTML = l.content;
   document.getElementById('btn-prev').classList.toggle('hidden', currentLessonIndex===0);
-  document.getElementById('btn-next').textContent = currentLessonIndex===currentDomain.lessons.length-1 ? 'Complete & Take Quiz →' : 'Continue →';
+  document.getElementById('btn-next').textContent = currentLessonIndex===currentDomain.lessons.length-1 ? 'Take Quiz →' : 'Continue →';
 }
 
-function prevLesson() { if(currentLessonIndex>0){currentLessonIndex--;showLesson();} }
+function prevLesson() { 
+  if(currentLessonIndex>0){
+    currentLessonIndex--;
+    showLesson();
+  } 
+}
 
 async function nextLesson() {
-  const p = currentUser.progress[currentDomain.id];
+  const p = userProgress[currentDomain.id];
   if(!p.lessonsCompleted.includes(currentLessonIndex)) { 
     p.lessonsCompleted.push(currentLessonIndex); 
     await saveProgress(); 
   }
-  if(currentLessonIndex < currentDomain.lessons.length-1) { currentLessonIndex++; showLesson(); }
-  else { startQuiz(currentDomain.id); }
+  if(currentLessonIndex < currentDomain.lessons.length-1) { 
+    currentLessonIndex++; 
+    showLesson(); 
+  } else { 
+    startQuiz(currentDomain.id); 
+  }
 }
 
 // QUIZ
 function startQuiz(id) {
   currentDomain = DOMAINS.find(d=>d.id===id);
-  currentQuizIndex = 0; selectedAnswer = null; quizScore = 0;
+  currentQuizIndex = 0; 
+  selectedAnswer = null; 
+  quizScore = 0;
   showQuizQuestion();
 }
 
@@ -585,12 +544,12 @@ function showQuizQuestion() {
   showScreen('quiz');
   const q = currentDomain.quizzes[currentQuizIndex];
   document.getElementById('quiz-domain-label').textContent = currentDomain.name;
-  document.getElementById('quiz-progress').textContent = `Question ${currentQuizIndex+1} of ${currentDomain.quizzes.length}`;
+  document.getElementById('quiz-progress').textContent = `${currentQuizIndex+1}/${currentDomain.quizzes.length}`;
   document.getElementById('quiz-question').textContent = q.question;
   document.getElementById('quiz-options').innerHTML = q.options.map((o,i) => 
-    `<button onclick="selectQuizOption(${i})" class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" data-index="${i}">
-      <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold text-slate-600">${String.fromCharCode(65+i)}</span>
-      <span class="text-slate-700">${o}</span>
+    `<button onclick="selectQuizOption(${i})" class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3">
+      <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">${String.fromCharCode(65+i)}</span>
+      <span>${o}</span>
     </button>`).join('');
   document.getElementById('quiz-feedback').classList.add('hidden');
   document.getElementById('btn-submit').classList.remove('hidden');
@@ -618,15 +577,19 @@ function submitAnswer() {
   const fb = document.getElementById('quiz-feedback');
   fb.classList.remove('hidden');
   fb.className = `mt-6 p-4 rounded-lg ${correct?'bg-green-50 border border-green-200':'bg-red-50 border border-red-200'}`;
-  fb.innerHTML = `<div class="font-medium ${correct?'text-green-800':'text-red-800'} mb-1">${correct?'✓ Correct!':'✗ Incorrect'}</div><div class="${correct?'text-green-700':'text-red-700'} text-sm">${q.explanation}</div>`;
+  fb.innerHTML = `<div class="font-medium ${correct?'text-green-800':'text-red-800'}">${correct?'✓ Correct!':'✗ Incorrect'}</div><div class="text-sm mt-1">${q.explanation}</div>`;
   document.getElementById('btn-submit').classList.add('hidden');
   document.getElementById('btn-next-q').classList.remove('hidden');
   document.getElementById('btn-next-q').textContent = currentQuizIndex===currentDomain.quizzes.length-1?'See Results':'Next →';
 }
 
 function nextQuestion() {
-  if(currentQuizIndex < currentDomain.quizzes.length-1) { currentQuizIndex++; showQuizQuestion(); }
-  else { showResults(); }
+  if(currentQuizIndex < currentDomain.quizzes.length-1) { 
+    currentQuizIndex++; 
+    showQuizQuestion(); 
+  } else { 
+    showResults(); 
+  }
 }
 
 async function showResults() {
@@ -634,13 +597,13 @@ async function showResults() {
   const total = currentDomain.quizzes.length;
   const pct = Math.round((quizScore/total)*100);
   const passed = pct >= 80;
-  const p = currentUser.progress[currentDomain.id];
+  const p = userProgress[currentDomain.id];
   p.quizScores.push(pct);
   if(passed && !p.completed) p.completed = true;
   await saveProgress();
   document.getElementById('results-icon').textContent = passed?'🎉':'📚';
   document.getElementById('results-title').textContent = passed?'Great Job!':'Keep Studying';
-  document.getElementById('results-message').textContent = passed?`You passed with ${quizScore}/${total} correct!`:`You scored ${quizScore}/${total}. Need 80% to pass.`;
+  document.getElementById('results-message').textContent = passed?`You passed with ${quizScore}/${total}!`:`${quizScore}/${total} - Need 80% to pass.`;
   document.getElementById('results-correct').textContent = quizScore;
   document.getElementById('results-incorrect').textContent = total-quizScore;
   document.getElementById('results-percent').textContent = pct+'%';
