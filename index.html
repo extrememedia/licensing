@@ -45,7 +45,7 @@
             <input type="password" id="login-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
           </div>
           <button onclick="handleLogin()" id="btn-login" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
-          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <button onclick="showRegister()" class="text-blue-600 hover:underline">Create one</button></p>
+          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <button type="button" onclick="showRegister()" class="text-blue-600 hover:underline">Create one</button></p>
         </div>
 
         <div id="register-form" class="hidden">
@@ -62,7 +62,7 @@
             <input type="password" id="reg-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
           </div>
           <button onclick="handleRegister()" id="btn-register" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
-          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <button onclick="showLogin()" class="text-blue-600 hover:underline">Sign in</button></p>
+          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <button type="button" onclick="showLogin()" class="text-blue-600 hover:underline">Sign in</button></p>
         </div>
 
         <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
@@ -304,14 +304,16 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 // AUTH
 function showRegister() {
+  console.log('showRegister called');
   document.getElementById('login-form').classList.add('hidden');
   document.getElementById('register-form').classList.remove('hidden');
-  hideError();
+  document.getElementById('login-error').classList.add('hidden');
 }
 function showLogin() {
+  console.log('showLogin called');
   document.getElementById('register-form').classList.add('hidden');
   document.getElementById('login-form').classList.remove('hidden');
-  hideError();
+  document.getElementById('login-error').classList.add('hidden');
 }
 
 async function handleRegister() {
