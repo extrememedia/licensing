@@ -8,8 +8,6 @@
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
-    .fade-in { animation: fadeIn 0.3s ease-in-out; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     .screen { display: none; }
     .screen.active { display: block; }
     .lesson-content { line-height: 1.8; }
@@ -20,6 +18,7 @@
     .quiz-option.selected { border-color: #3b82f6 !important; background: #eff6ff !important; }
     .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
     .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
+    .saving { opacity: 0.7; pointer-events: none; }
   </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -35,37 +34,44 @@
           <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing Tracker</h1>
           <p class="text-slate-500 mt-2">Study & prepare for your licensing interview</p>
         </div>
-        <div id="login-form">
+
+        <!-- GitHub Token Login -->
+        <div id="token-login">
+          <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+            <h3 class="font-medium text-blue-800 mb-2">☁️ Cloud Save with GitHub</h3>
+            <p class="text-blue-700 text-sm">Your progress saves to GitHub and syncs across all your devices. Create a free Personal Access Token to get started.</p>
+          </div>
+          
           <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-            <input type="email" id="login-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Your Name</label>
+            <input type="text" id="user-name" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="John Smith">
           </div>
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-            <input type="password" id="login-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+          
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">GitHub Personal Access Token</label>
+            <input type="password" id="github-token" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="ghp_xxxxxxxxxxxx">
+            <p class="text-xs text-slate-500 mt-1">Needs "gist" scope only. <a href="https://github.com/settings/tokens/new?description=Foursquare%20Tracker&scopes=gist" target="_blank" class="text-blue-600 hover:underline">Create token →</a></p>
           </div>
-          <button onclick="handleLogin()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
-          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <button onclick="showRegister()" class="text-blue-600 hover:underline">Create one</button></p>
+
+          <button onclick="handleGitHubLogin()" id="btn-login" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90 flex items-center justify-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            Connect with GitHub
+          </button>
+          
+          <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t"></div></div>
+            <div class="relative flex justify-center text-sm"><span class="px-2 bg-white text-slate-500">or continue offline</span></div>
+          </div>
+          
+          <button onclick="handleOfflineLogin()" class="w-full border py-3 rounded-lg text-slate-600 hover:bg-slate-50">
+            Use Local Storage Only
+          </button>
+          <p class="text-xs text-slate-500 text-center mt-2">Progress won't sync across devices</p>
         </div>
-        <div id="register-form" class="hidden">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-            <input type="text" id="reg-name" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="John Smith">
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-            <input type="email" id="reg-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-            <input type="password" id="reg-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
-          </div>
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-slate-700 mb-1">District (Optional)</label>
-            <input type="text" id="reg-district" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="e.g., Greater Los Angeles">
-          </div>
-          <button onclick="handleRegister()" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
-          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <button onclick="showLogin()" class="text-blue-600 hover:underline">Sign in</button></p>
+
+        <div id="login-status" class="hidden text-center py-8">
+          <div class="animate-spin w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+          <p class="text-slate-600">Connecting to GitHub...</p>
         </div>
       </div>
     </div>
@@ -84,13 +90,19 @@
             <p class="text-blue-200 text-sm" id="user-greeting">Welcome!</p>
           </div>
         </div>
-        <button onclick="handleLogout()" class="text-blue-200 hover:text-white text-sm">Sign Out</button>
+        <div class="flex items-center gap-4">
+          <span id="save-status" class="text-xs text-blue-200 hidden">✓ Saved</span>
+          <button onclick="handleLogout()" class="text-blue-200 hover:text-white text-sm">Sign Out</button>
+        </div>
       </div>
     </header>
     <main class="max-w-6xl mx-auto px-4 py-6">
       <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
         <div class="flex items-center justify-between mb-4">
-          <h2 class="text-xl font-bold text-slate-800">Your Learning Journey</h2>
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">Your Learning Journey</h2>
+            <p class="text-sm text-slate-500" id="storage-indicator">☁️ Synced with GitHub</p>
+          </div>
           <div class="text-right">
             <div class="text-2xl font-bold text-blue-600" id="overall-progress">0%</div>
             <div class="text-sm text-slate-500">Complete</div>
@@ -274,58 +286,224 @@ const DOMAINS = [
 
 // APP STATE
 let currentUser = null;
+let githubToken = null;
+let gistId = null;
+let isOnlineMode = false;
 let currentDomain = null;
 let currentLessonIndex = 0;
 let currentQuizIndex = 0;
 let selectedAnswer = null;
 let quizScore = 0;
 
-// INIT
-document.addEventListener('DOMContentLoaded', function() {
-  const saved = localStorage.getItem('foursquare_user');
-  if (saved) { currentUser = JSON.parse(saved); showApp(); }
-});
+const GIST_FILENAME = 'foursquare_tracker_progress.json';
+
+// GITHUB GIST API
+async function findOrCreateGist() {
+  // First, try to find existing gist
+  const listRes = await fetch('https://api.github.com/gists', {
+    headers: { 'Authorization': `token ${githubToken}` }
+  });
+  if (!listRes.ok) throw new Error('Failed to fetch gists');
+  
+  const gists = await listRes.json();
+  const existing = gists.find(g => g.files && g.files[GIST_FILENAME]);
+  
+  if (existing) {
+    gistId = existing.id;
+    const content = JSON.parse(existing.files[GIST_FILENAME].content);
+    return content;
+  }
+  
+  // Create new gist
+  const createRes = await fetch('https://api.github.com/gists', {
+    method: 'POST',
+    headers: {
+      'Authorization': `token ${githubToken}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      description: 'Foursquare Licensing Tracker Progress',
+      public: false,
+      files: {
+        [GIST_FILENAME]: {
+          content: JSON.stringify(createDefaultProgress())
+        }
+      }
+    })
+  });
+  
+  if (!createRes.ok) throw new Error('Failed to create gist');
+  const newGist = await createRes.json();
+  gistId = newGist.id;
+  return createDefaultProgress();
+}
+
+async function saveToGist(data) {
+  if (!isOnlineMode || !gistId) return;
+  
+  showSaveStatus('Saving...');
+  
+  try {
+    await fetch(`https://api.github.com/gists/${gistId}`, {
+      method: 'PATCH',
+      headers: {
+        'Authorization': `token ${githubToken}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        files: {
+          [GIST_FILENAME]: {
+            content: JSON.stringify(data)
+          }
+        }
+      })
+    });
+    showSaveStatus('✓ Saved to GitHub');
+  } catch (e) {
+    showSaveStatus('⚠ Save failed');
+    console.error(e);
+  }
+}
+
+function showSaveStatus(msg) {
+  const el = document.getElementById('save-status');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 2000);
+}
+
+function createDefaultProgress() {
+  const progress = {};
+  DOMAINS.forEach(d => {
+    progress[d.id] = { lessonsCompleted: [], quizScores: [], completed: false };
+  });
+  return { name: '', progress, createdAt: new Date().toISOString() };
+}
 
 // AUTH
-function showRegister() {
-  document.getElementById('login-form').classList.add('hidden');
-  document.getElementById('register-form').classList.remove('hidden');
+async function handleGitHubLogin() {
+  const name = document.getElementById('user-name').value.trim();
+  const token = document.getElementById('github-token').value.trim();
+  
+  if (!name) { alert('Please enter your name.'); return; }
+  if (!token) { alert('Please enter your GitHub token.'); return; }
+  
+  document.getElementById('token-login').classList.add('hidden');
+  document.getElementById('login-status').classList.remove('hidden');
+  
+  try {
+    githubToken = token;
+    isOnlineMode = true;
+    
+    // Verify token
+    const userRes = await fetch('https://api.github.com/user', {
+      headers: { 'Authorization': `token ${token}` }
+    });
+    if (!userRes.ok) throw new Error('Invalid token');
+    
+    // Find or create gist
+    const data = await findOrCreateGist();
+    data.name = name;
+    currentUser = data;
+    
+    // Save token locally for convenience
+    localStorage.setItem('fs_github_token', token);
+    localStorage.setItem('fs_user_data', JSON.stringify(currentUser));
+    
+    await saveToGist(currentUser);
+    showApp();
+  } catch (e) {
+    alert('Login failed: ' + e.message);
+    document.getElementById('token-login').classList.remove('hidden');
+    document.getElementById('login-status').classList.add('hidden');
+  }
 }
-function showLogin() {
-  document.getElementById('register-form').classList.add('hidden');
-  document.getElementById('login-form').classList.remove('hidden');
-}
-function handleRegister() {
-  const name = document.getElementById('reg-name').value.trim();
-  const email = document.getElementById('reg-email').value.trim();
-  const password = document.getElementById('reg-password').value;
-  if (!name || !email || !password) { alert('Please fill all required fields.'); return; }
-  currentUser = { name, email, progress: {} };
-  DOMAINS.forEach(d => { currentUser.progress[d.id] = { lessonsCompleted: [], quizScores: [], completed: false }; });
-  localStorage.setItem('foursquare_user', JSON.stringify(currentUser));
+
+function handleOfflineLogin() {
+  const name = document.getElementById('user-name').value.trim() || 'Student';
+  isOnlineMode = false;
+  
+  const saved = localStorage.getItem('fs_user_data');
+  if (saved) {
+    currentUser = JSON.parse(saved);
+    currentUser.name = name;
+  } else {
+    currentUser = createDefaultProgress();
+    currentUser.name = name;
+  }
+  
+  localStorage.setItem('fs_user_data', JSON.stringify(currentUser));
   showApp();
 }
-function handleLogin() {
-  const email = document.getElementById('login-email').value.trim();
-  if (!email) { alert('Please enter your email.'); return; }
-  const saved = localStorage.getItem('foursquare_user');
-  if (saved) { currentUser = JSON.parse(saved); showApp(); return; }
-  alert('No account found. Please create one.'); showRegister();
+
+function handleLogout() {
+  currentUser = null;
+  githubToken = null;
+  gistId = null;
+  isOnlineMode = false;
+  localStorage.removeItem('fs_github_token');
+  showScreen('login');
+  document.getElementById('token-login').classList.remove('hidden');
+  document.getElementById('login-status').classList.add('hidden');
 }
-function handleLogout() { currentUser = null; showScreen('login'); }
+
+// INIT
+document.addEventListener('DOMContentLoaded', async function() {
+  const savedToken = localStorage.getItem('fs_github_token');
+  const savedData = localStorage.getItem('fs_user_data');
+  
+  if (savedToken && savedData) {
+    githubToken = savedToken;
+    currentUser = JSON.parse(savedData);
+    isOnlineMode = true;
+    
+    // Try to sync with GitHub
+    try {
+      const data = await findOrCreateGist();
+      // Merge: use GitHub data if newer
+      if (data.lastUpdated > currentUser.lastUpdated) {
+        currentUser.progress = data.progress;
+      }
+      showApp();
+    } catch (e) {
+      // Offline fallback
+      isOnlineMode = false;
+      showApp();
+    }
+  } else if (savedData) {
+    currentUser = JSON.parse(savedData);
+    isOnlineMode = false;
+    showApp();
+  }
+});
 
 // NAV
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
 }
+
 function showApp() {
   showScreen('app');
   document.getElementById('user-greeting').textContent = 'Welcome, ' + currentUser.name + '!';
+  document.getElementById('storage-indicator').textContent = isOnlineMode ? '☁️ Synced with GitHub' : '💾 Local storage only';
   renderDomainCards();
   updateOverallProgress();
 }
+
 function backToApp() { showApp(); }
+
+// SAVE PROGRESS
+async function saveProgress() {
+  currentUser.lastUpdated = new Date().toISOString();
+  localStorage.setItem('fs_user_data', JSON.stringify(currentUser));
+  
+  if (isOnlineMode) {
+    await saveToGist(currentUser);
+  }
+  
+  updateOverallProgress();
+}
 
 // DOMAIN CARDS
 function renderDomainCards() {
@@ -340,7 +518,7 @@ function renderDomainCards() {
     return `<div class="bg-white rounded-xl shadow-sm border p-6 ${locked?'opacity-60':''}">
       <div class="flex items-center justify-between mb-4">
         <div class="text-3xl">${d.icon}</div>
-        ${complete?'<span class="text-green-500">✓</span>':locked?'<span class="text-slate-400">🔒</span>':''}
+        ${complete?'<span class="text-green-500 text-xl">✓</span>':locked?'<span class="text-slate-400">🔒</span>':''}
       </div>
       <h3 class="text-lg font-bold text-slate-800 mb-1">${d.name}</h3>
       <p class="text-slate-500 text-sm mb-4">${d.description}</p>
@@ -355,6 +533,7 @@ function renderDomainCards() {
     </div>`;
   }).join('');
 }
+
 function updateOverallProgress() {
   let total=0, done=0;
   DOMAINS.forEach(d => { total+=d.lessons.length; done+=currentUser.progress[d.id].lessonsCompleted.length; });
@@ -371,6 +550,7 @@ function startLessons(id) {
   for(let i=0;i<currentDomain.lessons.length;i++) { if(!p.lessonsCompleted.includes(i)){currentLessonIndex=i;break;} currentLessonIndex=i; }
   showLesson();
 }
+
 function showLesson() {
   showScreen('lesson');
   const l = currentDomain.lessons[currentLessonIndex];
@@ -381,10 +561,15 @@ function showLesson() {
   document.getElementById('btn-prev').classList.toggle('hidden', currentLessonIndex===0);
   document.getElementById('btn-next').textContent = currentLessonIndex===currentDomain.lessons.length-1 ? 'Complete & Take Quiz →' : 'Continue →';
 }
+
 function prevLesson() { if(currentLessonIndex>0){currentLessonIndex--;showLesson();} }
-function nextLesson() {
+
+async function nextLesson() {
   const p = currentUser.progress[currentDomain.id];
-  if(!p.lessonsCompleted.includes(currentLessonIndex)) { p.lessonsCompleted.push(currentLessonIndex); saveProgress(); }
+  if(!p.lessonsCompleted.includes(currentLessonIndex)) { 
+    p.lessonsCompleted.push(currentLessonIndex); 
+    await saveProgress(); 
+  }
   if(currentLessonIndex < currentDomain.lessons.length-1) { currentLessonIndex++; showLesson(); }
   else { startQuiz(currentDomain.id); }
 }
@@ -395,6 +580,7 @@ function startQuiz(id) {
   currentQuizIndex = 0; selectedAnswer = null; quizScore = 0;
   showQuizQuestion();
 }
+
 function showQuizQuestion() {
   showScreen('quiz');
   const q = currentDomain.quizzes[currentQuizIndex];
@@ -412,11 +598,13 @@ function showQuizQuestion() {
   document.getElementById('btn-next-q').classList.add('hidden');
   selectedAnswer = null;
 }
+
 function selectQuizOption(i) {
   selectedAnswer = i;
   document.querySelectorAll('.quiz-option').forEach((o,j)=>o.classList.toggle('selected',j===i));
   document.getElementById('btn-submit').disabled = false;
 }
+
 function submitAnswer() {
   const q = currentDomain.quizzes[currentQuizIndex];
   const correct = selectedAnswer === q.correct;
@@ -435,11 +623,13 @@ function submitAnswer() {
   document.getElementById('btn-next-q').classList.remove('hidden');
   document.getElementById('btn-next-q').textContent = currentQuizIndex===currentDomain.quizzes.length-1?'See Results':'Next →';
 }
+
 function nextQuestion() {
   if(currentQuizIndex < currentDomain.quizzes.length-1) { currentQuizIndex++; showQuizQuestion(); }
   else { showResults(); }
 }
-function showResults() {
+
+async function showResults() {
   showScreen('results');
   const total = currentDomain.quizzes.length;
   const pct = Math.round((quizScore/total)*100);
@@ -447,7 +637,7 @@ function showResults() {
   const p = currentUser.progress[currentDomain.id];
   p.quizScores.push(pct);
   if(passed && !p.completed) p.completed = true;
-  saveProgress();
+  await saveProgress();
   document.getElementById('results-icon').textContent = passed?'🎉':'📚';
   document.getElementById('results-title').textContent = passed?'Great Job!':'Keep Studying';
   document.getElementById('results-message').textContent = passed?`You passed with ${quizScore}/${total} correct!`:`You scored ${quizScore}/${total}. Need 80% to pass.`;
@@ -455,8 +645,8 @@ function showResults() {
   document.getElementById('results-incorrect').textContent = total-quizScore;
   document.getElementById('results-percent').textContent = pct+'%';
 }
+
 function retakeQuiz() { startQuiz(currentDomain.id); }
-function saveProgress() { localStorage.setItem('foursquare_user', JSON.stringify(currentUser)); updateOverallProgress(); }
 </script>
 </body>
 </html>
