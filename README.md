@@ -1,0 +1,2 @@
+# licensing
+foursquare licensing process
