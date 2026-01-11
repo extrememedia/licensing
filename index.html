@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Foursquare Licensing Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Open+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
@@ -16,8 +17,6 @@
     .category-content.expanded { max-height: 2000px; }
     .chapter-card { transition: all 0.2s; }
     .chapter-card:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .reading-content { line-height: 2; font-size: 1.05rem; white-space: pre-wrap; }
-    .reading-content p { margin-bottom: 1.5rem; }
     .lesson-content { line-height: 1.8; }
     .lesson-content ul { margin: 1rem 0; padding-left: 1.5rem; }
     .lesson-content li { margin-bottom: 0.5rem; }
@@ -34,6 +33,42 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .chevron { transition: transform 0.3s; }
     .chevron.rotated { transform: rotate(180deg); }
+    
+    /* READER STYLES */
+    .reader-container { min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
+    .reader-container.theme-light { background: #ffffff; color: #1a1a1a; }
+    .reader-container.theme-sepia { background: #f4ecd8; color: #5c4b37; }
+    .reader-container.theme-dark { background: #1a1a1a; color: #e0e0e0; }
+    .reader-container.theme-night { background: #0d1117; color: #c9d1d9; }
+    
+    .reader-content { max-width: 720px; margin: 0 auto; padding: 2rem; }
+    .reader-content p { margin-bottom: 1.5em; text-indent: 1.5em; }
+    .reader-content p:first-of-type { text-indent: 0; }
+    .reader-content h1, .reader-content h2, .reader-content h3 { text-indent: 0; margin-top: 2em; margin-bottom: 1em; }
+    
+    .reader-toolbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; transition: transform 0.3s; }
+    .reader-toolbar.hidden { transform: translateY(-100%); }
+    
+    .reader-settings { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; transform: translateY(100%); transition: transform 0.3s; }
+    .reader-settings.open { transform: translateY(0); }
+    
+    .font-serif { font-family: 'Merriweather', Georgia, serif; }
+    .font-sans { font-family: 'Open Sans', system-ui, sans-serif; }
+    .font-classic { font-family: 'Crimson Text', 'Times New Roman', serif; }
+    .font-modern { font-family: 'Literata', Georgia, serif; }
+    
+    .reading-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(to right, #ef4444, #f59e0b); z-index: 101; transition: width 0.1s; }
+    
+    .theme-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; cursor: pointer; transition: transform 0.2s; }
+    .theme-btn:hover { transform: scale(1.1); }
+    .theme-btn.active { border-width: 3px; box-shadow: 0 0 0 2px rgba(59,130,246,0.5); }
+    
+    .font-btn { padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
+    .font-btn.active { background: #3b82f6; color: white; }
+    
+    /* Dark mode adjustments for settings panel */
+    .theme-dark .settings-panel, .theme-night .settings-panel { background: #2d2d2d; border-color: #404040; }
+    .theme-dark .settings-label, .theme-night .settings-label { color: #e0e0e0; }
   </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -107,7 +142,6 @@
     </header>
     
     <main class="max-w-4xl mx-auto px-4 py-6">
-      <!-- Overall Progress -->
       <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -123,13 +157,11 @@
           <div class="bg-gradient-to-r from-red-500 to-red-600 h-3 rounded-full transition-all" id="progress-bar" style="width:0%"></div>
         </div>
       </div>
-
-      <!-- Categories -->
       <div id="categories-container" class="space-y-4"></div>
     </main>
   </div>
 
-  <!-- CHAPTER/LESSON SCREEN -->
+  <!-- CHAPTER SCREEN -->
   <div id="screen-chapter" class="screen">
     <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
       <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
@@ -149,20 +181,22 @@
       </div>
     </div>
     <main class="max-w-4xl mx-auto px-4 py-6">
-      <!-- READ TAB -->
       <div id="tab-read" class="tab-content">
         <div id="reading-loading" class="text-center py-12">
           <div class="loading-spinner mx-auto mb-4"></div>
           <p class="text-slate-500">Loading content...</p>
         </div>
-        <div id="reading-content" class="bg-white rounded-xl shadow-sm border p-6 md:p-8 hidden">
-          <div id="full-chapter-text" class="reading-content text-slate-700"></div>
-          <div class="mt-8 pt-6 border-t">
-            <button onclick="markReadComplete()" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700">✓ Mark as Read</button>
+        <div id="reading-preview" class="bg-white rounded-xl shadow-sm border p-6 hidden">
+          <div id="preview-text" class="prose max-w-none"></div>
+          <div class="mt-6 pt-6 border-t flex gap-3">
+            <button onclick="openReader()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Open Reader
+            </button>
+            <button onclick="markReadComplete()" class="px-6 py-3 border rounded-lg hover:bg-slate-50 flex items-center gap-2">✓ Mark as Read</button>
           </div>
         </div>
       </div>
-      <!-- STUDY TAB -->
       <div id="tab-study" class="tab-content hidden">
         <div class="bg-white rounded-xl shadow-sm border p-6">
           <div id="study-content" class="lesson-content"></div>
@@ -172,7 +206,6 @@
           </div>
         </div>
       </div>
-      <!-- QUIZ TAB -->
       <div id="tab-quiz" class="tab-content hidden">
         <div class="bg-white rounded-xl shadow-sm border p-6">
           <div id="quiz-container">
@@ -204,6 +237,85 @@
     </main>
   </div>
 
+  <!-- FULL READER SCREEN (Kindle-style) -->
+  <div id="screen-reader" class="screen">
+    <div id="reader-container" class="reader-container theme-light font-serif">
+      <!-- Reading Progress Bar -->
+      <div class="reading-progress" id="reading-progress" style="width: 0%"></div>
+      
+      <!-- Toolbar -->
+      <div id="reader-toolbar" class="reader-toolbar bg-white/95 backdrop-blur border-b shadow-sm">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+          <button onclick="closeReader()" class="flex items-center gap-2 text-slate-600 hover:text-slate-900">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            Back
+          </button>
+          <div class="text-center">
+            <div class="font-medium text-slate-800" id="reader-title"></div>
+          </div>
+          <button onclick="toggleSettings()" class="p-2 rounded-lg hover:bg-slate-100">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m8.66-10l-5.2 3m-6.92 4l-5.2 3M22.66 17l-5.2-3m-6.92-4l-5.2-3"/></svg>
+          </button>
+        </div>
+      </div>
+      
+      <!-- Content -->
+      <div class="reader-content pt-20 pb-32" id="reader-text-container">
+        <div id="reader-text"></div>
+      </div>
+      
+      <!-- Settings Panel -->
+      <div id="reader-settings" class="reader-settings settings-panel bg-white border-t shadow-lg">
+        <div class="max-w-lg mx-auto p-6">
+          <!-- Theme -->
+          <div class="mb-6">
+            <div class="settings-label text-sm font-medium text-slate-600 mb-3">Theme</div>
+            <div class="flex justify-center gap-4">
+              <button onclick="setTheme('light')" class="theme-btn bg-white border-slate-300" title="Light"></button>
+              <button onclick="setTheme('sepia')" class="theme-btn bg-[#f4ecd8] border-[#d4c4a8]" title="Sepia"></button>
+              <button onclick="setTheme('dark')" class="theme-btn bg-[#1a1a1a] border-[#404040]" title="Dark"></button>
+              <button onclick="setTheme('night')" class="theme-btn bg-[#0d1117] border-[#30363d]" title="Night"></button>
+            </div>
+          </div>
+          
+          <!-- Font Family -->
+          <div class="mb-6">
+            <div class="settings-label text-sm font-medium text-slate-600 mb-3">Font</div>
+            <div class="flex flex-wrap justify-center gap-2">
+              <button onclick="setFont('serif')" class="font-btn border font-serif">Merriweather</button>
+              <button onclick="setFont('classic')" class="font-btn border font-classic">Crimson</button>
+              <button onclick="setFont('modern')" class="font-btn border font-modern">Literata</button>
+              <button onclick="setFont('sans')" class="font-btn border font-sans">Open Sans</button>
+            </div>
+          </div>
+          
+          <!-- Font Size -->
+          <div class="mb-6">
+            <div class="settings-label text-sm font-medium text-slate-600 mb-3">Size</div>
+            <div class="flex items-center justify-center gap-4">
+              <button onclick="adjustFontSize(-1)" class="w-10 h-10 rounded-full border flex items-center justify-center text-lg hover:bg-slate-100">A-</button>
+              <span class="text-lg font-medium w-16 text-center" id="font-size-display">18px</span>
+              <button onclick="adjustFontSize(1)" class="w-10 h-10 rounded-full border flex items-center justify-center text-xl hover:bg-slate-100">A+</button>
+            </div>
+          </div>
+          
+          <!-- Line Spacing -->
+          <div class="mb-6">
+            <div class="settings-label text-sm font-medium text-slate-600 mb-3">Line Spacing</div>
+            <div class="flex justify-center gap-2">
+              <button onclick="setLineHeight(1.6)" class="font-btn border">Compact</button>
+              <button onclick="setLineHeight(1.8)" class="font-btn border">Normal</button>
+              <button onclick="setLineHeight(2.2)" class="font-btn border">Relaxed</button>
+            </div>
+          </div>
+          
+          <!-- Close Settings -->
+          <button onclick="toggleSettings()" class="w-full py-3 bg-slate-100 rounded-lg text-slate-700 font-medium hover:bg-slate-200">Done</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
 <script>
 // Toggle login/register forms
 (function() {
@@ -231,8 +343,32 @@ sbScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/u
 sbScript.onload = initSupabase;
 document.head.appendChild(sbScript);
 
+// Reader Settings (saved to localStorage)
+var readerSettings = {
+  theme: 'light',
+  font: 'serif',
+  fontSize: 18,
+  lineHeight: 1.8
+};
+
+function loadReaderSettings() {
+  try {
+    var saved = localStorage.getItem('readerSettings');
+    if (saved) readerSettings = JSON.parse(saved);
+  } catch(e) {}
+}
+
+function saveReaderSettings() {
+  try {
+    localStorage.setItem('readerSettings', JSON.stringify(readerSettings));
+  } catch(e) {}
+}
+
+loadReaderSettings();
+
 // Loaded content cache
 var loadedContent = {};
+var currentReadingContent = '';
 
 // ============ ALL DATA ============
 
@@ -248,11 +384,11 @@ var CATEGORIES = [
       {
         id: 'heritage-1',
         title: 'Aimee Semple McPherson',
-        reading: '<h2 class="text-2xl font-bold mb-4">Aimee Semple McPherson (1890-1944)</h2><p>Aimee Semple McPherson was born on October 9, 1890, near Ingersoll, Ontario, Canada. She became one of the most influential evangelists of the 20th century and founded the International Church of the Foursquare Gospel.</p><p>At age 17, Aimee attended a Pentecostal revival meeting where she heard Robert Semple preach. She was converted and later married Robert. Together they went as missionaries to China, where Robert died of malaria in 1910, leaving Aimee widowed with a newborn daughter.</p><p>After returning to America and a brief marriage to Harold McPherson, Aimee began her evangelistic ministry in earnest. She traveled across the country conducting revival meetings, becoming known for her dynamic preaching, dramatic illustrated sermons, and healing ministry.</p><div class="key-point"><strong>Key Fact:</strong> Aimee was one of the first women to preach on the radio and the first woman to receive an FCC broadcast license.</div>',
+        reading: '<h2>Aimee Semple McPherson (1890-1944)</h2><p>Aimee Semple McPherson was born on October 9, 1890, near Ingersoll, Ontario, Canada. She became one of the most influential evangelists of the 20th century and founded the International Church of the Foursquare Gospel.</p><p>At age 17, Aimee attended a Pentecostal revival meeting where she heard Robert Semple preach. She was converted and later married Robert. Together they went as missionaries to China, where Robert died of malaria in 1910, leaving Aimee widowed with a newborn daughter.</p><p>After returning to America and a brief marriage to Harold McPherson, Aimee began her evangelistic ministry in earnest. She traveled across the country conducting revival meetings, becoming known for her dynamic preaching, dramatic illustrated sermons, and healing ministry.</p><p>Aimee was a pioneer in many ways. She was one of the first women to preach on the radio and the first woman to receive an FCC broadcast license. Her use of media to spread the gospel set a pattern that would be followed by many who came after her.</p><p>During the Great Depression, Angelus Temple\'s commissary fed an estimated 1.5 million people. Aimee believed that the gospel must be demonstrated through both word and deed, and her ministry reflected this conviction.</p><p>Aimee Semple McPherson went to be with the Lord on September 27, 1944. Her legacy continues through the International Church of the Foursquare Gospel, which she founded and which now ministers in over 150 nations worldwide.</p>',
         studyGuide: [
           { title: 'Early Life', content: '<p>Aimee was born October 9, 1890 in Canada. Converted at age 17 at a Pentecostal revival. Married Robert Semple and went to China as missionaries.</p>' },
           { title: 'Ministry Begins', content: '<p>After Robert\'s death, Aimee returned to America. She began traveling evangelism, becoming famous for illustrated sermons and healing services.</p>' },
-          { title: 'Legacy', content: '<p>Founded Foursquare Church, Angelus Temple, LIFE Bible College, and KFSG radio. Fed 1.5 million during the Depression.</p>' }
+          { title: 'Legacy', content: '<p>Founded Foursquare Church, Angelus Temple, LIFE Bible College, and KFSG radio. Fed 1.5 million during the Depression. Ministry continues in 150+ nations.</p>' }
         ],
         quizzes: [
           {q: "When was Aimee Semple McPherson born?", options: ["1880", "1890", "1900", "1910"], correct: 1, explanation: "Aimee was born October 9, 1890."},
@@ -265,7 +401,7 @@ var CATEGORIES = [
       {
         id: 'heritage-2',
         title: 'Angelus Temple',
-        reading: '<h2 class="text-2xl font-bold mb-4">Angelus Temple</h2><p>Angelus Temple was dedicated on January 1, 1923, in the Echo Park area of Los Angeles, California. This magnificent 5,300-seat auditorium became the headquarters of the Foursquare movement.</p><p>The temple was built at a cost of $1.5 million, raised entirely through donations. Its distinctive dome became an iconic landmark in Los Angeles. The building featured state-of-the-art technology for its time, including a sophisticated lighting system for Aimee\'s illustrated sermons.</p><p>Angelus Temple was more than a church building—it was a center of community service. During the Great Depression, the temple\'s commissary fed an estimated 1.5 million people and provided clothing, blankets, and other necessities to those in need.</p><div class="key-point"><strong>Key Fact:</strong> Angelus Temple was one of the first megachurches in America and hosted services seven days a week.</div>',
+        reading: '<h2>Angelus Temple</h2><p>Angelus Temple was dedicated on January 1, 1923, in the Echo Park area of Los Angeles, California. This magnificent 5,300-seat auditorium became the headquarters of the Foursquare movement and remains so to this day.</p><p>The temple was built at a cost of $1.5 million, raised entirely through donations from people who believed in Aimee\'s ministry. Its distinctive dome became an iconic landmark in Los Angeles, visible from miles around.</p><p>The building featured state-of-the-art technology for its time, including a sophisticated lighting system that Aimee used for her famous illustrated sermons. These theatrical presentations of biblical stories drew thousands and made the gospel accessible to people from all walks of life.</p><p>Angelus Temple was more than a church building—it was a center of community service. During the Great Depression, the temple\'s commissary fed an estimated 1.5 million people and provided clothing, blankets, and other necessities to those in need. This practical demonstration of Christian love became a hallmark of Foursquare ministry.</p><p>Services were held seven days a week, with multiple services on Sundays. The temple became one of the first "megachurches" in America, drawing visitors from around the world who wanted to experience the dynamic worship and preaching.</p><p>Today, Angelus Temple continues as the flagship church of the Foursquare movement, hosting services, conferences, and special events that carry on the vision of its founder.</p>',
         studyGuide: [
           { title: 'The Building', content: '<p>Dedicated January 1, 1923. Located in Echo Park, Los Angeles. Cost $1.5 million, seats 5,300 people. Featured state-of-the-art technology.</p>' },
           { title: 'Ministry Center', content: '<p>Services seven days a week. Illustrated sermons with dramatic presentations. Became a model for modern megachurches.</p>' },
@@ -282,7 +418,7 @@ var CATEGORIES = [
       {
         id: 'heritage-3',
         title: 'KFSG Radio & LIFE Bible College',
-        reading: '<h2 class="text-2xl font-bold mb-4">KFSG Radio Station</h2><p>In 1924, Aimee Semple McPherson launched KFSG (Kall Four Square Gospel), making it the third radio station in Los Angeles. She was the first woman to receive an FCC broadcast license.</p><p>The radio station allowed Aimee\'s ministry to reach far beyond the walls of Angelus Temple, bringing the Foursquare message to homes across Southern California and beyond.</p><h2 class="text-2xl font-bold mb-4 mt-8">L.I.F.E. Bible College</h2><p>Founded in 1923, L.I.F.E. (Lighthouse of International Foursquare Evangelism) Bible College was established to train ministers for the growing Foursquare movement. The school continues today as Life Pacific University.</p><div class="key-point"><strong>Key Fact:</strong> KFSG was one of the first religious radio stations in America and pioneered Christian broadcasting.</div>',
+        reading: '<h2>KFSG Radio Station</h2><p>In 1924, Aimee Semple McPherson launched KFSG (Kall Four Square Gospel), making it the third radio station in Los Angeles. She was the first woman to receive an FCC broadcast license, a remarkable achievement for that era.</p><p>The radio station allowed Aimee\'s ministry to reach far beyond the walls of Angelus Temple. Families across Southern California and beyond could tune in to hear the Foursquare message, the music of the temple choir, and Aimee\'s compelling preaching.</p><p>KFSG pioneered Christian broadcasting and set a pattern that would be followed by countless ministries in the decades to come. Aimee understood the power of media to spread the gospel, and she embraced new technology as a tool for evangelism.</p><h2>L.I.F.E. Bible College</h2><p>Founded in 1923, L.I.F.E. (Lighthouse of International Foursquare Evangelism) Bible College was established to train ministers for the growing Foursquare movement.</p><p>From its earliest days, the school sent graduates to plant churches across America and around the world. The training combined solid biblical education with practical ministry experience, preparing men and women for effective service.</p><p>The school continues today as Life Pacific University, still training leaders for ministry and carrying on the vision of its founder to equip workers for the harvest.</p>',
         studyGuide: [
           { title: 'KFSG Radio', content: '<p>Launched 1924. Third radio station in LA. First woman with FCC broadcast license. "Kall Four Square Gospel."</p>' },
           { title: 'LIFE Bible College', content: '<p>Founded 1923. L.I.F.E. = Lighthouse of International Foursquare Evangelism. Trains Foursquare ministers. Now Life Pacific University.</p>' },
@@ -309,7 +445,7 @@ var CATEGORIES = [
       {
         id: 'identity-1',
         title: 'The Foursquare Gospel',
-        reading: '<h2 class="text-2xl font-bold mb-4">The Foursquare Gospel</h2><p>The name "Foursquare Gospel" came to Aimee Semple McPherson during a revival meeting in Oakland, California in 1922. While preaching on Ezekiel\'s vision of the four living creatures (Ezekiel 1:4-10), she saw in these four faces a picture of Jesus Christ:</p><ul class="list-disc pl-6 my-4"><li><strong>The Face of a Man</strong> — Jesus the Savior</li><li><strong>The Face of a Lion</strong> — Jesus the Baptizer with the Holy Spirit</li><li><strong>The Face of an Ox</strong> — Jesus the Healer</li><li><strong>The Face of an Eagle</strong> — Jesus the Soon-Coming King</li></ul><p>This "foursquare" message—Jesus as Savior, Baptizer, Healer, and Coming King—became the cornerstone of Foursquare theology and gave the movement its name.</p><div class="key-point"><strong>Key Verse:</strong> "Jesus Christ is the same yesterday, today, and forever." — Hebrews 13:8</div>',
+        reading: '<h2>The Foursquare Gospel</h2><p>The name "Foursquare Gospel" came to Aimee Semple McPherson during a revival meeting in Oakland, California in 1922. While preaching on Ezekiel\'s vision of the four living creatures (Ezekiel 1:4-10), she saw in these four faces a picture of Jesus Christ.</p><p>The four faces represent four aspects of Christ\'s ministry to humanity:</p><p><strong>The Face of a Man</strong> — Jesus the Savior. As a man, Jesus came to save humanity from sin. He is the perfect sacrifice, the Lamb of God who takes away the sin of the world.</p><p><strong>The Face of a Lion</strong> — Jesus the Baptizer with the Holy Spirit. The lion represents royalty and power. Jesus baptizes His followers with the Holy Spirit, empowering them for service.</p><p><strong>The Face of an Ox</strong> — Jesus the Healer. The ox represents service and sacrifice. Jesus bore our sicknesses and carried our pains. By His stripes we are healed.</p><p><strong>The Face of an Eagle</strong> — Jesus the Soon-Coming King. The eagle soars above, looking to the horizon. Jesus is coming again in power and glory to establish His kingdom.</p><p>This "foursquare" message—Jesus as Savior, Baptizer, Healer, and Coming King—became the cornerstone of Foursquare theology and gave the movement its name.</p><p>The message is anchored in Hebrews 13:8: "Jesus Christ is the same yesterday, today, and forever." The Jesus who saved, healed, and empowered in Bible times is the same Jesus who ministers today.</p>',
         studyGuide: [
           { title: 'Origin of the Name', content: '<p>Revealed in Oakland, 1922. Based on Ezekiel 1:4-10. Four living creatures represent four aspects of Jesus\' ministry.</p>' },
           { title: 'The Four Faces', content: '<p>Man = Savior. Lion = Baptizer with Holy Spirit. Ox = Healer. Eagle = Soon-Coming King.</p>' },
@@ -326,7 +462,7 @@ var CATEGORIES = [
       {
         id: 'identity-2',
         title: 'Global Movement',
-        reading: '<h2 class="text-2xl font-bold mb-4">A Global Movement</h2><p>What began in Los Angeles has grown into a worldwide movement. Today, the International Church of the Foursquare Gospel has presence in over 150 nations with millions of members worldwide.</p><p>The Foursquare Church has always emphasized church planting and missions. From the earliest days, Aimee sent graduates of LIFE Bible College to plant churches across America and around the world.</p><p>Key characteristics of Foursquare identity include:</p><ul class="list-disc pl-6 my-4"><li>Commitment to the authority of Scripture</li><li>Empowerment of women in ministry at all levels</li><li>Spirit-empowered evangelism</li><li>Church planting and multiplication</li><li>Compassionate outreach to communities</li></ul>',
+        reading: '<h2>A Global Movement</h2><p>What began in Los Angeles has grown into a worldwide movement. Today, the International Church of the Foursquare Gospel has presence in over 150 nations with millions of members worldwide.</p><p>The Foursquare Church has always emphasized church planting and missions. From the earliest days, Aimee sent graduates of LIFE Bible College to plant churches across America and around the world. This vision for multiplication continues today.</p><p>Key characteristics of Foursquare identity include:</p><p><strong>Commitment to Scripture:</strong> The Bible is the inspired, inerrant Word of God and the final authority for faith and practice.</p><p><strong>Empowerment of Women:</strong> From its founding, Foursquare has affirmed women in ministry at all levels. This reflects the example of our founder and the biblical pattern of women in leadership.</p><p><strong>Spirit-Empowered Ministry:</strong> We believe in the baptism with the Holy Spirit with the initial evidence of speaking in tongues, and in the operation of spiritual gifts today.</p><p><strong>Church Planting:</strong> We are committed to multiplying healthy churches that make disciples who make disciples.</p><p><strong>Compassionate Outreach:</strong> Following Aimee\'s example, Foursquare churches engage their communities with practical demonstrations of God\'s love.</p>',
         studyGuide: [
           { title: 'Global Reach', content: '<p>Present in 150+ nations. Millions of members worldwide. Started from one church in LA.</p>' },
           { title: 'Distinctive Values', content: '<p>Scripture authority. Women in ministry at all levels. Spirit-empowered evangelism. Church planting focus.</p>' },
@@ -353,7 +489,7 @@ var CATEGORIES = [
       {
         id: 'doctrine-1',
         title: 'Declaration of Faith Overview',
-        reading: '<h2 class="text-2xl font-bold mb-4">The Foursquare Declaration of Faith</h2><p>The Foursquare Declaration of Faith outlines the core doctrinal beliefs of the International Church of the Foursquare Gospel. These 22 statements cover the essential teachings of Scripture.</p><p><strong>Key Doctrines Include:</strong></p><ul class="list-disc pl-6 my-4"><li>The Holy Scriptures as the inspired Word of God</li><li>The Trinity: Father, Son, and Holy Spirit</li><li>The deity and humanity of Jesus Christ</li><li>The Fall of humanity and need for salvation</li><li>Salvation by grace through faith</li><li>The baptism with the Holy Spirit</li><li>Spiritual gifts for today</li><li>Divine healing in the atonement</li><li>The Second Coming of Christ</li><li>Heaven and hell as literal places</li></ul><div class="key-point"><strong>Foundation:</strong> All Foursquare doctrine is built on the authority and reliability of Scripture.</div>',
+        reading: '<h2>The Foursquare Declaration of Faith</h2><p>The Foursquare Declaration of Faith outlines the core doctrinal beliefs of the International Church of the Foursquare Gospel. These 22 statements cover the essential teachings of Scripture and define what we believe.</p><p>The Declaration addresses:</p><p><strong>The Holy Scriptures</strong> — We believe the Bible is the inspired Word of God, inerrant in its original manuscripts, and the final authority for faith and practice.</p><p><strong>The Eternal Godhead</strong> — We believe in one God, eternally existing in three persons: Father, Son, and Holy Spirit.</p><p><strong>The Fall of Man</strong> — We believe humanity was created in God\'s image but fell through sin, resulting in spiritual death and separation from God.</p><p><strong>The Plan of Redemption</strong> — We believe God\'s plan for salvation was provided through Jesus Christ, who died for our sins and rose again.</p><p><strong>Salvation Through Grace</strong> — We believe salvation is by grace through faith, not by works.</p><p><strong>The Baptism with the Holy Spirit</strong> — We believe in the baptism with the Holy Spirit as a distinct experience with the initial evidence of speaking in tongues.</p><p><strong>Divine Healing</strong> — We believe healing is provided in the atonement and is available to believers today.</p><p><strong>The Second Coming</strong> — We believe in the personal, imminent return of Jesus Christ.</p><p>All Foursquare doctrine is built on the foundation of Scripture\'s authority and reliability.</p>',
         studyGuide: [
           { title: 'What It Is', content: '<p>22 statements of core belief. Based on Scripture. Defines Foursquare theology.</p>' },
           { title: 'Key Topics', content: '<p>Scripture, Trinity, Christ, Salvation, Holy Spirit, Spiritual Gifts, Healing, Second Coming, Eternity.</p>' },
@@ -370,7 +506,7 @@ var CATEGORIES = [
       {
         id: 'doctrine-2',
         title: 'The Trinity & Salvation',
-        reading: '<h2 class="text-2xl font-bold mb-4">The Trinity</h2><p>Foursquare affirms the historic Christian doctrine of the Trinity: one God eternally existing in three persons—Father, Son, and Holy Spirit. Each person is fully God, co-equal and co-eternal.</p><h2 class="text-2xl font-bold mb-4 mt-8">Salvation</h2><p>Salvation is by grace alone, through faith alone, in Christ alone. It cannot be earned by works. When a person repents and believes in Jesus Christ:</p><ul class="list-disc pl-6 my-4"><li>They are justified (declared righteous)</li><li>They are regenerated (born again)</li><li>They become a child of God</li><li>They receive eternal life</li></ul><div class="scripture">"For by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not of works, lest anyone should boast." — Ephesians 2:8-9</div>',
+        reading: '<h2>The Trinity</h2><p>Foursquare affirms the historic Christian doctrine of the Trinity: one God eternally existing in three persons—Father, Son, and Holy Spirit. Each person is fully God, co-equal and co-eternal.</p><p>This is not three gods (tritheism), nor is it one God appearing in three different modes (modalism). It is one God in three distinct persons who exist in eternal relationship with one another.</p><p>The Father is God (1 Corinthians 8:6). The Son is God (John 1:1, 14). The Holy Spirit is God (Acts 5:3-4). Yet there is only one God (Deuteronomy 6:4).</p><h2>Salvation</h2><p>Salvation is by grace alone, through faith alone, in Christ alone. It cannot be earned by works or merit. When a person repents of sin and places their faith in Jesus Christ, they receive:</p><p><strong>Justification</strong> — God declares them righteous, not based on their own works but on the righteousness of Christ credited to their account.</p><p><strong>Regeneration</strong> — They are born again, receiving a new nature and becoming a child of God.</p><p><strong>Eternal Life</strong> — They pass from death to life and will never perish.</p><p>As Paul wrote: "For by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not of works, lest anyone should boast" (Ephesians 2:8-9).</p>',
         studyGuide: [
           { title: 'The Trinity', content: '<p>One God, three persons. Father, Son, Holy Spirit. Co-equal, co-eternal. Historic Christian doctrine.</p>' },
           { title: 'Salvation', content: '<p>By grace through faith. Not by works. Through Christ alone. Includes justification, regeneration.</p>' },
@@ -397,11 +533,11 @@ var CATEGORIES = [
       {
         id: 'polity-1',
         title: 'Church Government',
-        reading: '<h2 class="text-2xl font-bold mb-4">Foursquare Church Government</h2><p>The Foursquare Church operates under a modified episcopal form of government with congregational elements. The structure includes:</p><p><strong>Foursquare Convention:</strong> The highest governing body, meeting annually.</p><p><strong>Board of Directors:</strong> Provides oversight between conventions.</p><p><strong>President:</strong> The chief executive officer of the movement.</p><p><strong>Districts:</strong> Regional groupings of churches with district supervisors.</p><p><strong>Local Churches:</strong> Led by credentialed ministers who shepherd local congregations.</p><div class="key-point"><strong>Key Principle:</strong> Foursquare balances organizational accountability with local church autonomy.</div>',
+        reading: '<h2>Foursquare Church Government</h2><p>The Foursquare Church operates under a modified episcopal form of government with congregational elements. This structure provides both accountability and flexibility for local ministry.</p><p><strong>Foursquare Convention:</strong> The highest governing body of the organization, meeting annually. Delegates from churches across the movement gather to conduct business, receive vision, and make decisions that affect the whole.</p><p><strong>Board of Directors:</strong> Provides oversight and governance between conventions. Members are elected by the convention.</p><p><strong>President:</strong> The chief executive officer of the movement, providing spiritual leadership and administrative oversight.</p><p><strong>Districts:</strong> Regional groupings of churches, each with a district supervisor who provides pastoral care to ministers and oversight to churches in that region.</p><p><strong>Local Churches:</strong> Led by credentialed ministers who shepherd their congregations. Local churches have significant autonomy in how they conduct ministry while remaining connected to the larger movement.</p><p>This structure balances organizational accountability with local church autonomy, allowing for both unity and flexibility.</p>',
         studyGuide: [
           { title: 'Structure', content: '<p>Modified episcopal with congregational elements. Convention is highest body. Board provides oversight.</p>' },
           { title: 'Leadership Levels', content: '<p>President (CEO). Districts with supervisors. Local churches with credentialed ministers.</p>' },
-          { title: 'Balance', content: '<p>Organizational accountability + local autonomy. Churches own property through corporation. Collaborative model.</p>' }
+          { title: 'Balance', content: '<p>Organizational accountability + local autonomy. Churches connected but flexible. Collaborative model.</p>' }
         ],
         quizzes: [
           {q: "What is the highest governing body?", options: ["Board of Directors", "The President", "Foursquare Convention", "Local church"], correct: 2, explanation: "The Foursquare Convention is the highest governing body."},
@@ -414,7 +550,7 @@ var CATEGORIES = [
       {
         id: 'polity-2',
         title: 'Licensing & Ordination',
-        reading: '<h2 class="text-2xl font-bold mb-4">Credentialing in Foursquare</h2><p>The Foursquare Church has a clear pathway for ministry credentials:</p><p><strong>License:</strong> The initial credential for ministry. Requires completing approved training, examination, and interview. Licensed ministers can perform ministerial functions under supervision.</p><p><strong>Ordination:</strong> Full credentials for experienced ministers. Requires additional time in ministry, further examination, and demonstrated faithfulness.</p><p><strong>Requirements typically include:</strong></p><ul class="list-disc pl-6 my-4"><li>Completion of approved Bible/ministry training</li><li>Written doctrinal examination</li><li>Oral interview with licensing committee</li><li>Background check</li><li>Demonstrated ministry involvement</li><li>Commitment to Foursquare beliefs and practices</li></ul>',
+        reading: '<h2>Credentialing in Foursquare</h2><p>The Foursquare Church has a clear pathway for ministry credentials, ensuring that those who minister are trained, accountable, and aligned with our beliefs and values.</p><p><strong>License:</strong> The initial credential for ministry. Candidates must complete approved training, pass written examinations, and successfully complete an oral interview with a licensing committee. Licensed ministers can perform ministerial functions under supervision.</p><p><strong>Ordination:</strong> Full credentials for experienced ministers. After time in licensed ministry and demonstrating faithfulness and fruitfulness, ministers may apply for ordination. This involves additional examination and a more extensive interview process.</p><p><strong>Requirements typically include:</strong></p><p>• Completion of approved Bible/ministry training<br>• Written doctrinal examination<br>• Oral interview with licensing committee<br>• Background check and references<br>• Demonstrated ministry involvement<br>• Commitment to Foursquare beliefs, practices, and accountability</p><p>The credentialing process is designed to ensure that ministers are prepared for effective ministry and committed to the values and doctrines of the Foursquare movement.</p>',
         studyGuide: [
           { title: 'License', content: '<p>Initial credential. Requires training, exam, interview. Can minister under supervision.</p>' },
           { title: 'Ordination', content: '<p>Full credentials. Requires experience. Further examination. Demonstrated faithfulness.</p>' },
@@ -441,7 +577,7 @@ var CATEGORIES = [
       {
         id: 'practice-1',
         title: 'Ordinances',
-        reading: '<h2 class="text-2xl font-bold mb-4">The Ordinances</h2><p>Foursquare observes two ordinances instituted by Christ:</p><h3 class="text-xl font-semibold mt-6 mb-2">Water Baptism</h3><p>Baptism is by immersion in water, symbolizing the believer\'s identification with Christ\'s death, burial, and resurrection. It is an outward sign of an inward spiritual reality—not the means of salvation, but the public declaration of faith.</p><h3 class="text-xl font-semibold mt-6 mb-2">The Lord\'s Supper (Communion)</h3><p>The Lord\'s Supper is observed regularly as a remembrance of Christ\'s sacrifice. The bread represents His body broken for us; the cup represents His blood shed for remission of sins.</p><div class="scripture">"This do in remembrance of Me." — Luke 22:19</div>',
+        reading: '<h2>The Ordinances</h2><p>Foursquare observes two ordinances instituted by Christ Himself. These are not sacraments that convey grace, but symbols that declare spiritual realities.</p><h3>Water Baptism</h3><p>Baptism is by immersion in water, symbolizing the believer\'s identification with Christ\'s death, burial, and resurrection. When we go under the water, we picture dying with Christ; when we come up, we picture rising to new life.</p><p>Baptism is an outward sign of an inward spiritual reality. It does not save—we are saved by grace through faith. But it is a public declaration of faith, a testimony to the world that we have been born again.</p><p>Jesus commanded His followers to be baptized (Matthew 28:19), and the early church practiced baptism from the beginning (Acts 2:38-41).</p><h3>The Lord\'s Supper (Communion)</h3><p>The Lord\'s Supper is observed regularly as a remembrance of Christ\'s sacrifice. When Jesus shared the final meal with His disciples, He took bread and said, "This is My body which is given for you; do this in remembrance of Me" (Luke 22:19).</p><p>The bread represents His body broken for us; the cup represents His blood shed for the remission of sins. As we partake, we proclaim the Lord\'s death until He comes (1 Corinthians 11:26).</p>',
         studyGuide: [
           { title: 'Water Baptism', content: '<p>By immersion. Symbolizes death, burial, resurrection with Christ. Public declaration of faith. Not the means of salvation.</p>' },
           { title: 'Lord\'s Supper', content: '<p>Regular observance. Remembrance of Christ\'s sacrifice. Bread = body. Cup = blood.</p>' },
@@ -458,7 +594,7 @@ var CATEGORIES = [
       {
         id: 'practice-2',
         title: 'Christian Living',
-        reading: '<h2 class="text-2xl font-bold mb-4">Christian Living</h2><p>Foursquare emphasizes practical holiness and Spirit-led living. Key aspects include:</p><p><strong>Soul Winning:</strong> Every believer is called to share the gospel. Evangelism is not optional but essential to the Christian life.</p><p><strong>Tithing & Stewardship:</strong> Believers are encouraged to tithe (give 10%) and practice generous stewardship of all resources.</p><p><strong>Prayer:</strong> Personal and corporate prayer are vital to spiritual growth and ministry effectiveness.</p><p><strong>Moderation:</strong> Believers are called to avoid excess and live balanced lives that honor God.</p><p><strong>Separation from worldliness:</strong> While engaging culture, believers maintain distinct values and lifestyle.</p>',
+        reading: '<h2>Christian Living</h2><p>Foursquare emphasizes practical holiness and Spirit-led living. Our faith is not just about what we believe but how we live.</p><h3>Soul Winning</h3><p>Every believer is called to share the gospel. Evangelism is not optional but essential to the Christian life. Jesus\' final command was to "go and make disciples of all nations" (Matthew 28:19). This is our mission.</p><h3>Tithing & Stewardship</h3><p>Believers are encouraged to tithe (give 10% of income) and practice generous stewardship of all resources. Everything we have comes from God, and we are managers of His resources. Generous giving honors God and supports the work of the church.</p><h3>Prayer</h3><p>Personal and corporate prayer are vital to spiritual growth and ministry effectiveness. We are called to "pray without ceasing" (1 Thessalonians 5:17) and to gather for prayer as a community of faith.</p><h3>Moderation</h3><p>Believers are called to avoid excess and live balanced lives that honor God. We are temples of the Holy Spirit and should treat our bodies and our lives with respect.</p><h3>Separation from Worldliness</h3><p>While engaging culture, believers maintain distinct values and lifestyle. We are in the world but not of it, called to be salt and light wherever God has placed us.</p>',
         studyGuide: [
           { title: 'Soul Winning', content: '<p>Every believer called to share gospel. Evangelism is essential, not optional.</p>' },
           { title: 'Stewardship', content: '<p>Tithing encouraged (10%). Generous giving. Stewardship of all resources.</p>' },
@@ -536,13 +672,13 @@ var CATEGORIES = [
   }
 ];
 
-// FOPT Study Guides and Quizzes (abbreviated for space - full content in separate object)
+// FOPT Study Guides and Quizzes
 var FOPT_DATA = {
   ch1: {
     studyGuide: [
-      { title: 'Introduction', content: '<p>God reveals Himself through Scripture. The Bible is God-breathed (theopneustos). 66 books, 40+ authors, 1500+ years.</p>' },
-      { title: 'Inspiration', content: '<p><strong>Verbal Plenary Inspiration:</strong> Every word inspired. <strong>Inerrancy:</strong> Without error in originals.</p><div class="scripture">"All Scripture is given by inspiration of God." — 2 Timothy 3:16</div>' },
-      { title: 'Canon', content: '<p>Canon = rule/standard. Church recognized (not created) inspired books. 39 OT + 27 NT = 66 books.</p>' }
+      { title: 'Introduction', content: '<p>God reveals Himself through Scripture. The Bible is God-breathed (theopneustos). 66 books, 40+ authors, 1500+ years—yet one unified message.</p>' },
+      { title: 'Inspiration', content: '<p><strong>Verbal Plenary Inspiration:</strong> Every word inspired, not just the ideas. <strong>Inerrancy:</strong> Without error in original manuscripts.</p><div class="scripture">"All Scripture is given by inspiration of God." — 2 Timothy 3:16</div>' },
+      { title: 'Canon', content: '<p>Canon = rule/standard. The church recognized (not created) which books God inspired. 39 OT + 27 NT = 66 books.</p>' }
     ],
     quizzes: [
       {q: "What does 'theopneustos' mean?", options: ["Holy book", "God-breathed", "Divine scroll", "Sacred text"], correct: 1, explanation: "Theopneustos means 'God-breathed.'"},
@@ -556,7 +692,7 @@ var FOPT_DATA = {
     studyGuide: [
       { title: 'Nature of God', content: '<p>God is Spirit, perfect, personal, One. Knowable yet beyond full comprehension.</p><div class="scripture">"God is Spirit, and those who worship Him must worship in spirit and truth." — John 4:24</div>' },
       { title: 'Attributes', content: '<p><strong>Absolute:</strong> Self-existence, immutability, omnipresence, omniscience, omnipotence.</p><p><strong>Moral:</strong> Holiness, love, righteousness, justice, truth, mercy, grace.</p>' },
-      { title: 'Trinity', content: '<p>One God in three persons: Father, Son, Holy Spirit. Co-equal, co-eternal.</p>' }
+      { title: 'Trinity', content: '<p>One God in three persons: Father, Son, Holy Spirit. Co-equal, co-eternal, distinct yet one.</p>' }
     ],
     quizzes: [
       {q: "John 4:24 says God is:", options: ["Love", "Spirit", "Light", "Fire"], correct: 1, explanation: "God is Spirit."},
@@ -569,8 +705,8 @@ var FOPT_DATA = {
   ch3: {
     studyGuide: [
       { title: 'Created by God', content: '<p>Humans created by God, not evolved. Special creation in God\'s image (Imago Dei).</p>' },
-      { title: 'Image of God', content: '<p>Not physical. Personal: intellect, emotion, will. Moral: conscience. Spiritual capacity.</p>' },
-      { title: 'Constitution', content: '<p>Trichotomous: body, soul, spirit (1 Thess 5:23). Soul is immortal.</p>' }
+      { title: 'Image of God', content: '<p>Not physical. Personal: intellect, emotion, will. Moral: conscience. Spiritual capacity for relationship with God.</p>' },
+      { title: 'Constitution', content: '<p>Trichotomous: body, soul, spirit (1 Thess 5:23). Soul is immortal—continues after physical death.</p>' }
     ],
     quizzes: [
       {q: "What is Imago Dei?", options: ["Image of man", "Image of God", "God's creation", "Divine nature"], correct: 1, explanation: "Imago Dei = Image of God."},
@@ -583,7 +719,7 @@ var FOPT_DATA = {
   ch4: {
     studyGuide: [
       { title: 'Origin', content: '<p>Sin began with Satan\'s rebellion. Entered humanity through Adam (Genesis 3).</p>' },
-      { title: 'Nature', content: '<p>Hamartia = missing the mark. Original sin = inherited nature. Total depravity = affects all parts.</p>' },
+      { title: 'Nature', content: '<p>Hamartia = missing the mark. Original sin = inherited nature. Total depravity = sin affects all parts of human nature.</p>' },
       { title: 'Penalty', content: '<p>Wages of sin is death: spiritual, physical, eternal (Romans 6:23).</p>' }
     ],
     quizzes: [
@@ -596,8 +732,8 @@ var FOPT_DATA = {
   },
   ch5: {
     studyGuide: [
-      { title: 'Atonement', content: '<p>Christ died in our place (substitution). Paid sin\'s penalty. Satisfied God\'s wrath (propitiation).</p>' },
-      { title: 'Grace & Faith', content: '<p>Salvation by grace through faith, not works (Eph 2:8-9). Repentance = turning from sin.</p>' },
+      { title: 'Atonement', content: '<p>Christ died in our place (substitution). Paid sin\'s penalty. Satisfied God\'s wrath (propitiation). Purchased us (redemption).</p>' },
+      { title: 'Grace & Faith', content: '<p>Salvation by grace through faith, not works (Eph 2:8-9). Repentance = turning from sin to God.</p>' },
       { title: 'Results', content: '<p>Justification (declared righteous). Regeneration (born again). Sanctification (growing holy). Glorification (future completion).</p>' }
     ],
     quizzes: [
@@ -610,9 +746,9 @@ var FOPT_DATA = {
   },
   ch6: {
     studyGuide: [
-      { title: 'Person of Spirit', content: '<p>Third person of Trinity. Not a force—a Person with intellect, emotion, will.</p>' },
-      { title: 'Spirit Baptism', content: '<p>Distinct from salvation. Power for witness (Acts 1:8). Initial evidence: tongues.</p>' },
-      { title: 'Fruit & Gifts', content: '<p>Fruit (Gal 5:22-23): character. Gifts (1 Cor 12): supernatural abilities for ministry.</p>' }
+      { title: 'Person of Spirit', content: '<p>Third person of Trinity. Not a force—a Person with intellect, emotion, will. Fully God.</p>' },
+      { title: 'Spirit Baptism', content: '<p>Distinct from salvation. Power for witness (Acts 1:8). Initial evidence: speaking in tongues.</p>' },
+      { title: 'Fruit & Gifts', content: '<p>Fruit (Gal 5:22-23): character—love, joy, peace, etc. Gifts (1 Cor 12): supernatural abilities for ministry.</p>' }
     ],
     quizzes: [
       {q: "The Holy Spirit is:", options: ["A force", "Third person of Trinity", "An angel", "God's power only"], correct: 1, explanation: "The Holy Spirit is the third person of the Trinity."},
@@ -624,9 +760,9 @@ var FOPT_DATA = {
   },
   ch7: {
     studyGuide: [
-      { title: 'In the Atonement', content: '<p>"By His stripes we are healed" (Isaiah 53:5). Healing provided in Christ\'s sacrifice.</p>' },
-      { title: 'Jesus Heals', content: '<p>Jesus healed all who came. Same yesterday, today, forever (Heb 13:8).</p>' },
-      { title: 'For Today', content: '<p>James 5:14-15: Call elders, anoint with oil, pray. Faith important but God sovereign.</p>' }
+      { title: 'In the Atonement', content: '<p>"By His stripes we are healed" (Isaiah 53:5). Healing is provided in Christ\'s atoning sacrifice.</p>' },
+      { title: 'Jesus Heals', content: '<p>Jesus healed all who came. He is the same yesterday, today, forever (Heb 13:8).</p>' },
+      { title: 'For Today', content: '<p>James 5:14-15: Call elders, anoint with oil, pray in faith. God is sovereign—faith is important but not a formula.</p>' }
     ],
     quizzes: [
       {q: "Isaiah 53:5 says:", options: ["God is love", "By His stripes we are healed", "Repent and believe", "Fear not"], correct: 1, explanation: "By His stripes we are healed."},
@@ -638,9 +774,9 @@ var FOPT_DATA = {
   },
   ch8: {
     studyGuide: [
-      { title: 'Definition', content: '<p>Ekklesia = called-out assembly. Universal church: all believers. Local church: believers in one place.</p>' },
-      { title: 'Leadership', content: '<p>Fivefold ministry (Eph 4:11): apostles, prophets, evangelists, pastors, teachers. Also elders, deacons.</p>' },
-      { title: 'Ordinances', content: '<p>Two: Baptism (immersion) and Lord\'s Supper (communion). Both symbolic, not sacramental.</p>' }
+      { title: 'Definition', content: '<p>Ekklesia = called-out assembly. Universal church: all believers everywhere. Local church: believers gathered in one place.</p>' },
+      { title: 'Leadership', content: '<p>Fivefold ministry (Eph 4:11): apostles, prophets, evangelists, pastors, teachers. Also elders and deacons.</p>' },
+      { title: 'Ordinances', content: '<p>Two: Baptism by immersion and Lord\'s Supper. Both symbolic, not sacramental.</p>' }
     ],
     quizzes: [
       {q: "What does ekklesia mean?", options: ["Holy building", "Called-out assembly", "Sacred place", "Worship center"], correct: 1, explanation: "Ekklesia = called-out assembly."},
@@ -652,9 +788,9 @@ var FOPT_DATA = {
   },
   ch9: {
     studyGuide: [
-      { title: 'Holy Angels', content: '<p>Created beings. Ministering spirits (Heb 1:14). Innumerable, organized in ranks.</p>' },
-      { title: 'Notable Angels', content: '<p>Michael: archangel, warrior. Gabriel: messenger, announced Christ\'s birth.</p>' },
-      { title: 'Satan & Demons', content: '<p>Satan: fallen angel (Lucifer). Demons: angels who followed Satan. Defeated foe!</p>' }
+      { title: 'Holy Angels', content: '<p>Created beings, not eternal. Ministering spirits serving God and believers (Heb 1:14). Innumerable, organized in ranks.</p>' },
+      { title: 'Notable Angels', content: '<p>Michael: archangel, warrior, leads God\'s armies. Gabriel: messenger, announced Christ\'s birth.</p>' },
+      { title: 'Satan & Demons', content: '<p>Satan: fallen angel (Lucifer). Demons: angels who followed Satan. Powerful but defeated foe!</p>' }
     ],
     quizzes: [
       {q: "Are angels eternal?", options: ["Yes", "No, created beings", "Some are", "Unknown"], correct: 1, explanation: "Angels are created beings, not eternal."},
@@ -666,9 +802,9 @@ var FOPT_DATA = {
   },
   ch10: {
     studyGuide: [
-      { title: 'Second Coming', content: '<p>Personal, visible, bodily return. Imminent—could be any time.</p>' },
-      { title: 'Rapture & Tribulation', content: '<p>Rapture: believers caught up (1 Thess 4:16-17). Tribulation: 7 years of judgment.</p>' },
-      { title: 'Millennium & Eternity', content: '<p>1,000-year reign of Christ. Premillennialism: Christ returns before. Heaven/Hell eternal.</p>' }
+      { title: 'Second Coming', content: '<p>Personal, visible, bodily return. Imminent—could be any time. No one knows the day or hour.</p>' },
+      { title: 'Rapture & Tribulation', content: '<p>Rapture: believers caught up to meet Lord (1 Thess 4:16-17). Tribulation: 7 years of judgment on earth.</p>' },
+      { title: 'Millennium & Eternity', content: '<p>1,000-year reign of Christ on earth. Premillennialism: Christ returns before Millennium. Heaven and Hell are eternal, real places.</p>' }
     ],
     quizzes: [
       {q: "Christ's return will be:", options: ["Secret", "Personal, visible, bodily", "Symbolic only", "Already happened"], correct: 1, explanation: "Personal, visible, bodily return."},
@@ -690,6 +826,9 @@ var quizIndex = 0;
 var selectedAnswer = null;
 var quizScore = 0;
 var expandedCategories = {};
+var settingsOpen = false;
+var toolbarVisible = true;
+var toolbarTimeout = null;
 
 // HELPERS
 function showScreen(id) {
@@ -753,7 +892,6 @@ async function loadProgress() {
     if (result.data && result.data.data) { userProgress = result.data.data; }
     else { userProgress = createDefaultProgress(); await saveProgress(); }
   } catch (e) { userProgress = createDefaultProgress(); }
-  // Ensure all categories/chapters exist
   CATEGORIES.forEach(function(cat) {
     if (!userProgress[cat.id]) userProgress[cat.id] = {};
     if (cat.chapters) {
@@ -795,15 +933,11 @@ function renderCategories() {
     var progress = getCategoryProgress(cat);
     
     html += '<div class="bg-white rounded-xl shadow-sm border overflow-hidden">';
-    
-    // Category Header
     html += '<div class="category-header p-5 flex items-center justify-between" onclick="toggleCategory(\'' + cat.id + '\')">';
     html += '<div class="flex items-center gap-4">';
     html += '<div class="w-12 h-12 rounded-xl bg-gradient-to-br ' + cat.color + ' flex items-center justify-center text-2xl text-white shadow">' + cat.icon + '</div>';
-    html += '<div>';
-    html += '<h3 class="font-bold text-slate-800 text-lg">' + cat.name + '</h3>';
-    html += '<p class="text-sm text-slate-500">' + cat.description + '</p>';
-    html += '</div></div>';
+    html += '<div><h3 class="font-bold text-slate-800 text-lg">' + cat.name + '</h3>';
+    html += '<p class="text-sm text-slate-500">' + cat.description + '</p></div></div>';
     html += '<div class="flex items-center gap-4">';
     if (cat.comingSoon) {
       html += '<span class="px-3 py-1 bg-slate-100 text-slate-500 text-sm rounded-full">Coming Soon</span>';
@@ -813,7 +947,6 @@ function renderCategories() {
     html += '<svg class="chevron w-5 h-5 text-slate-400 ' + (isExpanded ? 'rotated' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
     html += '</div></div>';
     
-    // Category Content (chapters)
     html += '<div class="category-content ' + (isExpanded ? 'expanded' : '') + '">';
     if (!cat.comingSoon && cat.chapters && cat.chapters.length > 0) {
       html += '<div class="border-t px-5 py-4 space-y-2">';
@@ -829,8 +962,7 @@ function renderCategories() {
         } else {
           html += '<div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm">' + (ch.num || '•') + '</div>';
         }
-        html += '<span class="font-medium text-slate-700">' + title + '</span>';
-        html += '</div>';
+        html += '<span class="font-medium text-slate-700">' + title + '</span></div>';
         html += '<div class="flex items-center gap-2 text-xs">';
         html += '<span class="' + (chProgress.read ? 'text-green-600' : 'text-slate-400') + '">📖</span>';
         html += '<span class="' + (chProgress.studied ? 'text-green-600' : 'text-slate-400') + '">📝</span>';
@@ -854,7 +986,7 @@ function toggleCategory(catId) {
 
 function getCategoryProgress(cat) {
   if (cat.comingSoon || !cat.chapters || cat.chapters.length === 0) return 0;
-  var total = cat.chapters.length * 3; // read, study, quiz for each
+  var total = cat.chapters.length * 3;
   var done = 0;
   cat.chapters.forEach(function(ch) {
     var p = userProgress[cat.id]?.[ch.id] || {};
@@ -920,13 +1052,12 @@ function switchTab(tab) {
 // READ TAB
 function loadReadContent() {
   document.getElementById('reading-loading').classList.remove('hidden');
-  document.getElementById('reading-content').classList.add('hidden');
+  document.getElementById('reading-preview').classList.add('hidden');
   
-  // Check if it's a FOPT chapter with external JS file
   if (currentCategory.id === 'fopt' && currentChapter.hasFullText) {
     var chId = currentChapter.id;
     if (loadedContent[chId]) {
-      displayReadContent(loadedContent[chId]);
+      displayReadPreview(loadedContent[chId]);
     } else {
       var script = document.createElement('script');
       script.src = 'chapters/' + chId + '.js';
@@ -934,7 +1065,7 @@ function loadReadContent() {
         var varName = 'FOPT_' + chId.toUpperCase();
         if (window[varName]) {
           loadedContent[chId] = window[varName].content;
-          displayReadContent(loadedContent[chId]);
+          displayReadPreview(loadedContent[chId]);
         }
       };
       script.onerror = function() {
@@ -943,26 +1074,27 @@ function loadReadContent() {
       document.head.appendChild(script);
     }
   } else if (currentChapter.reading) {
-    // Inline reading content
-    displayReadContent(currentChapter.reading);
+    displayReadPreview(currentChapter.reading);
   } else {
     document.getElementById('reading-loading').innerHTML = '<p class="text-slate-500">No reading content available.</p>';
   }
 }
 
-function displayReadContent(content) {
+function displayReadPreview(content) {
+  currentReadingContent = content;
   document.getElementById('reading-loading').classList.add('hidden');
-  document.getElementById('reading-content').classList.remove('hidden');
+  document.getElementById('reading-preview').classList.remove('hidden');
   
-  // Format content
-  var formatted = content;
+  // Show preview (first 500 chars)
+  var preview = content;
   if (!content.includes('<')) {
-    // Plain text - add paragraph tags
-    formatted = content.split('\n\n').map(function(p) {
-      return '<p>' + p.trim().replace(/\n/g, '<br>') + '</p>';
-    }).join('');
+    preview = content.substring(0, 1000) + '...';
+    preview = '<p>' + preview.replace(/\n\n/g, '</p><p>') + '</p>';
+  } else {
+    // Just show beginning
+    preview = content.substring(0, 1500) + '...';
   }
-  document.getElementById('full-chapter-text').innerHTML = formatted;
+  document.getElementById('preview-text').innerHTML = preview;
 }
 
 function markReadComplete() {
@@ -972,6 +1104,122 @@ function markReadComplete() {
   saveProgress();
   updateChapterBadge();
   alert('Marked as read! ✓');
+}
+
+// FULL READER
+function openReader() {
+  showScreen('reader');
+  applyReaderSettings();
+  
+  var title = currentChapter.num ? 'Chapter ' + currentChapter.num : currentChapter.title;
+  document.getElementById('reader-title').textContent = title;
+  
+  // Format content
+  var content = currentReadingContent;
+  if (!content.includes('<')) {
+    content = content.split('\n\n').map(function(p) {
+      return '<p>' + p.trim().replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+  }
+  document.getElementById('reader-text').innerHTML = content;
+  
+  // Setup scroll listener for progress
+  var container = document.getElementById('reader-text-container');
+  container.onscroll = updateReadingProgress;
+  
+  // Show toolbar on tap
+  container.onclick = function() {
+    toggleToolbar();
+  };
+}
+
+function closeReader() {
+  showScreen('chapter');
+}
+
+function toggleToolbar() {
+  var toolbar = document.getElementById('reader-toolbar');
+  toolbarVisible = !toolbarVisible;
+  toolbar.classList.toggle('hidden', !toolbarVisible);
+  
+  // Auto-hide after 3 seconds
+  if (toolbarVisible) {
+    clearTimeout(toolbarTimeout);
+    toolbarTimeout = setTimeout(function() {
+      if (!settingsOpen) {
+        toolbar.classList.add('hidden');
+        toolbarVisible = false;
+      }
+    }, 3000);
+  }
+}
+
+function toggleSettings() {
+  settingsOpen = !settingsOpen;
+  document.getElementById('reader-settings').classList.toggle('open', settingsOpen);
+  updateSettingsUI();
+}
+
+function updateReadingProgress() {
+  var container = document.getElementById('reader-text-container');
+  var scrollTop = container.scrollTop;
+  var scrollHeight = container.scrollHeight - container.clientHeight;
+  var progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
+  document.getElementById('reading-progress').style.width = progress + '%';
+}
+
+// READER SETTINGS
+function setTheme(theme) {
+  readerSettings.theme = theme;
+  saveReaderSettings();
+  applyReaderSettings();
+}
+
+function setFont(font) {
+  readerSettings.font = font;
+  saveReaderSettings();
+  applyReaderSettings();
+}
+
+function adjustFontSize(delta) {
+  readerSettings.fontSize = Math.max(14, Math.min(28, readerSettings.fontSize + (delta * 2)));
+  saveReaderSettings();
+  applyReaderSettings();
+}
+
+function setLineHeight(lh) {
+  readerSettings.lineHeight = lh;
+  saveReaderSettings();
+  applyReaderSettings();
+}
+
+function applyReaderSettings() {
+  var container = document.getElementById('reader-container');
+  var textEl = document.getElementById('reader-text');
+  
+  // Theme
+  container.className = 'reader-container theme-' + readerSettings.theme + ' font-' + readerSettings.font;
+  
+  // Font size
+  textEl.style.fontSize = readerSettings.fontSize + 'px';
+  document.getElementById('font-size-display').textContent = readerSettings.fontSize + 'px';
+  
+  // Line height
+  textEl.style.lineHeight = readerSettings.lineHeight;
+  
+  updateSettingsUI();
+}
+
+function updateSettingsUI() {
+  // Update theme buttons
+  document.querySelectorAll('.theme-btn').forEach(function(btn) {
+    btn.classList.remove('active');
+  });
+  
+  // Update font buttons
+  document.querySelectorAll('.font-btn').forEach(function(btn) {
+    btn.classList.remove('active');
+  });
 }
 
 // STUDY TAB
@@ -1004,7 +1252,6 @@ function renderStudyLesson(studyGuide) {
   document.getElementById('study-prev').classList.toggle('hidden', studyIndex === 0);
   document.getElementById('study-next').textContent = studyIndex === studyGuide.length - 1 ? 'Complete Study ✓' : 'Next →';
   
-  // Store reference for nav
   window._currentStudyGuide = studyGuide;
 }
 
@@ -1019,7 +1266,6 @@ document.getElementById('study-next').onclick = function() {
     studyIndex++;
     renderStudyLesson(sg);
   } else {
-    // Mark studied
     if (!userProgress[currentCategory.id]) userProgress[currentCategory.id] = {};
     if (!userProgress[currentCategory.id][currentChapter.id]) userProgress[currentCategory.id][currentChapter.id] = {};
     userProgress[currentCategory.id][currentChapter.id].studied = true;
@@ -1117,7 +1363,6 @@ async function showQuizResults() {
   var pct = Math.round((quizScore / total) * 100);
   var passed = pct >= 80;
   
-  // Save score
   if (!userProgress[currentCategory.id]) userProgress[currentCategory.id] = {};
   if (!userProgress[currentCategory.id][currentChapter.id]) userProgress[currentCategory.id][currentChapter.id] = {};
   var currentBest = userProgress[currentCategory.id][currentChapter.id].quizScore || 0;
