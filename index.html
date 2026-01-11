@@ -5,1187 +5,977 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Foursquare Licensing Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Open+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Open+Sans:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+    body { margin: 0; font-family: system-ui, sans-serif; background: #f8fafc; }
     .screen { display: none; }
     .screen.active { display: block; }
-    .category-header { cursor: pointer; transition: all 0.2s; }
-    .category-header:hover { background: #f8fafc; }
-    .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-    .category-content.expanded { max-height: 2000px; }
-    .chapter-card { transition: all 0.2s; }
-    .chapter-card:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-    .lesson-content { line-height: 1.8; }
-    .lesson-content ul { margin: 1rem 0; padding-left: 1.5rem; }
-    .lesson-content li { margin-bottom: 0.5rem; }
-    .key-point { background: #fef3c7; padding: 1rem; border-left: 4px solid #f59e0b; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
-    .scripture { background: #dbeafe; padding: 0.75rem; border-radius: 0.5rem; font-style: italic; margin: 0.5rem 0; }
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; z-index: 100; }
+    .nav-item { flex: 1; padding: 8px 4px; text-align: center; color: #64748b; }
+    .nav-item.active { color: #dc2626; }
+    .nav-item svg { width: 24px; height: 24px; margin: 0 auto 2px; }
+    .main-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 16px; }
+    .section-header { padding: 20px; cursor: pointer; }
+    .section-content { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
+    .section-content.expanded { max-height: 5000px; }
+    .chapter-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+    .chapter-item:last-child { border-bottom: none; }
+    .progress-ring { transform: rotate(-90deg); }
+    .metric-card { background: white; border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #e5e7eb; }
+    .reader-container { min-height: 100vh; }
+    .reader-container.theme-light { background: #fff; color: #1a1a1a; }
+    .reader-container.theme-sepia { background: #f4ecd8; color: #5c4b37; }
+    .reader-container.theme-dark { background: #1a1a1a; color: #e0e0e0; }
+    .font-serif { font-family: 'Merriweather', Georgia, serif; }
+    .font-sans { font-family: 'Open Sans', sans-serif; }
+    .highlight-yellow { background: rgba(250, 204, 21, 0.4); }
+    .highlight-green { background: rgba(74, 222, 128, 0.4); }
+    .highlight-blue { background: rgba(96, 165, 250, 0.4); }
+    .highlight-pink { background: rgba(244, 114, 182, 0.4); }
+    .selection-popup { position: absolute; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 8px; display: none; z-index: 200; }
+    .selection-popup.show { display: flex; gap: 4px; }
+    .key-term { background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
+    .scripture-box { background: #dbeafe; padding: 12px 16px; border-radius: 8px; margin: 12px 0; border-left: 4px solid #3b82f6; font-style: italic; }
+    .key-point { background: #f0fdf4; padding: 12px 16px; border-radius: 8px; margin: 12px 0; border-left: 4px solid #22c55e; }
+    .tab-bar { display: flex; background: #f1f5f9; border-radius: 12px; padding: 4px; margin-bottom: 16px; }
+    .tab-btn { flex: 1; padding: 10px; border-radius: 8px; text-align: center; font-weight: 500; color: #64748b; font-size: 14px; }
+    .tab-btn.active { background: white; color: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
     .quiz-option { transition: all 0.2s; cursor: pointer; }
-    .quiz-option:hover:not(:disabled) { transform: translateX(4px); }
     .quiz-option.selected { border-color: #3b82f6 !important; background: #eff6ff !important; }
     .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
     .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
-    .tab-btn { padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent; }
-    .tab-btn.active { border-bottom-color: #3b82f6; color: #3b82f6; font-weight: 600; }
-    .loading-spinner { border: 3px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    .loading-spinner { border: 3px solid #e5e7eb; border-top-color: #dc2626; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .chevron { transition: transform 0.3s; }
-    .chevron.rotated { transform: rotate(180deg); }
-    
-    /* READER STYLES */
-    .reader-container { min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
-    .reader-container.theme-light { background: #ffffff; color: #1a1a1a; }
-    .reader-container.theme-sepia { background: #f4ecd8; color: #5c4b37; }
-    .reader-container.theme-dark { background: #1a1a1a; color: #e0e0e0; }
-    .reader-container.theme-night { background: #0d1117; color: #c9d1d9; }
-    
-    .reader-page { max-width: 720px; margin: 0 auto; padding: 1.5rem; min-height: calc(100vh - 140px); }
-    .reader-page p { margin-bottom: 1.2em; }
-    
-    .font-serif { font-family: 'Merriweather', Georgia, serif; }
-    .font-sans { font-family: 'Open Sans', system-ui, sans-serif; }
-    .font-classic { font-family: 'Crimson Text', 'Times New Roman', serif; }
-    .font-modern { font-family: 'Literata', Georgia, serif; }
-    
-    .reading-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(to right, #ef4444, #f59e0b); z-index: 101; transition: width 0.1s; }
-    
-    /* Highlights */
-    .highlight-yellow { background: rgba(250, 204, 21, 0.4); border-radius: 2px; cursor: pointer; }
-    .highlight-green { background: rgba(74, 222, 128, 0.4); border-radius: 2px; cursor: pointer; }
-    .highlight-blue { background: rgba(96, 165, 250, 0.4); border-radius: 2px; cursor: pointer; }
-    .highlight-pink { background: rgba(244, 114, 182, 0.4); border-radius: 2px; cursor: pointer; }
-    
-    /* Selection popup */
-    .selection-popup { position: absolute; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 8px; display: none; z-index: 200; }
-    .selection-popup.show { display: flex; gap: 4px; }
-    .selection-popup button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
-    .selection-popup button:hover { transform: scale(1.1); }
-    
-    /* Notes panel */
-    .notes-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 350px; background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.1); transform: translateX(100%); transition: transform 0.3s; z-index: 150; }
-    .notes-panel.open { transform: translateX(0); }
-    .theme-dark .notes-panel, .theme-night .notes-panel { background: #2d2d2d; color: #e0e0e0; }
-    
-    /* Page navigation */
-    .page-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-blur: 10px; border-top: 1px solid #e5e7eb; padding: 12px; z-index: 100; }
-    .theme-dark .page-nav, .theme-night .page-nav { background: rgba(30,30,30,0.95); border-color: #404040; }
-    
-    /* Bookmark indicator */
-    .bookmark-ribbon { position: absolute; right: 20px; top: -5px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #ef4444; }
-    
-    /* Note card */
-    .note-card { background: #f8fafc; border-left: 3px solid #3b82f6; padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
-    .theme-dark .note-card, .theme-night .note-card { background: #374151; }
-    
-    /* Settings panel */
-    .settings-drawer { position: fixed; bottom: 60px; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; transform: translateY(100%); transition: transform 0.3s; z-index: 99; max-height: 50vh; overflow-y: auto; }
-    .settings-drawer.open { transform: translateY(0); }
-    .theme-dark .settings-drawer, .theme-night .settings-drawer { background: #1f2937; border-color: #374151; }
-    
-    /* TOC */
-    .toc-panel { position: fixed; left: 0; top: 0; bottom: 0; width: 300px; background: white; box-shadow: 4px 0 20px rgba(0,0,0,0.1); transform: translateX(-100%); transition: transform 0.3s; z-index: 150; overflow-y: auto; }
-    .toc-panel.open { transform: translateX(0); }
-    .theme-dark .toc-panel, .theme-night .toc-panel { background: #1f2937; }
+    .note-card { background: white; border-radius: 12px; padding: 12px; margin-bottom: 8px; border-left: 3px solid #3b82f6; }
+    .reading-content { line-height: 1.9; }
+    .reading-content h2 { font-size: 1.4rem; font-weight: 700; margin: 1.5rem 0 1rem 0; }
+    .reading-content h3 { font-size: 1.15rem; font-weight: 600; margin: 1.25rem 0 0.75rem 0; }
+    .reading-content p { margin-bottom: 1rem; }
+    .reading-content ul { margin: 1rem 0; padding-left: 1.5rem; }
+    .reading-content li { margin-bottom: 0.5rem; }
   </style>
 </head>
-<body class="bg-slate-100 min-h-screen">
+<body>
 
-  <!-- LOGIN SCREEN -->
-  <div id="screen-login" class="screen active">
-    <div class="min-h-screen flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
-        <div class="text-center mb-8">
-          <div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing Tracker</h1>
-          <p class="text-slate-500 mt-2">Ministry Preparation & Study</p>
+<!-- LOGIN -->
+<div id="screen-login" class="screen active">
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
+      <div class="text-center mb-8">
+        <div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+          <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
-        <div id="login-form">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-            <input type="email" id="login-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="your@email.com">
-          </div>
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
-            <input type="password" id="login-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="••••••••">
-          </div>
-          <button id="btn-login" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
-          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <span id="link-register" class="text-red-600 hover:underline cursor-pointer">Create one</span></p>
-        </div>
-        <div id="register-form" style="display:none;">
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
-            <input type="text" id="reg-name" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="John Smith">
-          </div>
-          <div class="mb-4">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
-            <input type="email" id="reg-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="your@email.com">
-          </div>
-          <div class="mb-6">
-            <label class="block text-sm font-medium text-slate-700 mb-1">Password (min 6 characters)</label>
-            <input type="password" id="reg-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="••••••••">
-          </div>
-          <button id="btn-register" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
-          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <span id="link-login" class="text-red-600 hover:underline cursor-pointer">Sign in</span></p>
-        </div>
-        <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
-        <div id="login-loading" class="hidden mt-4 text-center text-slate-500">Loading...</div>
+        <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing</h1>
+        <p class="text-slate-500 mt-2">Ministry Preparation & Study</p>
       </div>
+      <div id="login-form">
+        <div class="mb-4"><label class="block text-sm font-medium text-slate-700 mb-1">Email</label><input type="email" id="login-email" class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-red-500"></div>
+        <div class="mb-6"><label class="block text-sm font-medium text-slate-700 mb-1">Password</label><input type="password" id="login-password" class="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-red-500"></div>
+        <button id="btn-login" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-medium">Sign In</button>
+        <p class="text-center text-sm text-slate-500 mt-4">No account? <span id="link-register" class="text-red-600 cursor-pointer">Create one</span></p>
+      </div>
+      <div id="register-form" style="display:none;">
+        <div class="mb-4"><label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label><input type="text" id="reg-name" class="w-full border rounded-xl px-4 py-3"></div>
+        <div class="mb-4"><label class="block text-sm font-medium text-slate-700 mb-1">Email</label><input type="email" id="reg-email" class="w-full border rounded-xl px-4 py-3"></div>
+        <div class="mb-6"><label class="block text-sm font-medium text-slate-700 mb-1">Password</label><input type="password" id="reg-password" class="w-full border rounded-xl px-4 py-3"></div>
+        <button id="btn-register" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-medium">Create Account</button>
+        <p class="text-center text-sm text-slate-500 mt-4">Have account? <span id="link-login" class="text-red-600 cursor-pointer">Sign in</span></p>
+      </div>
+      <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
     </div>
   </div>
+</div>
 
-  <!-- MAIN APP -->
-  <div id="screen-app" class="screen">
-    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
-      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+<!-- HOME -->
+<div id="screen-home" class="screen">
+  <header class="bg-gradient-to-r from-red-700 to-red-800 text-white px-4 pt-12 pb-6">
+    <div class="flex items-center justify-between mb-4">
+      <div><p class="text-red-200 text-sm">Welcome back,</p><h1 class="text-xl font-bold" id="user-name">Student</h1></div>
+      <button onclick="handleLogout()" class="text-red-200"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+    </div>
+    <div class="bg-white/10 rounded-xl p-4">
+      <div class="flex items-center justify-between">
+        <div><div class="text-3xl font-bold" id="total-progress">0%</div><div class="text-red-200 text-sm">Overall Progress</div></div>
+        <svg class="progress-ring" width="60" height="60"><circle cx="30" cy="30" r="26" stroke="rgba(255,255,255,0.2)" stroke-width="5" fill="none"/><circle id="progress-ring-circle" cx="30" cy="30" r="26" stroke="white" stroke-width="5" fill="none" stroke-dasharray="163.36" stroke-dashoffset="163.36" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+  </header>
+  <main class="px-4 py-4 pb-24">
+    <div class="grid grid-cols-4 gap-3 mb-6">
+      <div class="metric-card"><div class="text-2xl font-bold text-red-600" id="stat-chapters">0</div><div class="text-xs text-slate-500">Chapters</div></div>
+      <div class="metric-card"><div class="text-2xl font-bold text-green-600" id="stat-quizzes">0</div><div class="text-xs text-slate-500">Quizzes</div></div>
+      <div class="metric-card"><div class="text-2xl font-bold text-blue-600" id="stat-notes">0</div><div class="text-xs text-slate-500">Notes</div></div>
+      <div class="metric-card"><div class="text-2xl font-bold text-purple-600" id="stat-hours">0</div><div class="text-xs text-slate-500">Hours</div></div>
+    </div>
+    <div id="continue-section" class="main-card p-4 mb-4 hidden">
+      <h3 class="font-bold text-slate-800 mb-3">Continue Reading</h3>
+      <div class="flex items-center gap-3 cursor-pointer" onclick="resumeLastReading()">
+        <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-xl" id="continue-icon">📖</div>
+        <div class="flex-1"><div class="font-medium" id="continue-title"></div><div class="text-sm text-slate-500" id="continue-subtitle"></div></div>
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#94a3b8" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+      </div>
+    </div>
+    <div class="main-card" id="domains-card">
+      <div class="section-header flex items-center justify-between" onclick="toggleSection('domains')">
         <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          </div>
-          <div>
-            <h1 class="text-lg font-bold">Foursquare Licensing Tracker</h1>
-            <p class="text-red-200 text-sm" id="user-greeting">Welcome!</p>
-          </div>
+          <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div><h2 class="font-bold text-slate-800">Licensing Domains</h2><p class="text-sm text-slate-500">5 Core Areas</p></div>
         </div>
-        <div class="flex items-center gap-4">
-          <span id="save-status" class="text-xs text-green-300 hidden">✓ Saved</span>
-          <button id="btn-logout" class="text-red-200 hover:text-white text-sm">Sign Out</button>
-        </div>
+        <div class="flex items-center gap-3"><div class="font-bold text-slate-700" id="domains-progress">0%</div><svg class="w-5 h-5 text-slate-400" id="domains-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></div>
       </div>
-    </header>
-    
-    <main class="max-w-4xl mx-auto px-4 py-6">
-      <!-- Progress Card -->
-      <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
-        <div class="flex items-center justify-between mb-3">
-          <div>
-            <h2 class="text-xl font-bold text-slate-800">Licensing Progress</h2>
-            <p class="text-sm text-slate-500">Complete all categories to prepare for your interview</p>
-          </div>
-          <div class="text-right">
-            <div class="text-3xl font-bold text-red-600" id="overall-progress">0%</div>
-            <div class="text-sm text-slate-500">Complete</div>
-          </div>
+      <div class="section-content" id="domains-content"></div>
+    </div>
+    <div class="main-card" id="books-card">
+      <div class="section-header flex items-center justify-between" onclick="toggleSection('books')">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-700 rounded-xl flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></div>
+          <div><h2 class="font-bold text-slate-800">Required Reading</h2><p class="text-sm text-slate-500">5 Essential Books</p></div>
         </div>
-        <div class="w-full bg-slate-100 rounded-full h-3">
-          <div class="bg-gradient-to-r from-red-500 to-red-600 h-3 rounded-full transition-all" id="progress-bar" style="width:0%"></div>
-        </div>
+        <div class="flex items-center gap-3"><div class="font-bold text-slate-700" id="books-progress">0%</div><svg class="w-5 h-5 text-slate-400" id="books-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></div>
       </div>
+      <div class="section-content" id="books-content"></div>
+    </div>
+  </main>
+  <nav class="bottom-nav"><div class="flex">
+    <div class="nav-item active" onclick="showNav('home')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="text-xs">Home</div></div>
+    <div class="nav-item" onclick="showNav('study')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div class="text-xs">Study</div></div>
+    <div class="nav-item" onclick="showNav('notes')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><div class="text-xs">Notes</div></div>
+    <div class="nav-item" onclick="showNav('profile')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="text-xs">Profile</div></div>
+  </div></nav>
+</div>
 
-      <!-- My Notes & Highlights Card -->
-      <div id="notes-dashboard" class="bg-white rounded-xl shadow-sm border p-6 mb-6 hidden">
-        <div class="flex items-center justify-between mb-4">
-          <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-            <span>📝</span> My Notes & Highlights
-          </h2>
-          <button onclick="toggleNotesDashboard()" class="text-sm text-red-600 hover:underline">View All →</button>
-        </div>
-        <div id="recent-notes" class="space-y-3"></div>
-      </div>
+<!-- STUDY -->
+<div id="screen-study" class="screen">
+  <header class="bg-white border-b px-4 py-4 pt-12"><h1 class="text-xl font-bold text-slate-800">Study Materials</h1></header>
+  <main class="px-4 py-4 pb-24" id="study-list"></main>
+  <nav class="bottom-nav"><div class="flex">
+    <div class="nav-item" onclick="showNav('home')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="text-xs">Home</div></div>
+    <div class="nav-item active" onclick="showNav('study')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div class="text-xs">Study</div></div>
+    <div class="nav-item" onclick="showNav('notes')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><div class="text-xs">Notes</div></div>
+    <div class="nav-item" onclick="showNav('profile')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="text-xs">Profile</div></div>
+  </div></nav>
+</div>
 
-      <!-- Categories -->
-      <div id="categories-container" class="space-y-4"></div>
-    </main>
-  </div>
+<!-- NOTES -->
+<div id="screen-notes" class="screen">
+  <header class="bg-white border-b px-4 py-4 pt-12">
+    <h1 class="text-xl font-bold text-slate-800">My Notes</h1>
+    <div class="flex gap-2 mt-3">
+      <button onclick="filterNotes('all')" class="notes-filter px-3 py-1 rounded-full text-sm bg-red-600 text-white">All</button>
+      <button onclick="filterNotes('notes')" class="notes-filter px-3 py-1 rounded-full text-sm bg-slate-100">Notes</button>
+      <button onclick="filterNotes('highlights')" class="notes-filter px-3 py-1 rounded-full text-sm bg-slate-100">Highlights</button>
+      <button onclick="filterNotes('bookmarks')" class="notes-filter px-3 py-1 rounded-full text-sm bg-slate-100">Bookmarks</button>
+    </div>
+  </header>
+  <main class="px-4 py-4 pb-24" id="notes-list"></main>
+  <nav class="bottom-nav"><div class="flex">
+    <div class="nav-item" onclick="showNav('home')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="text-xs">Home</div></div>
+    <div class="nav-item" onclick="showNav('study')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div class="text-xs">Study</div></div>
+    <div class="nav-item active" onclick="showNav('notes')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><div class="text-xs">Notes</div></div>
+    <div class="nav-item" onclick="showNav('profile')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="text-xs">Profile</div></div>
+  </div></nav>
+</div>
 
-  <!-- NOTES DASHBOARD SCREEN -->
-  <div id="screen-notes" class="screen">
-    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
-      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <button onclick="backToApp()" class="flex items-center gap-2 text-red-200 hover:text-white">← Back</button>
-        <h1 class="font-bold">My Notes & Highlights</h1>
-        <div></div>
-      </div>
-    </header>
-    <main class="max-w-4xl mx-auto px-4 py-6">
-      <div class="flex gap-2 mb-6">
-        <button onclick="filterNotes('all')" class="filter-btn px-4 py-2 rounded-lg bg-red-600 text-white">All</button>
-        <button onclick="filterNotes('notes')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Notes</button>
-        <button onclick="filterNotes('highlights')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Highlights</button>
-        <button onclick="filterNotes('bookmarks')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Bookmarks</button>
-      </div>
-      <div id="all-notes-list" class="space-y-4"></div>
-    </main>
-  </div>
-
-  <!-- CHAPTER SCREEN -->
-  <div id="screen-chapter" class="screen">
-    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
-      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <button id="chapter-back" class="flex items-center gap-2 text-red-200 hover:text-white">← Back</button>
-        <div class="text-center">
-          <div class="text-sm text-red-200" id="chapter-category"></div>
-          <div class="font-bold" id="chapter-title"></div>
-        </div>
-        <div id="chapter-badge" class="text-sm text-red-200"></div>
-      </div>
-    </header>
-    <div class="bg-white border-b">
-      <div class="max-w-4xl mx-auto flex">
-        <button class="tab-btn active" data-tab="read" onclick="switchTab('read')">📖 Read</button>
-        <button class="tab-btn" data-tab="study" onclick="switchTab('study')">📝 Study Guide</button>
-        <button class="tab-btn" data-tab="quiz" onclick="switchTab('quiz')">✅ Quiz</button>
+<!-- PROFILE -->
+<div id="screen-profile" class="screen">
+  <header class="bg-gradient-to-r from-red-700 to-red-800 text-white px-4 pt-12 pb-6">
+    <div class="flex items-center gap-4">
+      <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl" id="profile-avatar">👤</div>
+      <div><h1 class="text-xl font-bold" id="profile-name">Student</h1><p class="text-red-200 text-sm" id="profile-email"></p></div>
+    </div>
+  </header>
+  <main class="px-4 py-4 pb-24">
+    <div class="main-card p-4 mb-4">
+      <h3 class="font-bold text-slate-800 mb-4">Statistics</h3>
+      <div class="space-y-3">
+        <div class="flex justify-between"><span>Chapters Completed</span><span class="font-bold" id="profile-chapters">0</span></div>
+        <div class="flex justify-between"><span>Quizzes Passed</span><span class="font-bold" id="profile-quizzes">0</span></div>
+        <div class="flex justify-between"><span>Notes Created</span><span class="font-bold" id="profile-notes">0</span></div>
       </div>
     </div>
-    <main class="max-w-4xl mx-auto px-4 py-6">
-      <div id="tab-read" class="tab-content">
-        <div id="reading-loading" class="text-center py-12">
-          <div class="loading-spinner mx-auto mb-4"></div>
-          <p class="text-slate-500">Loading content...</p>
-        </div>
-        <div id="reading-preview" class="bg-white rounded-xl shadow-sm border p-6 hidden">
-          <div id="preview-text" class="prose max-w-none" style="max-height: 300px; overflow: hidden;"></div>
-          <div class="mt-6 pt-6 border-t flex flex-wrap gap-3">
-            <button onclick="openReader()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-              Open Reader
-            </button>
-            <button onclick="resumeReading()" id="btn-resume" class="px-6 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 hidden">
-              📑 Resume (Page <span id="resume-page">1</span>)
-            </button>
-            <button onclick="markReadComplete()" class="px-6 py-3 border rounded-lg hover:bg-slate-50 flex items-center gap-2">✓ Mark as Read</button>
-          </div>
-        </div>
-      </div>
-      <div id="tab-study" class="tab-content hidden">
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-          <div id="study-content" class="lesson-content"></div>
-          <div class="mt-6 pt-6 border-t flex justify-between">
-            <button id="study-prev" class="px-5 py-2 border rounded-lg text-slate-600 hover:bg-slate-50 hidden">← Prev</button>
-            <button id="study-next" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 ml-auto">Next →</button>
-          </div>
-        </div>
-      </div>
-      <div id="tab-quiz" class="tab-content hidden">
-        <div class="bg-white rounded-xl shadow-sm border p-6">
-          <div id="quiz-container">
-            <div class="text-sm text-slate-500 mb-2" id="quiz-counter"></div>
-            <div id="quiz-question" class="text-xl font-medium text-slate-800 mb-6"></div>
-            <div id="quiz-options" class="space-y-3"></div>
-            <div id="quiz-feedback" class="hidden mt-6 p-4 rounded-lg"></div>
-            <div class="mt-6 flex justify-end">
-              <button id="quiz-submit" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50" disabled>Check Answer</button>
-              <button id="quiz-next" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 hidden">Next →</button>
-            </div>
-          </div>
-          <div id="quiz-results" class="hidden text-center py-8">
-            <div id="results-icon" class="text-6xl mb-4"></div>
-            <h2 class="text-2xl font-bold text-slate-800 mb-2" id="results-title"></h2>
-            <p class="text-slate-600 mb-6" id="results-message"></p>
-            <div class="flex justify-center gap-4 mb-6">
-              <div class="bg-green-50 rounded-xl p-4"><div class="text-3xl font-bold text-green-600" id="results-correct">0</div><div class="text-sm">Correct</div></div>
-              <div class="bg-red-50 rounded-xl p-4"><div class="text-3xl font-bold text-red-600" id="results-incorrect">0</div><div class="text-sm">Incorrect</div></div>
-              <div class="bg-blue-50 rounded-xl p-4"><div class="text-3xl font-bold text-blue-600" id="results-percent">0%</div><div class="text-sm">Score</div></div>
-            </div>
-            <div class="flex justify-center gap-4">
-              <button onclick="retakeQuiz()" class="px-6 py-3 border rounded-lg hover:bg-slate-50">Retake</button>
-              <button onclick="backToApp()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700">Done</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- FULL READER SCREEN -->
-  <div id="screen-reader" class="screen">
-    <div id="reader-container" class="reader-container theme-light font-serif">
-      <!-- Progress bar -->
-      <div class="reading-progress" id="reading-progress" style="width: 0%"></div>
-      
-      <!-- Top toolbar -->
-      <div class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur border-b z-50" id="reader-header">
-        <div class="flex items-center justify-between px-4 py-3">
-          <button onclick="closeReader()" class="p-2 hover:bg-slate-100 rounded-lg">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-          </button>
-          <div class="text-center">
-            <div class="font-medium text-sm" id="reader-title"></div>
-            <div class="text-xs text-slate-500" id="reader-page-info">Page 1 of 1</div>
-          </div>
-          <div class="flex items-center gap-1">
-            <button onclick="toggleBookmark()" id="btn-bookmark" class="p-2 hover:bg-slate-100 rounded-lg" title="Bookmark">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
-            </button>
-            <button onclick="toggleReaderNotes()" class="p-2 hover:bg-slate-100 rounded-lg" title="Notes">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-            </button>
-            <button onclick="toggleTOC()" class="p-2 hover:bg-slate-100 rounded-lg" title="Contents">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Page content -->
-      <div class="pt-16 pb-24 px-4" id="reader-page-container">
-        <div class="reader-page" id="reader-page"></div>
-      </div>
-      
-      <!-- Selection popup for highlighting -->
-      <div class="selection-popup" id="selection-popup">
-        <button onclick="addHighlight('yellow')" class="bg-yellow-300 border-yellow-400" title="Yellow"></button>
-        <button onclick="addHighlight('green')" class="bg-green-300 border-green-400" title="Green"></button>
-        <button onclick="addHighlight('blue')" class="bg-blue-300 border-blue-400" title="Blue"></button>
-        <button onclick="addHighlight('pink')" class="bg-pink-300 border-pink-400" title="Pink"></button>
-        <button onclick="addNoteToSelection()" class="bg-white border-slate-300" title="Add Note">📝</button>
-      </div>
-      
-      <!-- Bottom navigation -->
-      <div class="page-nav" id="page-nav">
-        <div class="max-w-lg mx-auto">
-          <div class="flex items-center justify-between mb-2">
-            <button onclick="prevPage()" class="px-4 py-2 border rounded-lg hover:bg-slate-100 disabled:opacity-30" id="btn-prev-page">← Prev</button>
-            <div class="flex items-center gap-2">
-              <input type="number" id="page-input" class="w-16 text-center border rounded-lg py-2" min="1" onchange="goToPage(this.value)">
-              <span class="text-slate-500">/ <span id="total-pages">1</span></span>
-            </div>
-            <button onclick="nextPage()" class="px-4 py-2 border rounded-lg hover:bg-slate-100 disabled:opacity-30" id="btn-next-page">Next →</button>
-          </div>
-          <div class="flex justify-center gap-4">
-            <button onclick="toggleSettings()" class="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-              Settings
-            </button>
-            <button onclick="addPageNote()" class="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
-              Add Note
-            </button>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Settings drawer -->
-      <div class="settings-drawer" id="settings-drawer">
-        <div class="p-6 max-w-lg mx-auto">
-          <div class="flex justify-between items-center mb-4">
-            <h3 class="font-bold text-lg">Reading Settings</h3>
-            <button onclick="toggleSettings()" class="text-slate-500">✕</button>
-          </div>
-          <!-- Theme -->
-          <div class="mb-6">
-            <div class="text-sm font-medium mb-3">Theme</div>
-            <div class="flex gap-3">
-              <button onclick="setTheme('light')" class="w-12 h-12 rounded-full bg-white border-2 border-slate-300" title="Light"></button>
-              <button onclick="setTheme('sepia')" class="w-12 h-12 rounded-full bg-[#f4ecd8] border-2 border-[#d4c4a8]" title="Sepia"></button>
-              <button onclick="setTheme('dark')" class="w-12 h-12 rounded-full bg-[#1a1a1a] border-2 border-[#404040]" title="Dark"></button>
-              <button onclick="setTheme('night')" class="w-12 h-12 rounded-full bg-[#0d1117] border-2 border-[#30363d]" title="Night"></button>
-            </div>
-          </div>
-          <!-- Font -->
-          <div class="mb-6">
-            <div class="text-sm font-medium mb-3">Font</div>
-            <div class="flex flex-wrap gap-2">
-              <button onclick="setFont('serif')" class="px-3 py-2 border rounded-lg font-serif">Merriweather</button>
-              <button onclick="setFont('classic')" class="px-3 py-2 border rounded-lg font-classic">Crimson</button>
-              <button onclick="setFont('modern')" class="px-3 py-2 border rounded-lg font-modern">Literata</button>
-              <button onclick="setFont('sans')" class="px-3 py-2 border rounded-lg font-sans">Open Sans</button>
-            </div>
-          </div>
-          <!-- Size -->
-          <div class="mb-6">
-            <div class="text-sm font-medium mb-3">Font Size</div>
-            <div class="flex items-center gap-4">
-              <button onclick="adjustFontSize(-2)" class="w-10 h-10 border rounded-full text-lg">A-</button>
-              <span id="font-size-display" class="text-lg font-medium w-16 text-center">18px</span>
-              <button onclick="adjustFontSize(2)" class="w-10 h-10 border rounded-full text-xl">A+</button>
-            </div>
-          </div>
-          <!-- Line Height -->
-          <div class="mb-4">
-            <div class="text-sm font-medium mb-3">Line Spacing</div>
-            <div class="flex gap-2">
-              <button onclick="setLineHeight(1.5)" class="px-4 py-2 border rounded-lg">Compact</button>
-              <button onclick="setLineHeight(1.8)" class="px-4 py-2 border rounded-lg">Normal</button>
-              <button onclick="setLineHeight(2.2)" class="px-4 py-2 border rounded-lg">Relaxed</button>
-            </div>
-          </div>
-        </div>
-      </div>
-      
-      <!-- Notes panel -->
-      <div class="notes-panel" id="notes-panel">
-        <div class="p-4 border-b flex justify-between items-center">
-          <h3 class="font-bold">Notes & Highlights</h3>
-          <button onclick="toggleReaderNotes()" class="text-slate-500">✕</button>
-        </div>
-        <div class="p-4 overflow-y-auto" style="height: calc(100% - 60px);" id="chapter-notes-list"></div>
-      </div>
-      
-      <!-- TOC panel -->
-      <div class="toc-panel" id="toc-panel">
-        <div class="p-4 border-b flex justify-between items-center">
-          <h3 class="font-bold">Contents</h3>
-          <button onclick="toggleTOC()" class="text-slate-500">✕</button>
-        </div>
-        <div class="p-4" id="toc-list"></div>
-      </div>
-      
-      <!-- Overlay -->
-      <div class="fixed inset-0 bg-black/30 z-40 hidden" id="reader-overlay" onclick="closeAllPanels()"></div>
+    <div class="main-card p-4">
+      <h3 class="font-bold text-slate-800 mb-4">TTS Voice</h3>
+      <select id="voice-select" class="w-full border rounded-lg px-3 py-2" onchange="saveVoicePref()"></select>
     </div>
-  </div>
+  </main>
+  <nav class="bottom-nav"><div class="flex">
+    <div class="nav-item" onclick="showNav('home')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="text-xs">Home</div></div>
+    <div class="nav-item" onclick="showNav('study')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg><div class="text-xs">Study</div></div>
+    <div class="nav-item" onclick="showNav('notes')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg><div class="text-xs">Notes</div></div>
+    <div class="nav-item active" onclick="showNav('profile')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg><div class="text-xs">Profile</div></div>
+  </div></nav>
+</div>
 
-  <!-- Note Modal -->
-  <div id="note-modal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl max-w-lg w-full p-6">
-      <h3 class="font-bold text-lg mb-2">Add Note</h3>
-      <div class="text-sm text-slate-500 mb-4 italic" id="note-modal-quote"></div>
-      <textarea id="note-modal-text" class="w-full border rounded-lg p-3 h-32 resize-none" placeholder="Write your note..."></textarea>
-      <div class="flex justify-end gap-3 mt-4">
-        <button onclick="closeNoteModal()" class="px-4 py-2 border rounded-lg">Cancel</button>
-        <button onclick="saveNote()" class="px-4 py-2 bg-red-600 text-white rounded-lg">Save Note</button>
+<!-- CHAPTER -->
+<div id="screen-chapter" class="screen">
+  <header class="bg-white border-b px-4 py-3 pt-10 flex items-center gap-3">
+    <button onclick="backFromChapter()" class="p-2 -ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+    <div class="flex-1"><h1 class="font-bold text-slate-800 truncate" id="chapter-title">Chapter</h1><p class="text-sm text-slate-500" id="chapter-subtitle">Category</p></div>
+  </header>
+  <div class="tab-bar mx-4 mt-4">
+    <div class="tab-btn active" data-tab="overview" onclick="switchChapterTab('overview')">Overview</div>
+    <div class="tab-btn" data-tab="read" onclick="switchChapterTab('read')">Read</div>
+    <div class="tab-btn" data-tab="study" onclick="switchChapterTab('study')">Study</div>
+    <div class="tab-btn" data-tab="quiz" onclick="switchChapterTab('quiz')">Quiz</div>
+  </div>
+  <main class="px-4 py-4 pb-8">
+    <div id="chapter-tab-overview" class="chapter-tab"></div>
+    <div id="chapter-tab-read" class="chapter-tab hidden"></div>
+    <div id="chapter-tab-study" class="chapter-tab hidden"></div>
+    <div id="chapter-tab-quiz" class="chapter-tab hidden"></div>
+  </main>
+</div>
+
+<!-- READER -->
+<div id="screen-reader" class="screen">
+  <div id="reader-container" class="reader-container theme-light font-serif">
+    <div class="fixed top-0 left-0 right-0 h-1 bg-slate-200 z-50"><div id="reading-progress-bar" class="h-full bg-red-500" style="width:0%"></div></div>
+    <header class="fixed top-0 left-0 right-0 bg-white/95 border-b z-40 px-4 py-3 flex items-center justify-between" id="reader-header">
+      <button onclick="closeReader()" class="p-2 -ml-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
+      <div class="text-center"><div class="font-medium text-sm" id="reader-title-bar">Chapter</div><div class="text-xs text-slate-500" id="reader-page-indicator">Page 1/1</div></div>
+      <div class="flex gap-1">
+        <button onclick="toggleBookmark()" id="btn-bookmark" class="p-2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg></button>
+        <button onclick="toggleReaderSettings()" class="p-2"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6"/></svg></button>
+      </div>
+    </header>
+    <div class="pt-16 pb-32 px-4"><div class="max-w-2xl mx-auto reading-content" id="reader-page-content" style="font-size:18px;"></div></div>
+    <div class="selection-popup" id="selection-popup">
+      <button onclick="addHighlight('yellow')" class="w-8 h-8 rounded-full bg-yellow-300 border-2 border-yellow-400"></button>
+      <button onclick="addHighlight('green')" class="w-8 h-8 rounded-full bg-green-300 border-2 border-green-400"></button>
+      <button onclick="addHighlight('blue')" class="w-8 h-8 rounded-full bg-blue-300 border-2 border-blue-400"></button>
+      <button onclick="addNoteToSelection()" class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-sm">📝</button>
+    </div>
+    <div class="fixed bottom-0 left-0 right-0 bg-white/95 border-t z-40 px-4 py-3" id="reader-footer">
+      <div class="flex items-center justify-between max-w-2xl mx-auto">
+        <button onclick="prevPage()" class="px-4 py-2 border rounded-lg" id="btn-prev">← Prev</button>
+        <div class="flex items-center gap-2"><input type="number" id="page-input" class="w-14 text-center border rounded-lg py-1" min="1"><span class="text-slate-500">/ <span id="total-pages">1</span></span></div>
+        <button onclick="nextPage()" class="px-4 py-2 border rounded-lg" id="btn-next">Next →</button>
+      </div>
+      <div class="flex items-center justify-center gap-4 mt-3 pt-3 border-t">
+        <button onclick="ttsRewind()" class="p-2 text-slate-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg></button>
+        <button onclick="toggleTTS()" id="btn-tts" class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center">
+          <svg id="tts-play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          <svg id="tts-pause-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+        </button>
+        <button onclick="ttsForward()" class="p-2 text-slate-600"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 19 22 12 13 5 13 19"/><polygon points="2 19 11 12 2 5 2 19"/></svg></button>
+        <select id="tts-speed" class="border rounded-lg px-2 py-1 text-sm" onchange="updateTTSSpeed()"><option value="0.75">0.75x</option><option value="1" selected>1x</option><option value="1.25">1.25x</option><option value="1.5">1.5x</option></select>
+      </div>
+    </div>
+    <div id="reader-settings-panel" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end">
+      <div class="bg-white w-full rounded-t-2xl p-6 max-h-[70vh] overflow-y-auto">
+        <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Settings</h3><button onclick="toggleReaderSettings()">✕</button></div>
+        <div class="mb-6"><div class="text-sm font-medium mb-3">Theme</div><div class="flex gap-3"><button onclick="setTheme('light')" class="w-12 h-12 rounded-full bg-white border-2"></button><button onclick="setTheme('sepia')" class="w-12 h-12 rounded-full bg-[#f4ecd8] border-2"></button><button onclick="setTheme('dark')" class="w-12 h-12 rounded-full bg-[#1a1a1a] border-2"></button></div></div>
+        <div class="mb-6"><div class="text-sm font-medium mb-3">Font</div><div class="flex gap-2"><button onclick="setFont('serif')" class="px-3 py-2 border rounded-lg">Serif</button><button onclick="setFont('sans')" class="px-3 py-2 border rounded-lg">Sans</button></div></div>
+        <div class="mb-6"><div class="text-sm font-medium mb-3">Size: <span id="size-display">18px</span></div><input type="range" min="14" max="28" value="18" class="w-full" id="font-size-slider" oninput="setFontSize(this.value)"></div>
+        <div><div class="text-sm font-medium mb-3">Voice</div><select id="reader-voice-select" class="w-full border rounded-lg px-3 py-2" onchange="setVoice(this.value)"></select></div>
       </div>
     </div>
   </div>
+</div>
+
+<!-- Note Modal -->
+<div id="note-modal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-xl max-w-lg w-full p-6">
+    <h3 class="font-bold text-lg mb-2">Add Note</h3>
+    <div class="text-sm text-slate-500 mb-4 italic" id="note-modal-quote"></div>
+    <textarea id="note-modal-text" class="w-full border rounded-lg p-3 h-32" placeholder="Write your note..."></textarea>
+    <div class="flex justify-end gap-3 mt-4"><button onclick="closeNoteModal()" class="px-4 py-2 border rounded-lg">Cancel</button><button onclick="saveNote()" class="px-4 py-2 bg-red-600 text-white rounded-lg">Save</button></div>
+  </div>
+</div>
+
 
 <script>
-// Toggle forms
-(function() {
-  document.getElementById('link-register').onclick = function() { document.getElementById('login-form').style.display = 'none'; document.getElementById('register-form').style.display = 'block'; };
-  document.getElementById('link-login').onclick = function() { document.getElementById('register-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; };
-})();
+// Forms toggle
+document.getElementById('link-register').onclick = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
+document.getElementById('link-login').onclick = () => { document.getElementById('register-form').style.display='none'; document.getElementById('login-form').style.display='block'; };
 
 // Supabase
-var supabase = null;
-var SUPABASE_URL = 'https://mvuvgecqxwuqfshqbtjf.supabase.co';
-var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXZnZWNxeHd1cWZzaHFidGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODQ4MTUsImV4cCI6MjA4MzY2MDgxNX0.6OezNuwN5Ip2a_Xw_SsuxoB80nn3WP7D5dnhAEE9A9o';
+var supabase=null, SUPABASE_URL='https://mvuvgecqxwuqfshqbtjf.supabase.co', SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXZnZWNxeHd1cWZzaHFidGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODQ4MTUsImV4cCI6MjA4MzY2MDgxNX0.6OezNuwN5Ip2a_Xw_SsuxoB80nn3WP7D5dnhAEE9A9o';
+function initSupabase(){if(window.supabase?.createClient){supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);checkSession();}}
+var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';s.onload=initSupabase;document.head.appendChild(s);
 
-function initSupabase() {
-  if (window.supabase && window.supabase.createClient) {
-    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    checkExistingSession();
+// State
+var currentUser=null,userProgress=null,currentCategory=null,currentChapter=null;
+var contentPages=[],currentPage=1,loadedContent={};
+var annotations={highlights:[],notes:[],bookmarks:[]};
+var expandedSections={domains:true,books:false};
+var readerSettings={theme:'light',font:'serif',fontSize:18,voice:''};
+var ttsPlaying=false,ttsUtterance=null,pendingSelection='';
+var studyIndex=0,quizIndex=0,quizScore=0,selectedQuizAnswer=null;
+try{var rs=localStorage.getItem('readerSettings');if(rs)readerSettings=JSON.parse(rs);}catch(e){}
+
+// ========== DOMAIN DATA ==========
+var DOMAINS = [
+  {
+    id: 'heritage', name: 'Heritage', icon: '🏛️', color: 'from-amber-500 to-orange-600', desc: 'History of Foursquare',
+    chapters: [
+      {
+        id: 'heritage-1', title: 'Aimee Semple McPherson: Our Founder',
+        summary: 'Discover the extraordinary life of Aimee Semple McPherson—from her dramatic conversion in Canada, missionary tragedy in China, to becoming one of America\'s most influential evangelists and founding the Foursquare Church.',
+        reading: `<h2>Aimee Semple McPherson (1890-1944)</h2>
+<p>Aimee Semple McPherson was a woman of intense passion, creativity, and energy. She led an incredible life that exemplified God's miraculous mercy. She sparked revival, established a major evangelical center in Los Angeles, and changed the lives of countless individuals around the world.</p>
+
+<h3>Early Life and Conversion</h3>
+<p>Born Aimee Elizabeth Kennedy on October 9, 1890, near Ingersoll, Ontario, Canada, she grew up in a Christian home but began to feel conflicted about faith as a teenager.</p>
+
+<div class="scripture-box">"Oh, God… if there be a God… reveal yourself to me!" This desperate prayer from seventeen-year-old Aimee would change the course of her life and ultimately impact millions.</div>
+
+<p>At age 17, she attended a Pentecostal revival meeting led by Robert Semple, a young Irish evangelist. After three days of fierce internal struggle, Aimee surrendered her life to Christ and was filled with the Holy Spirit.</p>
+
+<h3>Marriage and Missionary Call</h3>
+<p>A year after her conversion, Aimee married Robert Semple in 1908. Together, they set sail for China as missionaries in 1910. Tragically, shortly after arriving in Hong Kong, both contracted malaria. Robert died on August 19, 1910, leaving Aimee widowed, pregnant, and penniless at just 19 years old.</p>
+
+<div class="key-point"><strong>Key Moment:</strong> Despite devastating loss, Aimee's faith did not waver. She gave birth to Roberta Star Semple and eventually returned to America, where God would prepare her for even greater ministry.</div>
+
+<h3>Rise of an Evangelist</h3>
+<p>After returning to America, Aimee began traveling evangelism in 1915. In October 1918, she embarked on her famous Transcontinental Gospel Car Tour, driving nearly 6,000 miles from the East Coast to Los Angeles.</p>
+
+<p>Aimee rented large auditoriums to accommodate vast crowds. At one event in San Diego, the National Guard had to be called in to control a crowd of more than 30,000. People would wait in line for hours, even overnight, to hear "Sister McPherson" preach and pray.</p>
+
+<h3>Ministry Innovations</h3>
+<ul>
+<li><strong>Media Pioneer:</strong> First woman to receive an FCC broadcast license (KFSG, 1924)</li>
+<li><strong>Illustrated Sermons:</strong> Created theatrical presentations near Hollywood to communicate biblical truths</li>
+<li><strong>Compassion Ministry:</strong> Fed 1.5 million people during the Great Depression</li>
+<li><strong>Racial Inclusion:</strong> Preached to integrated audiences decades before civil rights</li>
+</ul>
+
+<h3>Miraculous Healings</h3>
+<p>During her revivals, people were regularly healed by God from illnesses and infirmity. The American Medical Association launched an investigation in 1921 and found the healings were "genuine, beneficial and wonderful."</p>
+
+<h3>Legacy</h3>
+<p>Aimee died September 27, 1944, in Oakland, California. But the movement she started survived and thrived. Today, Foursquare ministers in over 150 nations worldwide with millions carrying forward her passion for Jesus the Savior, Baptizer, Healer, and Coming King.</p>`,
+        studyGuide: {
+          objectives: ['Understand key events in Aimee\'s life and conversion', 'Recognize her ministry innovations', 'Appreciate how personal tragedy shaped her ministry', 'Connect her legacy to modern Foursquare'],
+          keyTerms: ['Pentecostal Revival', 'Transcontinental Gospel Car Tour', 'KFSG Radio', 'Illustrated Sermons', 'Angelus Temple'],
+          keyScriptures: ['Acts 1:8', 'Mark 16:15-18', 'Matthew 28:19-20'],
+          sections: [
+            {title: 'Early Life & Conversion', content: '<p>Aimee was born October 9, 1890, in Ontario, Canada. At 17, she attended a Pentecostal revival where Robert Semple preached. After three days of wrestling, she surrendered to Christ and was filled with the Holy Spirit.</p><p><strong>Discussion:</strong> How did Aimee\'s questioning lead her to deeper faith?</p>'},
+            {title: 'Tragedy in China', content: '<p>Aimee married Robert Semple in 1908. They went to China as missionaries in 1910. Robert died of malaria, leaving Aimee widowed with newborn daughter Roberta.</p><p><strong>Reflection:</strong> How does God use our deepest pain to prepare us for greater ministry?</p>'},
+            {title: 'Rise of an Evangelist', content: '<p>After returning to America, Aimee began traveling evangelism in 1915. Her 1918 Transcontinental Gospel Car Tour covered nearly 6,000 miles. Crowds of over 30,000 gathered to hear her. The AMA verified her healings as "genuine and beneficial."</p>'},
+            {title: 'Pioneer & Innovator', content: '<p>First woman with FCC broadcast license (KFSG, 1924). Created illustrated sermons near Hollywood. Fed 1.5 million during the Great Depression. Preached to integrated audiences decades before civil rights.</p>'},
+            {title: 'Lasting Legacy', content: '<p>Aimee died September 27, 1944, in Oakland. Today Foursquare ministers in 150+ nations worldwide. Her vision of Jesus as Savior, Baptizer, Healer, and Coming King continues.</p>'}
+          ]
+        },
+        quizzes: [
+          {q:'When and where was Aimee born?', options:['October 9, 1890, Ontario, Canada', 'September 27, 1894, Los Angeles', 'January 1, 1890, England', 'March 15, 1888, New York'], correct:0, explanation:'Aimee was born October 9, 1890, near Ingersoll, Ontario, Canada.'},
+          {q:'Who led the revival where Aimee was converted?', options:['Jack Hayford', 'Harold McPherson', 'Robert Semple', 'Billy Sunday'], correct:2, explanation:'Robert Semple was the young Irish evangelist. They later married.'},
+          {q:'What happened to Robert Semple in China?', options:['Started a church', 'Died of malaria', 'Returned to America', 'Became a translator'], correct:1, explanation:'Robert died of malaria in 1910, leaving Aimee widowed and pregnant.'},
+          {q:'What does KFSG stand for?', options:['Keep Faith Strong Gospel', 'Kall Four Square Gospel', 'Kingdom Foursquare Glory', 'Knowledge Faith Spirit Grace'], correct:1, explanation:'KFSG stands for "Kall Four Square Gospel" - launched in 1924.'},
+          {q:'How many people did Angelus Temple feed during the Depression?', options:['50,000', '500,000', '1.5 million', '3 million'], correct:2, explanation:'The commissary fed an estimated 1.5 million people.'},
+          {q:'What did the AMA conclude about Aimee\'s healings?', options:['Fraudulent', 'Genuine and beneficial', 'Needed more study', 'Psychological'], correct:1, explanation:'The AMA found the healings were "genuine, beneficial and wonderful."'},
+          {q:'When did Aimee die?', options:['January 1, 1950', 'September 27, 1944', 'December 25, 1940', 'October 9, 1948'], correct:1, explanation:'She died September 27, 1944, in Oakland, California.'},
+          {q:'How many nations does Foursquare minister in today?', options:['50', '100', '150+', '200+'], correct:2, explanation:'Today Foursquare ministers in over 150 nations worldwide.'}
+        ]
+      },
+      {
+        id: 'heritage-2', title: 'Angelus Temple, KFSG & L.I.F.E. Bible College',
+        summary: 'Learn about Angelus Temple—the 5,300-seat cathedral that became Foursquare headquarters—along with KFSG radio and L.I.F.E. Bible College.',
+        reading: `<h2>Angelus Temple: Where It All Began</h2>
+<p>Angelus Temple was dedicated on January 1, 1923, in the Echo Park area of Los Angeles, California. This magnificent 5,300-seat auditorium became the headquarters of the Foursquare movement and remains an active church today.</p>
+
+<h3>Building the Dream</h3>
+<p>Built at a cost of $1.5 million—raised entirely through donations—Angelus Temple was a remarkable feat for its time. The distinctive dome became an iconic Los Angeles landmark.</p>
+
+<div class="key-point"><strong>Historic Fact:</strong> From the day the doors opened, a mighty revival surged into Angelus Temple. Eight thousand converts knelt at the altars in the first six months, and 1,500 believers were baptized in water.</div>
+
+<h3>The Prayer Tower</h3>
+<p>In February 1923, the Prayer Tower opened. Here, prayer has never ceased—men gather in two-hour shifts during the night, and women pray during the day.</p>
+
+<h3>KFSG: Pioneer of Christian Broadcasting</h3>
+<p>In 1924, Aimee launched KFSG (Kall Four Square Gospel), making her a pioneer in Christian broadcasting. KFSG was the third radio station in Los Angeles, and Aimee became the first woman to receive an FCC broadcast license.</p>
+
+<div class="scripture-box">Her broadcasts reached as far as the Cape Verde islands off Africa's coast!</div>
+
+<h3>L.I.F.E. Bible College</h3>
+<p>Also in 1923, Aimee founded the Lighthouse of International Foursquare Evangelism (L.I.F.E.) Bible College to train men and women for ministry. Today it continues as Life Pacific University in San Dimas, California.</p>`,
+        studyGuide: {
+          objectives: ['Know the history of Angelus Temple', 'Understand KFSG\'s pioneering role', 'Appreciate L.I.F.E. Bible College\'s mission'],
+          keyTerms: ['Angelus Temple', 'Echo Park', 'KFSG', 'L.I.F.E. Bible College', 'Prayer Tower'],
+          keyScriptures: ['Acts 2:42-47', 'Matthew 28:19-20', '2 Timothy 2:2'],
+          sections: [
+            {title: 'Angelus Temple', content: '<p>Dedicated January 1, 1923, in Echo Park, Los Angeles. Cost $1.5 million. Seats 5,300 people. 8,000 converts in first six months.</p>'},
+            {title: 'The Prayer Tower', content: '<p>Opened February 1923. 24/7 prayer has never ceased. Men pray in night shifts, women during the day.</p>'},
+            {title: 'KFSG Radio', content: '<p>Launched 1924. Third radio station in LA. First woman with FCC broadcast license. Broadcasts reached Cape Verde, Africa.</p>'},
+            {title: 'L.I.F.E. Bible College', content: '<p>Founded 1923. Trained both men and women for ministry. Now Life Pacific University in San Dimas, California.</p>'}
+          ]
+        },
+        quizzes: [
+          {q:'When was Angelus Temple dedicated?', options:['January 1, 1920', 'January 1, 1923', 'December 25, 1923', 'January 1, 1925'], correct:1, explanation:'Angelus Temple was dedicated on January 1, 1923.'},
+          {q:'How much did Angelus Temple cost to build?', options:['$500,000', '$1 million', '$1.5 million', '$2 million'], correct:2, explanation:'Angelus Temple cost $1.5 million.'},
+          {q:'How many people can Angelus Temple seat?', options:['2,500', '3,500', '5,300', '8,000'], correct:2, explanation:'Angelus Temple seats 5,300 people.'},
+          {q:'What is unique about the Prayer Tower?', options:['Tallest building', '24/7 prayer has never ceased', 'Had radio antenna', 'Housed offices'], correct:1, explanation:'The Prayer Tower has maintained continuous 24/7 prayer since February 1923.'},
+          {q:'What was historic about Aimee\'s FCC license?', options:['First ever', 'First woman to receive one', 'Most powerful', 'Free'], correct:1, explanation:'Aimee was the first woman to receive an FCC broadcast license.'},
+          {q:'What does L.I.F.E. stand for?', options:['Living In Faith Eternally', 'Lighthouse of International Foursquare Evangelism', 'Leaders In Foursquare Education', 'Learning Is For Everyone'], correct:1, explanation:'L.I.F.E. = Lighthouse of International Foursquare Evangelism.'}
+        ]
+      }
+    ]
+  },
+  {
+    id: 'identity', name: 'Identity', icon: '✨', color: 'from-purple-500 to-violet-600', desc: 'What makes Foursquare distinctive',
+    chapters: [
+      {
+        id: 'identity-1', title: 'The Foursquare Gospel: Our Name & Message',
+        summary: 'Understand the powerful biblical vision that gave Foursquare its name—four faces from Ezekiel representing Jesus as Savior, Baptizer, Healer, and Coming King.',
+        reading: `<h2>The Origin of the Foursquare Name</h2>
+<p>The name "Foursquare Gospel" came to Aimee Semple McPherson during a revival in Oakland, California in July 1922.</p>
+
+<div class="scripture-box">"Jesus Christ is the same yesterday, today, and forever." — Hebrews 13:8</div>
+
+<h3>The Vision of Ezekiel</h3>
+<p>During the Oakland revival, Aimee preached on Ezekiel's vision of four living creatures, each with four faces: man, lion, ox, and eagle. Suddenly she saw a complete picture of Jesus' ministry!</p>
+
+<div class="key-point">"Why—why, it's the Foursquare Gospel. The Foursquare Gospel!" burst from her heart as waves of praise rocked the audience.</div>
+
+<h3>The Four Faces of Jesus</h3>
+<p><strong>1. Face of Man — Jesus the SAVIOR</strong><br>Jesus came as a man to save humanity. "The Son of Man has come to seek and to save that which was lost." (Luke 19:10)</p>
+
+<p><strong>2. Face of Lion — Jesus the BAPTIZER</strong><br>Jesus baptizes believers with the Holy Spirit and fire. "He will baptize you with the Holy Spirit and fire." (Matthew 3:11)</p>
+
+<p><strong>3. Face of Ox — Jesus the HEALER</strong><br>Jesus bore our sicknesses. "By His stripes we are healed." (Isaiah 53:5)</p>
+
+<p><strong>4. Face of Eagle — Jesus the COMING KING</strong><br>Jesus is coming again! "The Lord Himself will descend from heaven with a shout." (1 Thessalonians 4:16-17)</p>`,
+        studyGuide: {
+          objectives: ['Explain the biblical origin of the Foursquare name', 'Describe each of the four faces', 'Connect Hebrews 13:8 to our message'],
+          keyTerms: ['Foursquare Gospel', 'Ezekiel\'s Vision', 'Four Living Creatures', 'Savior', 'Baptizer', 'Healer', 'Coming King'],
+          keyScriptures: ['Ezekiel 1:4-10', 'Hebrews 13:8', 'Luke 19:10', 'Matthew 3:11', 'Isaiah 53:5', '1 Thessalonians 4:16-17'],
+          sections: [
+            {title: 'The Oakland Revelation (1922)', content: '<p>During a revival in Oakland, July 1922, Aimee preached on Ezekiel\'s vision and saw a complete picture of Jesus\' ministry in the four faces.</p>'},
+            {title: 'Face of Man — SAVIOR', content: '<p>Jesus became man to save humanity. Luke 19:10: "The Son of Man has come to seek and to save that which was lost."</p>'},
+            {title: 'Face of Lion — BAPTIZER', content: '<p>Jesus baptizes with Holy Spirit and fire. Matthew 3:11. Initial evidence: speaking in tongues (Acts 2:4).</p>'},
+            {title: 'Face of Ox — HEALER', content: '<p>Isaiah 53:5: "By His stripes we are healed." Divine healing is in the atonement.</p>'},
+            {title: 'Face of Eagle — COMING KING', content: '<p>Jesus will return personally, visibly, triumphantly. 1 Thessalonians 4:16-17.</p>'}
+          ]
+        },
+        quizzes: [
+          {q:'Where did Aimee receive the "Foursquare" revelation?', options:['Los Angeles, 1923', 'Oakland, California, July 1922', 'China, 1910', 'Toronto, 1918'], correct:1, explanation:'The revelation came during a revival in Oakland in July 1922.'},
+          {q:'What Scripture was Aimee preaching on?', options:['Revelation 4', 'Isaiah 6', 'Ezekiel 1:4-10', 'Daniel 7'], correct:2, explanation:'She preached on Ezekiel\'s vision of the four living creatures.'},
+          {q:'What is the foundational Scripture for Foursquare?', options:['John 3:16', 'Romans 8:28', 'Hebrews 13:8', 'Acts 2:38'], correct:2, explanation:'Hebrews 13:8: "Jesus Christ is the same yesterday, today, and forever."'},
+          {q:'The face of MAN represents Jesus as?', options:['Healer', 'Savior', 'Baptizer', 'King'], correct:1, explanation:'The face of a man represents Jesus the Savior.'},
+          {q:'The face of LION represents Jesus as?', options:['Savior', 'Healer', 'Baptizer with Holy Spirit', 'Coming King'], correct:2, explanation:'The face of a lion represents Jesus the Baptizer.'},
+          {q:'The face of OX represents Jesus as?', options:['Savior', 'Healer', 'Baptizer', 'King'], correct:1, explanation:'The face of an ox represents Jesus the Healer.'},
+          {q:'The face of EAGLE represents Jesus as?', options:['Savior', 'Healer', 'Baptizer', 'Soon-Coming King'], correct:3, explanation:'The face of an eagle represents Jesus the Soon-Coming King.'}
+        ]
+      },
+      {
+        id: 'identity-2', title: 'The Six Global Distinctives',
+        summary: 'Explore the six foundational principles that unite every Foursquare church worldwide.',
+        reading: `<h2>What Makes Foursquare Different?</h2>
+<p>In 2012, leaders from over 70 nations agreed on six foundational principles called the Global Distinctives.</p>
+
+<h3>1. Kingdom Partnerships</h3>
+<p>"We will work alongside other Christians and churches with whom we can partner in mission."</p>
+
+<h3>2. Sound Doctrine</h3>
+<p>"The Declaration of Faith will guide our practice, rooted in the Word of God."</p>
+
+<h3>3. Empowering Leadership</h3>
+<p>"We will prepare and release men and women across generations into all positions of leadership."</p>
+
+<h3>4. Family Relationships</h3>
+<p>"We will relate to each other with love in our Global Family."</p>
+
+<h3>5. Spirit Empowerment</h3>
+<p>"We will consistently minister the baptism with the Holy Spirit and encourage spiritual gifts."</p>
+
+<h3>6. Shared Mission</h3>
+<p>"We will focus on multiplying disciples, leaders, churches, and national movements."</p>`,
+        studyGuide: {
+          objectives: ['List and explain the six Global Distinctives', 'Understand how they unite Foursquare globally', 'Apply these principles to local ministry'],
+          keyTerms: ['Global Distinctives', 'Kingdom Partnerships', 'Sound Doctrine', 'Empowering Leadership', 'Family Relationships', 'Spirit Empowerment', 'Shared Mission'],
+          keyScriptures: ['Ephesians 4:3-6', 'Acts 2:42-47', 'Galatians 5:22-23', '1 Corinthians 12:4-11'],
+          sections: [
+            {title: 'Kingdom Partnerships', content: '<p>We work alongside other Christians and churches. We are distinct but collegial.</p>'},
+            {title: 'Sound Doctrine', content: '<p>The Declaration of Faith (22 statements) guides our practice, rooted in Scripture.</p>'},
+            {title: 'Empowering Leadership', content: '<p>Both men and women are called to ministry leadership across generations.</p>'},
+            {title: 'Family Relationships', content: '<p>We are a family, not just an organization. Relationships are prioritized.</p>'},
+            {title: 'Spirit Empowerment', content: '<p>We consistently minister Spirit baptism and encourage spiritual gifts.</p>'},
+            {title: 'Shared Mission', content: '<p>We multiply disciples, leaders, churches, and movements.</p>'}
+          ]
+        },
+        quizzes: [
+          {q:'How many Global Distinctives are there?', options:['4', '5', '6', '7'], correct:2, explanation:'There are six Global Distinctives.'},
+          {q:'When were the Global Distinctives agreed upon?', options:['1923', '2000', '2012', '2020'], correct:2, explanation:'Leaders from 70+ nations agreed in Phoenix in 2012.'},
+          {q:'Which distinctive emphasizes working with other churches?', options:['Sound Doctrine', 'Kingdom Partnerships', 'Family Relationships', 'Shared Mission'], correct:1, explanation:'Kingdom Partnerships emphasizes working alongside others.'},
+          {q:'What guides Foursquare practice according to Sound Doctrine?', options:['The Bible only', 'The Declaration of Faith', 'Tradition', 'Local rules'], correct:1, explanation:'The Declaration of Faith guides our practice.'},
+          {q:'What does Empowering Leadership recognize?', options:['Only men lead', 'Only trained clergy', 'Both men and women are called', 'Leadership not important'], correct:2, explanation:'Both men and women are called to ministry.'},
+          {q:'What is at the core of Spirit Empowerment?', options:['Good preaching', 'Spirit baptism and gifts', 'Large buildings', 'Programs'], correct:1, explanation:'Spirit baptism and spiritual gifts are central.'}
+        ]
+      }
+    ]
+  },
+  {
+    id: 'doctrine', name: 'Doctrine', icon: '📖', color: 'from-blue-500 to-indigo-600', desc: 'Core Foursquare beliefs',
+    chapters: [
+      {
+        id: 'doctrine-1', title: 'The Declaration of Faith',
+        summary: 'Study the 22 statements that define Foursquare\'s core beliefs.',
+        reading: `<h2>The Declaration of Faith</h2>
+<p>The Declaration of Faith contains 22 statements compiled by Aimee Semple McPherson.</p>
+
+<h3>Key Doctrines</h3>
+<p><strong>1. Scripture:</strong> The Bible is fully inspired and without error.</p>
+<p><strong>2. The Trinity:</strong> One God in three persons—Father, Son, Holy Spirit.</p>
+<p><strong>3-7. Salvation:</strong> By grace through faith, not works.</p>
+<p><strong>10-11. Spirit Baptism:</strong> Subsequent to salvation, with initial evidence of tongues.</p>
+<p><strong>14. Divine Healing:</strong> Provided in the atonement.</p>
+<p><strong>15. Second Coming:</strong> Personal, imminent, premillennial return.</p>`,
+        studyGuide: {
+          objectives: ['Know the 22 statements purpose', 'Understand key doctrines', 'Explain why sound doctrine creates unity'],
+          keyTerms: ['Declaration of Faith', 'Inerrancy', 'Trinity', 'Regeneration', 'Spirit Baptism', 'Initial Evidence', 'Divine Healing', 'Premillennial'],
+          keyScriptures: ['2 Timothy 3:16-17', '1 Corinthians 8:6', 'Romans 10:9', 'Acts 2:4', 'Isaiah 53:5', '1 Thessalonians 4:16-17'],
+          sections: [
+            {title: 'Scripture & God (1-2)', content: '<p>The Bible is God\'s inspired, inerrant Word. God exists eternally as Father, Son, and Holy Spirit.</p>'},
+            {title: 'Salvation (3-7)', content: '<p>Humanity fell through sin. Salvation is by grace through faith, not works.</p>'},
+            {title: 'Holy Spirit (10-13)', content: '<p>Spirit baptism is subsequent to salvation. Initial evidence is speaking in tongues.</p>'},
+            {title: 'Healing & Return (14-15)', content: '<p>Divine healing is in the atonement. Christ\'s return is personal, imminent, and premillennial.</p>'}
+          ]
+        },
+        quizzes: [
+          {q:'How many statements in the Declaration of Faith?', options:['12', '18', '22', '28'], correct:2, explanation:'There are 22 statements.'},
+          {q:'What does Foursquare believe about the Bible?', options:['Contains God\'s Word', 'Fully inspired and without error', 'One of many holy books', 'Good moral guide'], correct:1, explanation:'The Bible is fully inspired and without error.'},
+          {q:'How is salvation received?', options:['Good works', 'Baptism', 'Grace through faith', 'Church membership'], correct:2, explanation:'Salvation is by grace through faith.'},
+          {q:'What is the initial evidence of Spirit baptism?', options:['Joy', 'Falling down', 'Speaking in tongues', 'Healing'], correct:2, explanation:'Speaking in tongues as the Spirit gives utterance.'},
+          {q:'What view does Foursquare hold about Christ\'s return?', options:['Postmillennial', 'Amillennial', 'Premillennial', 'Preterist'], correct:2, explanation:'Foursquare holds to premillennialism.'}
+        ]
+      }
+    ]
+  },
+  {
+    id: 'polity', name: 'Polity', icon: '⚖️', color: 'from-emerald-500 to-teal-600', desc: 'Church governance',
+    chapters: [
+      {
+        id: 'polity-1', title: 'Foursquare Church Government',
+        summary: 'Understand Foursquare\'s modified episcopal structure.',
+        reading: `<h2>How Foursquare Is Governed</h2>
+<p>Foursquare operates under a modified episcopal form of government with congregational elements.</p>
+
+<h3>Levels of Government</h3>
+<p><strong>1. Convention:</strong> Highest governing body. Votes on bylaws, elects Board.</p>
+<p><strong>2. Board of Directors:</strong> Provides oversight between conventions.</p>
+<p><strong>3. President:</strong> Chief executive officer. Randy Remington (since 2020).</p>
+<p><strong>4. Six Districts:</strong> Atlantic, Central, National Hispanic, Northwest, Pacific, Western.</p>
+<p><strong>5. Local Churches:</strong> Pastor and Church Council provide local leadership.</p>`,
+        studyGuide: {
+          objectives: ['Describe Foursquare\'s government structure', 'Identify roles of Convention, Board, President, Districts, Local Churches'],
+          keyTerms: ['Modified Episcopal', 'Convention', 'Board of Directors', 'President', 'District Supervisor', 'Church Council'],
+          keyScriptures: ['Acts 15:1-29', 'Titus 1:5-9', '1 Timothy 3:1-13'],
+          sections: [
+            {title: 'Convention', content: '<p>Annual gathering. Votes on bylaws. Elects Board members.</p>'},
+            {title: 'Board of Directors', content: '<p>Provides oversight between conventions. Multiple committees.</p>'},
+            {title: 'President', content: '<p>Chief executive officer. Current: Randy Remington (since 2020).</p>'},
+            {title: 'Six Districts', content: '<p>Atlantic, Central, National Hispanic, Northwest, Pacific, Western.</p>'},
+            {title: 'Local Churches', content: '<p>Pastor and Church Council provide local leadership.</p>'}
+          ]
+        },
+        quizzes: [
+          {q:'What type of government does Foursquare use?', options:['Congregational', 'Episcopal', 'Modified episcopal', 'Presbyterian'], correct:2, explanation:'Foursquare uses modified episcopal with congregational elements.'},
+          {q:'What is the highest governing body?', options:['The President', 'The Board', 'The Convention', 'Local churches'], correct:2, explanation:'The Convention is the highest governing body.'},
+          {q:'Who is the current Foursquare President?', options:['Glenn Burris Jr.', 'Jack Hayford', 'Randy Remington', 'Rolf McPherson'], correct:2, explanation:'Randy Remington has served since 2020.'},
+          {q:'How many U.S. districts are there?', options:['4', '6', '12', '14'], correct:1, explanation:'There are currently six U.S. districts.'}
+        ]
+      }
+    ]
+  },
+  {
+    id: 'practice', name: 'Ministry Practice', icon: '🙏', color: 'from-pink-500 to-rose-600', desc: 'Ordinances & Christian living',
+    chapters: [
+      {
+        id: 'practice-1', title: 'The Ordinances & Christian Living',
+        summary: 'Learn about water baptism, Lord\'s Supper, and Spirit-empowered living.',
+        reading: `<h2>The Two Ordinances</h2>
+
+<h3>Water Baptism</h3>
+<p>Baptism is by immersion, symbolizing our identification with Christ in His death, burial, and resurrection (Romans 6:3-4).</p>
+
+<h3>The Lord's Supper</h3>
+<p>Bread represents Christ's body; the cup represents His blood. We remember His sacrifice until He comes.</p>
+
+<h2>Spirit-Empowered Living</h2>
+<p>Spirit baptism is subsequent to salvation, with initial evidence of speaking in tongues (Acts 2:4).</p>
+
+<h3>Spiritual Gifts</h3>
+<p>All nine gifts from 1 Corinthians 12 are available today: wisdom, knowledge, faith, healing, miracles, prophecy, discernment, tongues, interpretation.</p>`,
+        studyGuide: {
+          objectives: ['Explain the two ordinances', 'Understand Spirit baptism with initial evidence', 'List the nine spiritual gifts'],
+          keyTerms: ['Ordinances', 'Immersion', 'Lord\'s Supper', 'Spirit Baptism', 'Initial Evidence', 'Tongues', 'Spiritual Gifts'],
+          keyScriptures: ['Matthew 28:19', 'Romans 6:3-4', '1 Corinthians 11:23-26', 'Acts 1:8', 'Acts 2:4', '1 Corinthians 12:4-11'],
+          sections: [
+            {title: 'Water Baptism', content: '<p>By immersion. Symbolizes death, burial, resurrection with Christ.</p>'},
+            {title: 'Lord\'s Supper', content: '<p>Bread = Christ\'s body. Cup = His blood. Memorial until He comes.</p>'},
+            {title: 'Spirit Baptism', content: '<p>Subsequent to salvation. Initial evidence: speaking in tongues.</p>'},
+            {title: 'Spiritual Gifts', content: '<p>All nine gifts operate today. Wisdom, knowledge, faith, healing, miracles, prophecy, discernment, tongues, interpretation.</p>'}
+          ]
+        },
+        quizzes: [
+          {q:'How many ordinances does Foursquare observe?', options:['1', '2', '5', '7'], correct:1, explanation:'Two ordinances: Water Baptism and Lord\'s Supper.'},
+          {q:'How is baptism performed?', options:['Sprinkling', 'Pouring', 'Immersion', 'Any method'], correct:2, explanation:'Baptism is by immersion.'},
+          {q:'What is the initial evidence of Spirit baptism?', options:['Joy', 'Falling down', 'Speaking in tongues', 'Visions'], correct:2, explanation:'Speaking in tongues (Acts 2:4).'},
+          {q:'How many spiritual gifts are listed in 1 Corinthians 12?', options:['7', '9', '12', '15'], correct:1, explanation:'Nine spiritual gifts are listed.'}
+        ]
+      }
+    ]
   }
-}
-var sbScript = document.createElement('script');
-sbScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';
-sbScript.onload = initSupabase;
-document.head.appendChild(sbScript);
-
-// Settings
-var readerSettings = { theme: 'light', font: 'serif', fontSize: 18, lineHeight: 1.8 };
-try { var s = localStorage.getItem('readerSettings'); if (s) readerSettings = JSON.parse(s); } catch(e) {}
-function saveReaderSettings() { try { localStorage.setItem('readerSettings', JSON.stringify(readerSettings)); } catch(e) {} }
-
-// Content cache
-var loadedContent = {};
-var currentReadingContent = '';
-var contentPages = [];
-var currentPageNum = 1;
-var CHARS_PER_PAGE = 3000;
-
-// Annotations (highlights, notes, bookmarks)
-var annotations = { highlights: [], notes: [], bookmarks: [] };
-
-// STATE
-var currentUser = null;
-var userProgress = null;
-var currentCategory = null;
-var currentChapter = null;
-var studyIndex = 0;
-var quizIndex = 0;
-var selectedAnswer = null;
-var quizScore = 0;
-var expandedCategories = {};
-var pendingSelection = null;
-
-// DATA - Categories and chapters (keeping compact for space)
-var CATEGORIES = [
-  { id: 'heritage', name: 'Heritage', icon: '🏛️', color: 'from-amber-500 to-orange-600', description: 'The history and founding of the Foursquare Church', type: 'domain',
-    chapters: [
-      { id: 'heritage-1', title: 'Aimee Semple McPherson', reading: '<h2>Aimee Semple McPherson (1890-1944)</h2><p>Aimee Semple McPherson was born on October 9, 1890, near Ingersoll, Ontario, Canada. She became one of the most influential evangelists of the 20th century and founded the International Church of the Foursquare Gospel.</p><p>At age 17, Aimee attended a Pentecostal revival meeting where she heard Robert Semple preach. She was converted and later married Robert. Together they went as missionaries to China, where Robert died of malaria in 1910, leaving Aimee widowed with a newborn daughter.</p><p>After returning to America and a brief marriage to Harold McPherson, Aimee began her evangelistic ministry in earnest. She traveled across the country conducting revival meetings, becoming known for her dynamic preaching, dramatic illustrated sermons, and healing ministry.</p><p>Aimee was a pioneer in many ways. She was one of the first women to preach on the radio and the first woman to receive an FCC broadcast license.</p>', studyGuide: [{ title: 'Early Life', content: '<p>Born October 9, 1890 in Canada. Converted at 17. Married Robert Semple, went to China.</p>' }], quizzes: [{q: "When was Aimee born?", options: ["1880", "1890", "1900", "1910"], correct: 1, explanation: "1890"}] },
-      { id: 'heritage-2', title: 'Angelus Temple', reading: '<h2>Angelus Temple</h2><p>Angelus Temple was dedicated on January 1, 1923, in Echo Park, Los Angeles. This 5,300-seat auditorium became the headquarters of the Foursquare movement.</p><p>Built at a cost of $1.5 million, its distinctive dome became iconic. During the Great Depression, the commissary fed 1.5 million people.</p>', studyGuide: [{ title: 'The Building', content: '<p>Dedicated Jan 1, 1923. Seats 5,300. Cost $1.5 million.</p>' }], quizzes: [{q: "When was Angelus Temple dedicated?", options: ["1920", "1923", "1925", "1930"], correct: 1, explanation: "Jan 1, 1923"}] }
-    ]
-  },
-  { id: 'identity', name: 'Identity', icon: '✨', color: 'from-purple-500 to-violet-600', description: 'What makes Foursquare distinctive', type: 'domain',
-    chapters: [
-      { id: 'identity-1', title: 'The Foursquare Gospel', reading: '<h2>The Foursquare Gospel</h2><p>The name came to Aimee in Oakland, 1922, while preaching on Ezekiel 1. The four faces represent: Man = Savior, Lion = Baptizer, Ox = Healer, Eagle = Coming King.</p><p>Hebrews 13:8: "Jesus Christ is the same yesterday, today, and forever."</p>', studyGuide: [{ title: 'The Four Faces', content: '<p>Man=Savior, Lion=Baptizer, Ox=Healer, Eagle=King</p>' }], quizzes: [{q: "Where did Aimee receive the vision?", options: ["LA", "Oakland", "SF", "NY"], correct: 1, explanation: "Oakland, 1922"}] }
-    ]
-  },
-  { id: 'doctrine', name: 'Doctrine', icon: '📖', color: 'from-blue-500 to-indigo-600', description: 'Core Foursquare beliefs', type: 'domain',
-    chapters: [
-      { id: 'doctrine-1', title: 'Declaration of Faith', reading: '<h2>Declaration of Faith</h2><p>22 statements of core belief covering Scripture, Trinity, salvation, Holy Spirit, healing, and Second Coming.</p>', studyGuide: [{ title: 'Overview', content: '<p>22 statements based on Scripture.</p>' }], quizzes: [{q: "How many statements?", options: ["10", "22", "30", "40"], correct: 1, explanation: "22"}] }
-    ]
-  },
-  { id: 'polity', name: 'Polity', icon: '⚖️', color: 'from-emerald-500 to-teal-600', description: 'Church structure and governance', type: 'domain',
-    chapters: [
-      { id: 'polity-1', title: 'Church Government', reading: '<h2>Church Government</h2><p>Modified episcopal with congregational elements. Convention is highest body. Districts provide regional oversight.</p>', studyGuide: [{ title: 'Structure', content: '<p>Convention > Board > President > Districts > Local</p>' }], quizzes: [{q: "Highest governing body?", options: ["Board", "President", "Convention", "Local"], correct: 2, explanation: "Convention"}] }
-    ]
-  },
-  { id: 'practice', name: 'Ministry Practice', icon: '🙏', color: 'from-pink-500 to-rose-600', description: 'Practical ministry', type: 'domain',
-    chapters: [
-      { id: 'practice-1', title: 'Ordinances', reading: '<h2>Ordinances</h2><p>Two ordinances: Water Baptism by immersion and Lord\'s Supper. Both symbolic, not sacramental.</p>', studyGuide: [{ title: 'Two Ordinances', content: '<p>Baptism and Communion</p>' }], quizzes: [{q: "How many ordinances?", options: ["1", "2", "3", "7"], correct: 1, explanation: "Two"}] }
-    ]
-  },
-  { id: 'fopt', name: 'Foundations of Pentecostal Theology', icon: '📚', color: 'from-indigo-500 to-purple-600', description: 'Complete textbook (10 Chapters)', type: 'book',
-    chapters: [
-      { id: 'ch1', num: 1, title: 'The Doctrine of Scripture', hasFullText: true },
-      { id: 'ch2', num: 2, title: 'The Doctrine of God', hasFullText: true },
-      { id: 'ch3', num: 3, title: 'The Doctrine of Humankind', hasFullText: true },
-      { id: 'ch4', num: 4, title: 'The Doctrine of Sin', hasFullText: true },
-      { id: 'ch5', num: 5, title: 'The Doctrine of Salvation', hasFullText: true },
-      { id: 'ch6', num: 6, title: 'The Doctrine of the Holy Spirit', hasFullText: true },
-      { id: 'ch7', num: 7, title: 'The Doctrine of Divine Healing', hasFullText: true },
-      { id: 'ch8', num: 8, title: 'The Doctrine of the Church', hasFullText: true },
-      { id: 'ch9', num: 9, title: 'The Doctrine of Angels', hasFullText: true },
-      { id: 'ch10', num: 10, title: 'The Doctrine of Last Things', hasFullText: true }
-    ]
-  },
-  { id: 'aimee-bio', name: 'Aimee: Life Story', icon: '👩', color: 'from-rose-400 to-pink-500', description: 'Biography', type: 'book', comingSoon: true, chapters: [] },
-  { id: 'women-ministry', name: 'Women in Ministry', icon: '👩‍🏫', color: 'from-fuchsia-400 to-purple-500', description: 'Biblical position', type: 'book', comingSoon: true, chapters: [] },
-  { id: 'disciples-nations', name: 'Disciples of All Nations', icon: '🌍', color: 'from-cyan-400 to-blue-500', description: 'Missions', type: 'book', comingSoon: true, chapters: [] },
-  { id: 'identity-keystones', name: 'Foursquare Keystones', icon: '🔑', color: 'from-amber-400 to-orange-500', description: 'Five key areas', type: 'book', comingSoon: true, chapters: [] }
 ];
 
-var FOPT_DATA = {
-  ch1: { studyGuide: [{ title: 'Scripture', content: '<p>God-breathed. 66 books. Verbal plenary inspiration.</p>' }], quizzes: [{q: "Books in Bible?", options: ["39","27","66","73"], correct: 2, explanation: "66"}] },
-  ch2: { studyGuide: [{ title: 'God', content: '<p>Trinity. One God, three persons.</p>' }], quizzes: [{q: "Persons in Trinity?", options: ["1","2","3","4"], correct: 2, explanation: "3"}] },
-  ch3: { studyGuide: [{ title: 'Humanity', content: '<p>Imago Dei. Body, soul, spirit.</p>' }], quizzes: [{q: "Imago Dei means?", options: ["Image of man","Image of God","Creation","Nature"], correct: 1, explanation: "Image of God"}] },
-  ch4: { studyGuide: [{ title: 'Sin', content: '<p>Hamartia = missing mark. Wages = death.</p>' }], quizzes: [{q: "Wages of sin?", options: ["Sickness","Poverty","Death","Suffering"], correct: 2, explanation: "Death"}] },
-  ch5: { studyGuide: [{ title: 'Salvation', content: '<p>By grace through faith. Not works.</p>' }], quizzes: [{q: "Salvation by?", options: ["Works","Grace","Baptism","Law"], correct: 1, explanation: "Grace through faith"}] },
-  ch6: { studyGuide: [{ title: 'Holy Spirit', content: '<p>Third person. Spirit baptism with tongues.</p>' }], quizzes: [{q: "Initial evidence?", options: ["Joy","Prophecy","Tongues","Healing"], correct: 2, explanation: "Tongues"}] },
-  ch7: { studyGuide: [{ title: 'Healing', content: '<p>In the atonement. Isaiah 53:5.</p>' }], quizzes: [{q: "Isaiah 53:5?", options: ["God is love","By stripes healed","Repent","Fear not"], correct: 1, explanation: "By His stripes"}] },
-  ch8: { studyGuide: [{ title: 'Church', content: '<p>Ekklesia = called out. Two ordinances.</p>' }], quizzes: [{q: "Ekklesia means?", options: ["Building","Called-out","Sacred","Worship"], correct: 1, explanation: "Called-out assembly"}] },
-  ch9: { studyGuide: [{ title: 'Angels', content: '<p>Created beings. Satan = fallen angel.</p>' }], quizzes: [{q: "Angels are?", options: ["Eternal","Created","Gods","Myths"], correct: 1, explanation: "Created beings"}] },
-  ch10: { studyGuide: [{ title: 'Last Things', content: '<p>Second coming. Rapture. Millennium.</p>' }], quizzes: [{q: "Millennium?", options: ["10 yrs","100 yrs","1000 yrs","Eternity"], correct: 2, explanation: "1000 years"}] }
-};
+var BOOKS = [
+  {id:'fopt', name:'Foundations of Pentecostal Theology', icon:'📚', color:'from-indigo-500 to-purple-600', desc:'Complete Textbook (10 Chapters)',
+    chapters:[
+      {id:'ch1', num:1, title:'The Doctrine of Scripture', hasFullText:true, summary:'Explore the doctrine of Scripture—its inspiration, inerrancy, and authority.'},
+      {id:'ch2', num:2, title:'The Doctrine of God', hasFullText:true, summary:'Study the nature and attributes of God and the Trinity.'},
+      {id:'ch3', num:3, title:'The Doctrine of Humankind', hasFullText:true, summary:'Understand human nature—created in God\'s image.'},
+      {id:'ch4', num:4, title:'The Doctrine of Sin', hasFullText:true, summary:'Examine the doctrine of sin—its origin and consequences.'},
+      {id:'ch5', num:5, title:'The Doctrine of Salvation', hasFullText:true, summary:'Discover how God saves through Christ.'},
+      {id:'ch6', num:6, title:'The Doctrine of the Holy Spirit', hasFullText:true, summary:'Study the person and work of the Holy Spirit.'},
+      {id:'ch7', num:7, title:'The Doctrine of Divine Healing', hasFullText:true, summary:'Learn about healing in the atonement.'},
+      {id:'ch8', num:8, title:'The Doctrine of the Church', hasFullText:true, summary:'Explore the nature and mission of the church.'},
+      {id:'ch9', num:9, title:'The Doctrine of Angels', hasFullText:true, summary:'Study angels, Satan, and demons.'},
+      {id:'ch10', num:10, title:'The Doctrine of Last Things', hasFullText:true, summary:'Discover eschatology—rapture, tribulation, millennium.'}
+    ]
+  },
+  {id:'aimee-bio', name:'Aimee: Life Story', icon:'👩', color:'from-rose-400 to-pink-500', desc:'Biography', comingSoon:true, chapters:[]},
+  {id:'women-ministry', name:'Women in Ministry', icon:'👩‍🏫', color:'from-fuchsia-400 to-purple-500', desc:'Biblical position', comingSoon:true, chapters:[]},
+  {id:'disciples-nations', name:'Disciples of All Nations', icon:'🌍', color:'from-cyan-400 to-blue-500', desc:'Missions', comingSoon:true, chapters:[]},
+  {id:'keystones', name:'Foursquare Keystones', icon:'🔑', color:'from-amber-400 to-orange-500', desc:'Five key areas', comingSoon:true, chapters:[]}
+];
 
-// HELPERS
-function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-' + id).classList.add('active'); }
-function showError(msg) { document.getElementById('login-error').textContent = msg; document.getElementById('login-error').classList.remove('hidden'); }
-function hideError() { document.getElementById('login-error').classList.add('hidden'); }
-function showSaveStatus() { var el = document.getElementById('save-status'); el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 2000); }
 
-function createDefaultProgress() {
-  var p = { annotations: { highlights: [], notes: [], bookmarks: [] } };
-  CATEGORIES.forEach(cat => {
-    p[cat.id] = {};
-    if (cat.chapters) cat.chapters.forEach(ch => { p[cat.id][ch.id] = { read: false, studied: false, quizScore: 0, lastPage: 1 }; });
-  });
+// ========== AUTH ==========
+async function handleLogin(){
+  var email=document.getElementById('login-email').value.trim();
+  var pw=document.getElementById('login-password').value;
+  if(!email||!pw)return showError('Fill all fields');
+  if(!supabase)return showError('Connecting...');
+  hideError();
+  try{var r=await supabase.auth.signInWithPassword({email,password:pw});if(r.error)throw r.error;currentUser=r.data.user;await loadProgress();showNav('home');}catch(e){showError(e.message);}
+}
+async function handleRegister(){
+  var name=document.getElementById('reg-name').value.trim();
+  var email=document.getElementById('reg-email').value.trim();
+  var pw=document.getElementById('reg-password').value;
+  if(!name||!email||!pw)return showError('Fill all fields');
+  if(pw.length<6)return showError('Password min 6 chars');
+  if(!supabase)return showError('Connecting...');
+  hideError();
+  try{var r=await supabase.auth.signUp({email,password:pw,options:{data:{name}}});if(r.error)throw r.error;currentUser=r.data.user;userProgress=createDefaultProgress();await saveProgress();showNav('home');}catch(e){showError(e.message);}
+}
+async function handleLogout(){if(supabase)await supabase.auth.signOut();currentUser=null;userProgress=null;showScreen('login');}
+function checkSession(){supabase?.auth.getSession().then(r=>{if(r.data.session){currentUser=r.data.session.user;loadProgress().then(()=>showNav('home'));}});}
+function showError(msg){document.getElementById('login-error').textContent=msg;document.getElementById('login-error').classList.remove('hidden');}
+function hideError(){document.getElementById('login-error').classList.add('hidden');}
+
+function createDefaultProgress(){
+  var p={annotations:{highlights:[],notes:[],bookmarks:[]},lastRead:null};
+  DOMAINS.forEach(d=>{p[d.id]={};d.chapters.forEach(c=>{p[d.id][c.id]={read:false,studied:false,quizScore:0,lastPage:1};});});
+  BOOKS.forEach(b=>{if(!b.comingSoon){p[b.id]={};b.chapters.forEach(c=>{p[b.id][c.id]={read:false,studied:false,quizScore:0,lastPage:1};});}});
   return p;
 }
+async function loadProgress(){try{var r=await supabase.from('progress').select('data').eq('user_id',currentUser.id).single();userProgress=r.data?.data||createDefaultProgress();}catch(e){userProgress=createDefaultProgress();}if(!userProgress.annotations)userProgress.annotations={highlights:[],notes:[],bookmarks:[]};annotations=userProgress.annotations;}
+async function saveProgress(){userProgress.annotations=annotations;try{await supabase.from('progress').upsert({user_id:currentUser.id,data:userProgress,updated_at:new Date().toISOString()},{onConflict:'user_id'});}catch(e){console.error(e);}}
 
-// AUTH
-async function handleRegister() {
-  var name = document.getElementById('reg-name').value.trim();
-  var email = document.getElementById('reg-email').value.trim();
-  var pw = document.getElementById('reg-password').value;
-  if (!name || !email || !pw) return showError('Fill all fields');
-  if (pw.length < 6) return showError('Password min 6 chars');
-  if (!supabase) return showError('Connecting...');
-  hideError();
-  try {
-    var r = await supabase.auth.signUp({ email, password: pw, options: { data: { name } } });
-    if (r.error) throw r.error;
-    currentUser = r.data.user; userProgress = createDefaultProgress(); await saveProgress(); showApp();
-  } catch (e) { showError(e.message); }
+// ========== NAVIGATION ==========
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('screen-'+id).classList.add('active');}
+function showNav(nav){
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  if(nav==='home'){showScreen('home');renderHome();}
+  else if(nav==='study'){showScreen('study');renderStudyList();}
+  else if(nav==='notes'){showScreen('notes');filterNotes('all');}
+  else if(nav==='profile'){showScreen('profile');renderProfile();}
 }
 
-async function handleLogin() {
-  var email = document.getElementById('login-email').value.trim();
-  var pw = document.getElementById('login-password').value;
-  if (!email || !pw) return showError('Fill all fields');
-  if (!supabase) return showError('Connecting...');
-  hideError();
-  try {
-    var r = await supabase.auth.signInWithPassword({ email, password: pw });
-    if (r.error) throw r.error;
-    currentUser = r.data.user; await loadProgress(); showApp();
-  } catch (e) { showError(e.message); }
+// ========== HOME ==========
+function renderHome(){
+  var name=currentUser?.user_metadata?.name||currentUser?.email?.split('@')[0]||'Student';
+  document.getElementById('user-name').textContent=name;
+  var totalItems=0,doneItems=0,chaptersRead=0,quizzesPassed=0;
+  [...DOMAINS,...BOOKS].forEach(cat=>{if(cat.comingSoon)return;cat.chapters?.forEach(ch=>{totalItems+=3;var p=userProgress[cat.id]?.[ch.id]||{};if(p.read){doneItems++;chaptersRead++;}if(p.studied)doneItems++;if(p.quizScore>=80){doneItems++;quizzesPassed++;}});});
+  var pct=totalItems>0?Math.round((doneItems/totalItems)*100):0;
+  document.getElementById('total-progress').textContent=pct+'%';
+  document.getElementById('progress-ring-circle').style.strokeDashoffset=163.36-(pct/100)*163.36;
+  document.getElementById('stat-chapters').textContent=chaptersRead;
+  document.getElementById('stat-quizzes').textContent=quizzesPassed;
+  document.getElementById('stat-notes').textContent=annotations.notes.length+annotations.highlights.length;
+  document.getElementById('stat-hours').textContent=Math.round((userProgress.studyTime||0)/60);
+  if(userProgress.lastRead){document.getElementById('continue-section').classList.remove('hidden');document.getElementById('continue-title').textContent=userProgress.lastRead.title;document.getElementById('continue-subtitle').textContent='Page '+userProgress.lastRead.page;document.getElementById('continue-icon').textContent=userProgress.lastRead.icon||'📖';}
+  renderDomainsSection();renderBooksSection();
+  var domainsDone=0,domainsTotal=0;DOMAINS.forEach(d=>d.chapters.forEach(c=>{domainsTotal+=3;var p=userProgress[d.id]?.[c.id]||{};if(p.read)domainsDone++;if(p.studied)domainsDone++;if(p.quizScore>=80)domainsDone++;}));
+  document.getElementById('domains-progress').textContent=domainsTotal>0?Math.round((domainsDone/domainsTotal)*100)+'%':'0%';
+  var booksDone=0,booksTotal=0;BOOKS.forEach(b=>{if(!b.comingSoon)b.chapters?.forEach(c=>{booksTotal+=3;var p=userProgress[b.id]?.[c.id]||{};if(p.read)booksDone++;if(p.studied)booksDone++;if(p.quizScore>=80)booksDone++;});});
+  document.getElementById('books-progress').textContent=booksTotal>0?Math.round((booksDone/booksTotal)*100)+'%':'0%';
+}
+function toggleSection(id){expandedSections[id]=!expandedSections[id];document.getElementById(id+'-content').classList.toggle('expanded',expandedSections[id]);document.getElementById(id+'-chevron').style.transform=expandedSections[id]?'rotate(180deg)':'';}
+function renderDomainsSection(){
+  var html='';DOMAINS.forEach(d=>{var done=0;d.chapters.forEach(c=>{var p=userProgress[d.id]?.[c.id]||{};if(p.read&&p.studied&&p.quizScore>=80)done++;});
+  html+=`<div class="chapter-item" onclick="openCategory('domain','${d.id}')"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ${d.color} flex items-center justify-center text-xl mr-3">${d.icon}</div><div class="flex-1"><div class="font-medium">${d.name}</div><div class="text-sm text-slate-500">${d.chapters.length} chapters</div></div><div class="text-sm text-slate-500 mr-2">${done}/${d.chapters.length}</div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>`;});
+  document.getElementById('domains-content').innerHTML=html;document.getElementById('domains-content').classList.toggle('expanded',expandedSections.domains);document.getElementById('domains-chevron').style.transform=expandedSections.domains?'rotate(180deg)':'';
+}
+function renderBooksSection(){
+  var html='';BOOKS.forEach(b=>{if(b.comingSoon){html+=`<div class="chapter-item opacity-60"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center text-xl mr-3">${b.icon}</div><div class="flex-1"><div class="font-medium">${b.name}</div><div class="text-sm text-slate-500">${b.desc}</div></div><span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full">Coming Soon</span></div>`;}
+  else{var done=0;b.chapters.forEach(c=>{var p=userProgress[b.id]?.[c.id]||{};if(p.read&&p.studied&&p.quizScore>=80)done++;});html+=`<div class="chapter-item" onclick="openCategory('book','${b.id}')"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center text-xl mr-3">${b.icon}</div><div class="flex-1"><div class="font-medium">${b.name}</div><div class="text-sm text-slate-500">${b.chapters.length} chapters</div></div><div class="text-sm text-slate-500 mr-2">${done}/${b.chapters.length}</div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>`;}});
+  document.getElementById('books-content').innerHTML=html;document.getElementById('books-content').classList.toggle('expanded',expandedSections.books);document.getElementById('books-chevron').style.transform=expandedSections.books?'rotate(180deg)':'';
+}
+function openCategory(type,id){
+  var cat=type==='domain'?DOMAINS.find(d=>d.id===id):BOOKS.find(b=>b.id===id);if(!cat||cat.comingSoon)return;
+  showScreen('study');
+  var html=`<div class="flex items-center gap-3 mb-4"><div class="w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-2xl">${cat.icon}</div><div><h2 class="font-bold text-lg">${cat.name}</h2><p class="text-sm text-slate-500">${cat.chapters.length} chapters</p></div></div>`;
+  cat.chapters.forEach(ch=>{var p=userProgress[cat.id]?.[ch.id]||{};var done=p.read&&p.studied&&p.quizScore>=80;var title=ch.num?`Ch. ${ch.num}: ${ch.title}`:ch.title;
+  html+=`<div class="main-card p-4 mb-3 cursor-pointer" onclick="openChapter('${type}','${cat.id}','${ch.id}')"><div class="flex items-center gap-3">${done?'<div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white">✓</div>':`<div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-slate-500">${ch.num||'•'}</div>`}<div class="flex-1"><div class="font-medium">${title}</div><div class="flex gap-2 mt-1"><span class="text-xs ${p.read?'text-green-600':'text-slate-400'}">📖 Read</span><span class="text-xs ${p.studied?'text-green-600':'text-slate-400'}">📝 Study</span><span class="text-xs ${p.quizScore>=80?'text-green-600':'text-slate-400'}">✅ Quiz ${p.quizScore>0?p.quizScore+'%':''}</span></div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>`;});
+  document.getElementById('study-list').innerHTML=html;
+}
+function renderStudyList(){
+  var html='<h2 class="font-bold text-lg mb-4">All Study Materials</h2><h3 class="font-medium text-slate-500 text-sm uppercase mb-3">Licensing Domains</h3>';
+  DOMAINS.forEach(d=>{html+=`<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory('domain','${d.id}')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ${d.color} flex items-center justify-center text-xl">${d.icon}</div><div class="flex-1"><div class="font-medium">${d.name}</div><div class="text-sm text-slate-500">${d.chapters.length} chapters</div></div></div></div>`;});
+  html+='<h3 class="font-medium text-slate-500 text-sm uppercase mb-3 mt-6">Required Books</h3>';
+  BOOKS.forEach(b=>{html+=b.comingSoon?`<div class="main-card p-4 mb-3 opacity-60"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center text-xl">${b.icon}</div><div class="flex-1"><div class="font-medium">${b.name}</div><div class="text-sm text-slate-500">Coming Soon</div></div></div></div>`:`<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory('book','${b.id}')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ${b.color} flex items-center justify-center text-xl">${b.icon}</div><div class="flex-1"><div class="font-medium">${b.name}</div><div class="text-sm text-slate-500">${b.chapters.length} chapters</div></div></div></div>`;});
+  document.getElementById('study-list').innerHTML=html;
 }
 
-async function handleLogout() { if (supabase) await supabase.auth.signOut(); currentUser = null; userProgress = null; showScreen('login'); }
-
-async function loadProgress() {
-  try {
-    var r = await supabase.from('progress').select('data').eq('user_id', currentUser.id).single();
-    userProgress = r.data?.data || createDefaultProgress();
-  } catch (e) { userProgress = createDefaultProgress(); }
-  if (!userProgress.annotations) userProgress.annotations = { highlights: [], notes: [], bookmarks: [] };
-  CATEGORIES.forEach(cat => {
-    if (!userProgress[cat.id]) userProgress[cat.id] = {};
-    if (cat.chapters) cat.chapters.forEach(ch => {
-      if (!userProgress[cat.id][ch.id]) userProgress[cat.id][ch.id] = { read: false, studied: false, quizScore: 0, lastPage: 1 };
-    });
-  });
-  annotations = userProgress.annotations;
+// ========== NOTES ==========
+function filterNotes(type){
+  document.querySelectorAll('.notes-filter').forEach(b=>{b.classList.remove('bg-red-600','text-white');b.classList.add('bg-slate-100');});
+  event?.target?.classList.remove('bg-slate-100');event?.target?.classList.add('bg-red-600','text-white');
+  var items=[];if(type==='all'||type==='notes')items=items.concat(annotations.notes.map(n=>({...n,type:'note'})));if(type==='all'||type==='highlights')items=items.concat(annotations.highlights.map(h=>({...h,type:'highlight'})));if(type==='all'||type==='bookmarks')items=items.concat(annotations.bookmarks.map(b=>({...b,type:'bookmark'})));
+  items.sort((a,b)=>new Date(b.date)-new Date(a.date));
+  var html='';if(items.length===0)html='<div class="text-center py-12 text-slate-400"><p>No items yet</p></div>';
+  items.forEach(n=>{var icon=n.type==='note'?'📝':n.type==='highlight'?'🖍️':'🔖';
+  html+=`<div class="note-card"><div class="flex items-start gap-3"><span class="text-xl">${icon}</span><div class="flex-1"><div class="font-medium text-sm">${n.chapterTitle||'Chapter'}</div><div class="text-xs text-slate-500 mb-2">Page ${n.page} • ${new Date(n.date).toLocaleDateString()}</div>${n.quote?`<div class="text-sm highlight-${n.color||'yellow'} px-2 py-1 rounded mb-2">"${n.quote.substring(0,100)}..."</div>`:''}${n.text?`<div class="text-sm">${n.text}</div>`:''}</div><button onclick="deleteAnnotation('${n.type}','${n.id}')" class="text-slate-400 hover:text-red-500 p-1">✕</button></div></div>`;});
+  document.getElementById('notes-list').innerHTML=html;
 }
+function deleteAnnotation(type,id){if(type==='note')annotations.notes=annotations.notes.filter(n=>n.id!==id);if(type==='highlight')annotations.highlights=annotations.highlights.filter(h=>h.id!==id);if(type==='bookmark')annotations.bookmarks=annotations.bookmarks.filter(b=>b.id!==id);saveProgress();filterNotes('all');}
 
-async function saveProgress() {
-  userProgress.annotations = annotations;
-  try { await supabase.from('progress').upsert({ user_id: currentUser.id, data: userProgress, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); showSaveStatus(); }
-  catch (e) { console.error(e); }
+// ========== PROFILE ==========
+function renderProfile(){
+  var name=currentUser?.user_metadata?.name||'Student';
+  document.getElementById('profile-name').textContent=name;
+  document.getElementById('profile-email').textContent=currentUser?.email||'';
+  document.getElementById('profile-avatar').textContent=name.charAt(0).toUpperCase();
+  var chaptersRead=0,quizzesPassed=0;
+  [...DOMAINS,...BOOKS].forEach(cat=>{if(cat.comingSoon)return;cat.chapters?.forEach(ch=>{var p=userProgress[cat.id]?.[ch.id]||{};if(p.read)chaptersRead++;if(p.quizScore>=80)quizzesPassed++;});});
+  document.getElementById('profile-chapters').textContent=chaptersRead;
+  document.getElementById('profile-quizzes').textContent=quizzesPassed;
+  document.getElementById('profile-notes').textContent=annotations.notes.length+annotations.highlights.length;
+  loadVoices();
 }
+function loadVoices(){var sel=document.getElementById('voice-select');var sel2=document.getElementById('reader-voice-select');function populateVoices(){var voices=speechSynthesis.getVoices();var html='<option value="">Default</option>';voices.forEach((v,i)=>{html+=`<option value="${i}" ${readerSettings.voice==i?'selected':''}>${v.name}</option>`;});if(sel)sel.innerHTML=html;if(sel2)sel2.innerHTML=html;}populateVoices();speechSynthesis.onvoiceschanged=populateVoices;}
+function saveVoicePref(){readerSettings.voice=document.getElementById('voice-select').value;localStorage.setItem('readerSettings',JSON.stringify(readerSettings));}
 
-function checkExistingSession() {
-  supabase?.auth.getSession().then(r => { if (r.data.session) { currentUser = r.data.session.user; loadProgress().then(showApp); } }).catch(console.error);
-}
-
-// APP
-function showApp() {
-  showScreen('app');
-  document.getElementById('user-greeting').textContent = 'Welcome, ' + (currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || 'Student') + '!';
-  renderCategories();
-  updateOverallProgress();
-  renderNotesDashboard();
-}
-
-function backToApp() { showApp(); }
-
-function renderCategories() {
-  var html = '';
-  CATEGORIES.forEach(cat => {
-    var isExp = expandedCategories[cat.id];
-    var prog = getCategoryProgress(cat);
-    html += `<div class="bg-white rounded-xl shadow-sm border overflow-hidden">
-      <div class="category-header p-5 flex items-center justify-between" onclick="toggleCategory('${cat.id}')">
-        <div class="flex items-center gap-4">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-2xl text-white shadow">${cat.icon}</div>
-          <div><h3 class="font-bold text-slate-800 text-lg">${cat.name}</h3><p class="text-sm text-slate-500">${cat.description}</p></div>
-        </div>
-        <div class="flex items-center gap-4">
-          ${cat.comingSoon ? '<span class="px-3 py-1 bg-slate-100 text-slate-500 text-sm rounded-full">Coming Soon</span>' : `<div class="text-right mr-2"><div class="text-lg font-bold text-slate-700">${prog}%</div><div class="text-xs text-slate-400">Complete</div></div>`}
-          <svg class="chevron w-5 h-5 text-slate-400 ${isExp ? 'rotated' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-        </div>
-      </div>
-      <div class="category-content ${isExp ? 'expanded' : ''}">`;
-    if (!cat.comingSoon && cat.chapters?.length) {
-      html += '<div class="border-t px-5 py-4 space-y-2">';
-      cat.chapters.forEach(ch => {
-        var p = userProgress[cat.id]?.[ch.id] || {};
-        var done = p.read && p.studied && p.quizScore >= 80;
-        var title = ch.num ? `Ch. ${ch.num}: ${ch.title}` : ch.title;
-        html += `<div class="chapter-card flex items-center justify-between p-3 bg-slate-50 rounded-lg cursor-pointer" onclick="openChapter('${cat.id}','${ch.id}')">
-          <div class="flex items-center gap-3">
-            ${done ? '<div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">✓</div>' : `<div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm">${ch.num||'•'}</div>`}
-            <span class="font-medium text-slate-700">${title}</span>
-          </div>
-          <div class="flex items-center gap-2 text-xs">
-            <span class="${p.read ? 'text-green-600' : 'text-slate-400'}">📖</span>
-            <span class="${p.studied ? 'text-green-600' : 'text-slate-400'}">📝</span>
-            <span class="${p.quizScore >= 80 ? 'text-green-600' : 'text-slate-400'}">✅${p.quizScore > 0 ? p.quizScore+'%' : ''}</span>
-          </div>
-        </div>`;
-      });
-      html += '</div>';
-    } else if (cat.comingSoon) {
-      html += '<div class="border-t px-5 py-8 text-center text-slate-400">Coming soon!</div>';
-    }
-    html += '</div></div>';
-  });
-  document.getElementById('categories-container').innerHTML = html;
-}
-
-function toggleCategory(id) { expandedCategories[id] = !expandedCategories[id]; renderCategories(); }
-
-function getCategoryProgress(cat) {
-  if (cat.comingSoon || !cat.chapters?.length) return 0;
-  var t = cat.chapters.length * 3, d = 0;
-  cat.chapters.forEach(ch => { var p = userProgress[cat.id]?.[ch.id] || {}; if (p.read) d++; if (p.studied) d++; if (p.quizScore >= 80) d++; });
-  return Math.round((d / t) * 100);
-}
-
-function updateOverallProgress() {
-  var t = 0, d = 0;
-  CATEGORIES.forEach(cat => {
-    if (!cat.comingSoon && cat.chapters) cat.chapters.forEach(ch => { t += 3; var p = userProgress[cat.id]?.[ch.id] || {}; if (p.read) d++; if (p.studied) d++; if (p.quizScore >= 80) d++; });
-  });
-  var pct = t > 0 ? Math.round((d / t) * 100) : 0;
-  document.getElementById('overall-progress').textContent = pct + '%';
-  document.getElementById('progress-bar').style.width = pct + '%';
-}
-
-// Notes Dashboard
-function renderNotesDashboard() {
-  var all = [...annotations.notes, ...annotations.highlights, ...annotations.bookmarks].sort((a, b) => new Date(b.date) - new Date(a.date));
-  if (all.length === 0) { document.getElementById('notes-dashboard').classList.add('hidden'); return; }
-  document.getElementById('notes-dashboard').classList.remove('hidden');
-  var recent = all.slice(0, 3);
-  var html = '';
-  recent.forEach(n => {
-    var icon = n.type === 'note' ? '📝' : n.type === 'highlight' ? '🖍️' : '🔖';
-    html += `<div class="note-card"><div class="flex items-start gap-2"><span>${icon}</span><div class="flex-1"><div class="text-sm font-medium">${n.chapterTitle || 'Unknown'}</div><div class="text-xs text-slate-500">${n.text?.substring(0, 80) || 'Page ' + n.page}${n.text?.length > 80 ? '...' : ''}</div></div></div></div>`;
-  });
-  document.getElementById('recent-notes').innerHTML = html;
-}
-
-function toggleNotesDashboard() {
-  showScreen('notes');
-  filterNotes('all');
-}
-
-function filterNotes(type) {
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-red-600', 'text-white'));
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-slate-100', 'text-slate-700'));
-  event.target.classList.remove('bg-slate-100', 'text-slate-700');
-  event.target.classList.add('bg-red-600', 'text-white');
-  
-  var items = [];
-  if (type === 'all' || type === 'notes') items = items.concat(annotations.notes.map(n => ({...n, type: 'note'})));
-  if (type === 'all' || type === 'highlights') items = items.concat(annotations.highlights.map(h => ({...h, type: 'highlight'})));
-  if (type === 'all' || type === 'bookmarks') items = items.concat(annotations.bookmarks.map(b => ({...b, type: 'bookmark'})));
-  items.sort((a, b) => new Date(b.date) - new Date(a.date));
-  
-  var html = '';
-  if (items.length === 0) html = '<p class="text-slate-500 text-center py-8">No items yet</p>';
-  items.forEach(n => {
-    var icon = n.type === 'note' ? '📝' : n.type === 'highlight' ? '🖍️' : '🔖';
-    var color = n.color ? `highlight-${n.color}` : '';
-    html += `<div class="bg-white rounded-xl border p-4">
-      <div class="flex items-start gap-3">
-        <span class="text-xl">${icon}</span>
-        <div class="flex-1">
-          <div class="font-medium">${n.chapterTitle || 'Chapter'}</div>
-          <div class="text-sm text-slate-500 mb-2">Page ${n.page} • ${new Date(n.date).toLocaleDateString()}</div>
-          ${n.quote ? `<div class="text-sm ${color} px-2 py-1 rounded mb-2">"${n.quote}"</div>` : ''}
-          ${n.text ? `<div class="text-sm">${n.text}</div>` : ''}
-        </div>
-        <button onclick="deleteAnnotation('${n.type}', '${n.id}')" class="text-slate-400 hover:text-red-500">✕</button>
-      </div>
-    </div>`;
-  });
-  document.getElementById('all-notes-list').innerHTML = html;
-}
-
-function deleteAnnotation(type, id) {
-  if (type === 'note') annotations.notes = annotations.notes.filter(n => n.id !== id);
-  if (type === 'highlight') annotations.highlights = annotations.highlights.filter(h => h.id !== id);
-  if (type === 'bookmark') annotations.bookmarks = annotations.bookmarks.filter(b => b.id !== id);
-  saveProgress();
-  filterNotes('all');
-}
-
-// CHAPTER VIEW
-function openChapter(catId, chId) {
-  currentCategory = CATEGORIES.find(c => c.id === catId);
-  currentChapter = currentCategory.chapters.find(c => c.id === chId);
-  studyIndex = 0; quizIndex = 0; quizScore = 0;
+// ========== CHAPTER ==========
+function openChapter(type,catId,chId){
+  var cat=type==='domain'?DOMAINS.find(d=>d.id===catId):BOOKS.find(b=>b.id===catId);
+  currentCategory=cat;currentChapter=cat.chapters.find(c=>c.id===chId);
   showScreen('chapter');
-  document.getElementById('chapter-category').textContent = currentCategory.name;
-  document.getElementById('chapter-title').textContent = currentChapter.num ? `Chapter ${currentChapter.num}: ${currentChapter.title}` : currentChapter.title;
-  updateChapterBadge();
-  switchTab('read');
+  var title=currentChapter.num?`Chapter ${currentChapter.num}: ${currentChapter.title}`:currentChapter.title;
+  document.getElementById('chapter-title').textContent=title;
+  document.getElementById('chapter-subtitle').textContent=cat.name;
+  switchChapterTab('overview');
 }
-
-function updateChapterBadge() {
-  var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
-  document.getElementById('chapter-badge').textContent = p.quizScore > 0 ? `Quiz: ${p.quizScore}%` : '';
+function backFromChapter(){showNav('home');}
+function switchChapterTab(tab){
+  document.querySelectorAll('.tab-btn').forEach(t=>t.classList.toggle('active',t.dataset.tab===tab));
+  document.querySelectorAll('.chapter-tab').forEach(t=>t.classList.add('hidden'));
+  document.getElementById('chapter-tab-'+tab).classList.remove('hidden');
+  if(tab==='overview')renderOverviewTab();
+  else if(tab==='read')renderReadTab();
+  else if(tab==='study')renderStudyTab();
+  else if(tab==='quiz')renderQuizTab();
 }
-
-function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-  document.getElementById('tab-' + tab).classList.remove('hidden');
-  if (tab === 'read') loadReadContent();
-  else if (tab === 'study') loadStudyContent();
-  else if (tab === 'quiz') startQuiz();
+function renderOverviewTab(){
+  var ch=currentChapter;var p=userProgress[currentCategory.id]?.[ch.id]||{};
+  var html=`<div class="main-card p-4 mb-4"><h3 class="font-bold text-lg mb-2">About This Chapter</h3><p class="text-slate-600">${ch.summary||'No summary available.'}</p></div>`;
+  html+=`<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">Your Progress</h3><div class="space-y-3"><div class="flex items-center justify-between"><span>📖 Reading</span>${p.read?'<span class="text-green-600 font-medium">✓ Complete</span>':'<span class="text-slate-400">Not started</span>'}</div><div class="flex items-center justify-between"><span>📝 Study Guide</span>${p.studied?'<span class="text-green-600 font-medium">✓ Complete</span>':'<span class="text-slate-400">Not started</span>'}</div><div class="flex items-center justify-between"><span>✅ Quiz</span>${p.quizScore>=80?`<span class="text-green-600 font-medium">✓ ${p.quizScore}%</span>`:p.quizScore>0?`<span class="text-amber-600">${p.quizScore}%</span>`:'<span class="text-slate-400">Not taken</span>'}</div></div></div>`;
+  if(ch.studyGuide?.objectives){html+=`<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">🎯 Learning Objectives</h3><div class="space-y-2">`;ch.studyGuide.objectives.forEach(obj=>{html+=`<div class="flex items-start gap-2"><span class="text-green-500 mt-1">○</span><span>${obj}</span></div>`;});html+='</div></div>';}
+  if(ch.studyGuide?.keyTerms){html+=`<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">📚 Key Terms</h3><div class="flex flex-wrap gap-2">`;ch.studyGuide.keyTerms.forEach(term=>{html+=`<span class="key-term">${term}</span>`;});html+='</div></div>';}
+  if(ch.studyGuide?.keyScriptures){html+=`<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">📖 Key Scriptures</h3><div class="flex flex-wrap gap-2">`;ch.studyGuide.keyScriptures.forEach(ref=>{html+=`<span class="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm">${ref}</span>`;});html+='</div></div>';}
+  html+=`<div class="grid grid-cols-2 gap-3"><button onclick="switchChapterTab('read')" class="py-3 bg-red-600 text-white rounded-xl font-medium">📖 Start Reading</button><button onclick="switchChapterTab('study')" class="py-3 border border-red-600 text-red-600 rounded-xl font-medium">📝 Study Guide</button></div>`;
+  document.getElementById('chapter-tab-overview').innerHTML=html;
 }
-
-// READ
-function loadReadContent() {
-  document.getElementById('reading-loading').classList.remove('hidden');
-  document.getElementById('reading-preview').classList.add('hidden');
-  
-  if (currentCategory.id === 'fopt' && currentChapter.hasFullText) {
-    var chId = currentChapter.id;
-    if (loadedContent[chId]) return displayReadPreview(loadedContent[chId]);
-    var s = document.createElement('script');
-    s.src = 'chapters/' + chId + '.js';
-    s.onload = () => { var v = 'FOPT_' + chId.toUpperCase(); if (window[v]) { loadedContent[chId] = window[v].content; displayReadPreview(loadedContent[chId]); } };
-    s.onerror = () => { document.getElementById('reading-loading').innerHTML = '<p class="text-red-500">Failed to load chapter file.</p>'; };
-    document.head.appendChild(s);
-  } else if (currentChapter.reading) {
-    displayReadPreview(currentChapter.reading);
-  } else {
-    document.getElementById('reading-loading').innerHTML = '<p class="text-slate-500">No content available.</p>';
-  }
+function renderReadTab(){
+  var ch=currentChapter;
+  var html='<div id="read-loading" class="text-center py-12"><div class="loading-spinner mx-auto mb-4"></div><p class="text-slate-500">Loading...</p></div><div id="read-preview" class="hidden"></div>';
+  document.getElementById('chapter-tab-read').innerHTML=html;
+  if(ch.hasFullText){if(loadedContent[ch.id]){showReadPreview(loadedContent[ch.id]);}else{var s=document.createElement('script');s.src='chapters/'+ch.id+'.js';s.onload=()=>{var v='FOPT_'+ch.id.toUpperCase();if(window[v]){loadedContent[ch.id]=window[v].content;showReadPreview(loadedContent[ch.id]);}};s.onerror=()=>{document.getElementById('read-loading').innerHTML='<p class="text-red-500">Failed to load.</p>';};document.head.appendChild(s);}}
+  else if(ch.reading){showReadPreview(ch.reading);}
+  else{document.getElementById('read-loading').innerHTML='<p class="text-slate-500">No content available.</p>';}
 }
-
-function displayReadPreview(content) {
-  currentReadingContent = content;
-  document.getElementById('reading-loading').classList.add('hidden');
-  document.getElementById('reading-preview').classList.remove('hidden');
-  var preview = content.substring(0, 800).replace(/\n\n/g, '</p><p>');
-  document.getElementById('preview-text').innerHTML = '<p>' + preview + '...</p>';
-  
-  var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
-  if (p.lastPage > 1) {
-    document.getElementById('btn-resume').classList.remove('hidden');
-    document.getElementById('resume-page').textContent = p.lastPage;
-  } else {
-    document.getElementById('btn-resume').classList.add('hidden');
-  }
+function showReadPreview(content){
+  loadedContent[currentChapter.id]=content;
+  document.getElementById('read-loading').classList.add('hidden');
+  document.getElementById('read-preview').classList.remove('hidden');
+  var preview=content.substring(0,1000).replace(/<[^>]+>/g,'');
+  var p=userProgress[currentCategory.id]?.[currentChapter.id]||{};
+  var html=`<div class="main-card p-4 mb-4"><p class="text-slate-600 leading-relaxed">${preview}...</p></div><div class="space-y-3"><button onclick="openReader()" class="w-full py-3 bg-red-600 text-white rounded-xl font-medium">📖 Open Full Reader</button>${p.lastPage>1?`<button onclick="openReader(${p.lastPage})" class="w-full py-3 border border-red-600 text-red-600 rounded-xl font-medium">📑 Resume from Page ${p.lastPage}</button>`:''}<button onclick="markRead()" class="w-full py-3 border rounded-xl text-slate-600">${p.read?'✓ Marked as Read':'Mark as Read'}</button></div>`;
+  document.getElementById('read-preview').innerHTML=html;
 }
+function markRead(){userProgress[currentCategory.id][currentChapter.id].read=true;saveProgress();renderReadTab();}
 
-function markReadComplete() {
-  userProgress[currentCategory.id][currentChapter.id].read = true;
+// ========== STUDY ==========
+function renderStudyTab(){
+  var ch=currentChapter;var sg=ch.studyGuide;
+  if(!sg||!sg.sections){document.getElementById('chapter-tab-study').innerHTML='<p class="text-slate-500">No study guide available.</p>';return;}
+  studyIndex=0;renderStudySection();
+}
+function renderStudySection(){
+  var sg=currentChapter.studyGuide;var section=sg.sections[studyIndex];
+  var html=`<div class="text-sm text-slate-500 mb-2">Section ${studyIndex+1} of ${sg.sections.length}</div><div class="main-card p-4 mb-4"><h3 class="font-bold text-lg mb-3">${section.title}</h3><div class="text-slate-600 leading-relaxed">${section.content}</div></div><div class="flex justify-between"><button onclick="prevStudySection()" class="px-4 py-2 border rounded-lg ${studyIndex===0?'opacity-30':''}" ${studyIndex===0?'disabled':''}>← Previous</button><button onclick="nextStudySection()" class="px-4 py-2 bg-red-600 text-white rounded-lg">${studyIndex===sg.sections.length-1?'Complete ✓':'Next →'}</button></div>`;
+  document.getElementById('chapter-tab-study').innerHTML=html;
+}
+function prevStudySection(){if(studyIndex>0){studyIndex--;renderStudySection();}}
+function nextStudySection(){var sg=currentChapter.studyGuide;if(studyIndex<sg.sections.length-1){studyIndex++;renderStudySection();}else{userProgress[currentCategory.id][currentChapter.id].studied=true;saveProgress();switchChapterTab('quiz');}}
+
+// ========== QUIZ ==========
+function renderQuizTab(){
+  var ch=currentChapter;if(!ch.quizzes||ch.quizzes.length===0){document.getElementById('chapter-tab-quiz').innerHTML='<p class="text-slate-500">No quiz available.</p>';return;}
+  quizIndex=0;quizScore=0;renderQuizQuestion();
+}
+function renderQuizQuestion(){
+  var q=currentChapter.quizzes[quizIndex];
+  var html=`<div class="text-sm text-slate-500 mb-2">Question ${quizIndex+1} of ${currentChapter.quizzes.length}</div><div class="main-card p-4 mb-4"><h3 class="font-bold text-lg mb-4">${q.q}</h3><div class="space-y-3" id="quiz-options">`;
+  ['A','B','C','D'].forEach((l,i)=>{if(q.options[i]){html+=`<button class="quiz-option w-full p-4 border-2 rounded-xl text-left flex items-center gap-3" onclick="selectQuizAnswer(${i})" data-idx="${i}"><span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">${l}</span><span>${q.options[i]}</span></button>`;}});
+  html+=`</div><div id="quiz-feedback" class="hidden mt-4 p-4 rounded-xl"></div></div><button id="quiz-submit-btn" onclick="submitQuizAnswer()" class="w-full py-3 bg-red-600 text-white rounded-xl font-medium disabled:opacity-30" disabled>Check Answer</button><button id="quiz-next-btn" onclick="nextQuizQuestion()" class="w-full py-3 bg-green-600 text-white rounded-xl font-medium hidden">Next →</button>`;
+  document.getElementById('chapter-tab-quiz').innerHTML=html;
+}
+function selectQuizAnswer(i){selectedQuizAnswer=i;document.querySelectorAll('.quiz-option').forEach((b,idx)=>b.classList.toggle('selected',idx===i));document.getElementById('quiz-submit-btn').disabled=false;}
+function submitQuizAnswer(){
+  var q=currentChapter.quizzes[quizIndex];var correct=selectedQuizAnswer===q.correct;if(correct)quizScore++;
+  document.querySelectorAll('.quiz-option').forEach(b=>{var idx=parseInt(b.dataset.idx);b.onclick=null;if(idx===q.correct)b.classList.add('correct');else if(idx===selectedQuizAnswer&&!correct)b.classList.add('incorrect');});
+  var fb=document.getElementById('quiz-feedback');fb.classList.remove('hidden');fb.className='mt-4 p-4 rounded-xl '+(correct?'bg-green-50 border border-green-200':'bg-red-50 border border-red-200');fb.innerHTML=`<div class="font-medium ${correct?'text-green-800':'text-red-800'}">${correct?'✓ Correct!':'✗ Incorrect'}</div><div class="text-sm mt-1">${q.explanation}</div>`;
+  document.getElementById('quiz-submit-btn').classList.add('hidden');
+  document.getElementById('quiz-next-btn').classList.remove('hidden');
+  document.getElementById('quiz-next-btn').textContent=quizIndex===currentChapter.quizzes.length-1?'See Results':'Next →';
+}
+function nextQuizQuestion(){if(quizIndex<currentChapter.quizzes.length-1){quizIndex++;selectedQuizAnswer=null;renderQuizQuestion();}else{showQuizResults();}}
+function showQuizResults(){
+  var total=currentChapter.quizzes.length;var pct=Math.round((quizScore/total)*100);var passed=pct>=80;
+  var best=userProgress[currentCategory.id][currentChapter.id].quizScore||0;
+  if(pct>best)userProgress[currentCategory.id][currentChapter.id].quizScore=pct;
   saveProgress();
-  alert('Marked as read! ✓');
+  var html=`<div class="text-center py-8"><div class="text-6xl mb-4">${passed?'🎉':'📚'}</div><h2 class="text-2xl font-bold mb-2">${passed?'Great Job!':'Keep Studying'}</h2><p class="text-slate-600 mb-6">${passed?`You passed with ${pct}%!`:`You need 80% to pass. You got ${pct}%.`}</p><div class="flex justify-center gap-4 mb-6"><div class="bg-green-50 rounded-xl p-4"><div class="text-3xl font-bold text-green-600">${quizScore}</div><div class="text-sm">Correct</div></div><div class="bg-red-50 rounded-xl p-4"><div class="text-3xl font-bold text-red-600">${total-quizScore}</div><div class="text-sm">Wrong</div></div></div><div class="flex gap-3"><button onclick="renderQuizTab()" class="flex-1 py-3 border rounded-xl">Retake</button><button onclick="switchChapterTab('overview')" class="flex-1 py-3 bg-red-600 text-white rounded-xl">Done</button></div></div>`;
+  document.getElementById('chapter-tab-quiz').innerHTML=html;
 }
 
-// READER
-function openReader() {
+
+// ========== READER ==========
+function openReader(startPage){
   showScreen('reader');
-  paginateContent();
-  currentPageNum = 1;
-  applyReaderSettings();
-  document.getElementById('reader-title').textContent = currentChapter.num ? `Chapter ${currentChapter.num}` : currentChapter.title;
-  renderPage();
-  setupTextSelection();
-}
-
-function resumeReading() {
-  var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
-  openReader();
-  currentPageNum = p.lastPage || 1;
-  renderPage();
-}
-
-function closeReader() {
-  userProgress[currentCategory.id][currentChapter.id].lastPage = currentPageNum;
+  var content=loadedContent[currentChapter.id]||currentChapter.reading||'';
+  var paras=content.split(/\n\n+/);contentPages=[];var currentPageContent='';var charCount=0;var CHARS_PER_PAGE=2500;
+  paras.forEach(p=>{var cleanP=p.replace(/<[^>]+>/g,'');if(charCount+cleanP.length>CHARS_PER_PAGE&&currentPageContent){contentPages.push(currentPageContent);currentPageContent='';charCount=0;}currentPageContent+='<p class="mb-4">'+p.replace(/\n/g,'<br>')+'</p>';charCount+=cleanP.length;});
+  if(currentPageContent)contentPages.push(currentPageContent);
+  if(contentPages.length===0)contentPages=['<p>No content</p>'];
+  currentPage=startPage||1;
+  document.getElementById('total-pages').textContent=contentPages.length;
+  var title=currentChapter.num?`Ch. ${currentChapter.num}`:currentChapter.title;
+  document.getElementById('reader-title-bar').textContent=title;
+  applyReaderSettings();renderReaderPage();loadVoices();setupTextSelection();
+  userProgress.lastRead={catId:currentCategory.id,chId:currentChapter.id,title:currentChapter.title,page:currentPage,icon:currentCategory.icon};
   saveProgress();
-  showScreen('chapter');
+}
+function closeReader(){stopTTS();userProgress[currentCategory.id][currentChapter.id].lastPage=currentPage;saveProgress();showScreen('chapter');}
+function renderReaderPage(){
+  var page=contentPages[currentPage-1]||'';
+  var chapterHighlights=annotations.highlights.filter(h=>h.chapterId===currentChapter.id&&h.page===currentPage);
+  chapterHighlights.forEach(h=>{if(h.quote){var re=new RegExp(h.quote.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'gi');page=page.replace(re,`<span class="highlight-${h.color}">${h.quote}</span>`);}});
+  document.getElementById('reader-page-content').innerHTML=page;
+  document.getElementById('page-input').value=currentPage;
+  document.getElementById('reader-page-indicator').textContent=`Page ${currentPage} of ${contentPages.length}`;
+  document.getElementById('btn-prev').disabled=currentPage<=1;
+  document.getElementById('btn-next').disabled=currentPage>=contentPages.length;
+  document.getElementById('reading-progress-bar').style.width=((currentPage/contentPages.length)*100)+'%';
+  var hasBookmark=annotations.bookmarks.some(b=>b.chapterId===currentChapter.id&&b.page===currentPage);
+  document.getElementById('btn-bookmark').innerHTML=hasBookmark?'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>':'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+}
+function prevPage(){if(currentPage>1){currentPage--;renderReaderPage();}}
+function nextPage(){if(currentPage<contentPages.length){currentPage++;renderReaderPage();}}
+document.getElementById('page-input').onchange=function(){var p=parseInt(this.value);if(p>=1&&p<=contentPages.length){currentPage=p;renderReaderPage();}};
+function resumeLastReading(){
+  var lr=userProgress.lastRead;if(!lr)return;
+  var cat=[...DOMAINS,...BOOKS].find(c=>c.id===lr.catId);if(!cat)return;
+  currentCategory=cat;currentChapter=cat.chapters.find(c=>c.id===lr.chId);if(!currentChapter)return;
+  if(currentChapter.hasFullText&&!loadedContent[currentChapter.id]){
+    var s=document.createElement('script');s.src='chapters/'+currentChapter.id+'.js';
+    s.onload=()=>{var v='FOPT_'+currentChapter.id.toUpperCase();if(window[v]){loadedContent[currentChapter.id]=window[v].content;openReader(lr.page);}};
+    document.head.appendChild(s);
+  }else{openReader(lr.page);}
 }
 
-function paginateContent() {
-  var text = currentReadingContent;
-  // Split into paragraphs
-  var paras = text.split(/\n\n+/);
-  contentPages = [];
-  var currentPage = '';
-  var charCount = 0;
-  
-  paras.forEach(p => {
-    if (charCount + p.length > CHARS_PER_PAGE && currentPage) {
-      contentPages.push(currentPage);
-      currentPage = '';
-      charCount = 0;
-    }
-    currentPage += '<p>' + p.replace(/\n/g, '<br>') + '</p>';
-    charCount += p.length;
-  });
-  if (currentPage) contentPages.push(currentPage);
-  if (contentPages.length === 0) contentPages = ['<p>No content</p>'];
-  
-  document.getElementById('total-pages').textContent = contentPages.length;
+// ========== READER SETTINGS ==========
+function toggleReaderSettings(){document.getElementById('reader-settings-panel').classList.toggle('hidden');}
+function setTheme(t){readerSettings.theme=t;localStorage.setItem('readerSettings',JSON.stringify(readerSettings));applyReaderSettings();}
+function setFont(f){readerSettings.font=f;localStorage.setItem('readerSettings',JSON.stringify(readerSettings));applyReaderSettings();}
+function setFontSize(s){readerSettings.fontSize=parseInt(s);document.getElementById('size-display').textContent=s+'px';localStorage.setItem('readerSettings',JSON.stringify(readerSettings));applyReaderSettings();}
+function setVoice(v){readerSettings.voice=v;localStorage.setItem('readerSettings',JSON.stringify(readerSettings));}
+function applyReaderSettings(){
+  var c=document.getElementById('reader-container');c.className=`reader-container theme-${readerSettings.theme} font-${readerSettings.font}`;
+  document.getElementById('reader-page-content').style.fontSize=readerSettings.fontSize+'px';
+  document.getElementById('font-size-slider').value=readerSettings.fontSize;
+  document.getElementById('size-display').textContent=readerSettings.fontSize+'px';
+  var header=document.getElementById('reader-header');var footer=document.getElementById('reader-footer');
+  if(readerSettings.theme==='dark'){header.style.background='rgba(30,30,30,0.95)';footer.style.background='rgba(30,30,30,0.95)';}
+  else{header.style.background='rgba(255,255,255,0.95)';footer.style.background='rgba(255,255,255,0.95)';}
 }
 
-function renderPage() {
-  var page = contentPages[currentPageNum - 1] || '';
-  // Apply highlights
-  var chapterHighlights = annotations.highlights.filter(h => h.chapterId === currentChapter.id && h.page === currentPageNum);
-  chapterHighlights.forEach(h => {
-    if (h.quote) {
-      var regex = new RegExp(escapeRegex(h.quote), 'gi');
-      page = page.replace(regex, `<span class="highlight-${h.color}" data-highlight-id="${h.id}">${h.quote}</span>`);
-    }
-  });
-  
-  document.getElementById('reader-page').innerHTML = page;
-  document.getElementById('page-input').value = currentPageNum;
-  document.getElementById('reader-page-info').textContent = `Page ${currentPageNum} of ${contentPages.length}`;
-  document.getElementById('btn-prev-page').disabled = currentPageNum <= 1;
-  document.getElementById('btn-next-page').disabled = currentPageNum >= contentPages.length;
-  document.getElementById('reading-progress').style.width = ((currentPageNum / contentPages.length) * 100) + '%';
-  
-  // Check bookmark
-  var hasBookmark = annotations.bookmarks.some(b => b.chapterId === currentChapter.id && b.page === currentPageNum);
-  document.getElementById('btn-bookmark').innerHTML = hasBookmark ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
-  
-  renderChapterNotes();
+// ========== TTS ==========
+function toggleTTS(){if(ttsPlaying){stopTTS();}else{startTTS();}}
+function startTTS(){
+  var text=document.getElementById('reader-page-content').innerText;if(!text)return;
+  ttsUtterance=new SpeechSynthesisUtterance(text);
+  var voices=speechSynthesis.getVoices();
+  if(readerSettings.voice&&voices[readerSettings.voice]){ttsUtterance.voice=voices[readerSettings.voice];}
+  ttsUtterance.rate=parseFloat(document.getElementById('tts-speed').value);
+  ttsUtterance.onend=()=>{if(currentPage<contentPages.length){currentPage++;renderReaderPage();startTTS();}else{stopTTS();}};
+  speechSynthesis.speak(ttsUtterance);ttsPlaying=true;
+  document.getElementById('tts-play-icon').classList.add('hidden');
+  document.getElementById('tts-pause-icon').classList.remove('hidden');
 }
+function stopTTS(){speechSynthesis.cancel();ttsPlaying=false;document.getElementById('tts-play-icon').classList.remove('hidden');document.getElementById('tts-pause-icon').classList.add('hidden');}
+function ttsRewind(){prevPage();if(ttsPlaying){stopTTS();startTTS();}}
+function ttsForward(){nextPage();if(ttsPlaying){stopTTS();startTTS();}}
+function updateTTSSpeed(){if(ttsPlaying){stopTTS();startTTS();}}
 
-function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-
-function prevPage() { if (currentPageNum > 1) { currentPageNum--; renderPage(); } }
-function nextPage() { if (currentPageNum < contentPages.length) { currentPageNum++; renderPage(); } }
-function goToPage(n) { n = parseInt(n); if (n >= 1 && n <= contentPages.length) { currentPageNum = n; renderPage(); } }
-
-// Text Selection for Highlighting
-function setupTextSelection() {
-  document.getElementById('reader-page').addEventListener('mouseup', handleSelection);
-  document.getElementById('reader-page').addEventListener('touchend', handleSelection);
+// ========== HIGHLIGHTING ==========
+function setupTextSelection(){
+  document.getElementById('reader-page-content').addEventListener('mouseup',handleSelection);
+  document.getElementById('reader-page-content').addEventListener('touchend',handleSelection);
 }
-
-function handleSelection(e) {
-  var sel = window.getSelection();
-  var text = sel.toString().trim();
-  if (text.length > 0) {
-    pendingSelection = text;
-    var range = sel.getRangeAt(0);
-    var rect = range.getBoundingClientRect();
-    var popup = document.getElementById('selection-popup');
-    popup.style.top = (rect.top + window.scrollY - 50) + 'px';
-    popup.style.left = (rect.left + rect.width/2 - 80) + 'px';
+function handleSelection(){
+  var sel=window.getSelection();var text=sel.toString().trim();
+  if(text.length>3){
+    pendingSelection=text;var range=sel.getRangeAt(0);var rect=range.getBoundingClientRect();
+    var popup=document.getElementById('selection-popup');
+    popup.style.top=(rect.top+window.scrollY-50)+'px';
+    popup.style.left=(rect.left+rect.width/2-70)+'px';
     popup.classList.add('show');
-  } else {
-    document.getElementById('selection-popup').classList.remove('show');
-  }
+  }else{document.getElementById('selection-popup').classList.remove('show');}
 }
-
-function addHighlight(color) {
-  if (!pendingSelection) return;
-  annotations.highlights.push({
-    id: Date.now().toString(),
-    chapterId: currentChapter.id,
-    chapterTitle: currentChapter.title,
-    page: currentPageNum,
-    quote: pendingSelection,
-    color: color,
-    date: new Date().toISOString()
-  });
-  saveProgress();
-  document.getElementById('selection-popup').classList.remove('show');
-  window.getSelection().removeAllRanges();
-  renderPage();
+function addHighlight(color){
+  if(!pendingSelection)return;
+  annotations.highlights.push({id:Date.now().toString(),chapterId:currentChapter.id,chapterTitle:currentChapter.title,page:currentPage,quote:pendingSelection,color:color,date:new Date().toISOString()});
+  saveProgress();window.getSelection().removeAllRanges();
+  document.getElementById('selection-popup').classList.remove('show');renderReaderPage();
 }
-
-function addNoteToSelection() {
-  if (!pendingSelection) return;
-  document.getElementById('note-modal-quote').textContent = '"' + pendingSelection.substring(0, 100) + (pendingSelection.length > 100 ? '...' : '') + '"';
-  document.getElementById('note-modal-text').value = '';
+function addNoteToSelection(){
+  document.getElementById('note-modal-quote').textContent='"'+(pendingSelection||'').substring(0,100)+'..."';
+  document.getElementById('note-modal-text').value='';
   document.getElementById('note-modal').classList.remove('hidden');
   document.getElementById('selection-popup').classList.remove('show');
 }
-
-function addPageNote() {
-  pendingSelection = '';
-  document.getElementById('note-modal-quote').textContent = 'Note for Page ' + currentPageNum;
-  document.getElementById('note-modal-text').value = '';
-  document.getElementById('note-modal').classList.remove('hidden');
+function closeNoteModal(){document.getElementById('note-modal').classList.add('hidden');}
+function saveNote(){
+  var text=document.getElementById('note-modal-text').value.trim();if(!text)return;
+  annotations.notes.push({id:Date.now().toString(),chapterId:currentChapter.id,chapterTitle:currentChapter.title,page:currentPage,quote:pendingSelection||null,text:text,date:new Date().toISOString()});
+  saveProgress();closeNoteModal();pendingSelection='';
+}
+function toggleBookmark(){
+  var idx=annotations.bookmarks.findIndex(b=>b.chapterId===currentChapter.id&&b.page===currentPage);
+  if(idx>=0){annotations.bookmarks.splice(idx,1);}
+  else{annotations.bookmarks.push({id:Date.now().toString(),chapterId:currentChapter.id,chapterTitle:currentChapter.title,page:currentPage,date:new Date().toISOString()});}
+  saveProgress();renderReaderPage();
 }
 
-function closeNoteModal() {
-  document.getElementById('note-modal').classList.add('hidden');
-  pendingSelection = null;
-}
-
-function saveNote() {
-  var text = document.getElementById('note-modal-text').value.trim();
-  if (!text) return;
-  annotations.notes.push({
-    id: Date.now().toString(),
-    chapterId: currentChapter.id,
-    chapterTitle: currentChapter.title,
-    page: currentPageNum,
-    quote: pendingSelection || null,
-    text: text,
-    date: new Date().toISOString()
-  });
-  saveProgress();
-  closeNoteModal();
-  renderPage();
-}
-
-// Bookmarks
-function toggleBookmark() {
-  var existing = annotations.bookmarks.findIndex(b => b.chapterId === currentChapter.id && b.page === currentPageNum);
-  if (existing >= 0) {
-    annotations.bookmarks.splice(existing, 1);
-  } else {
-    annotations.bookmarks.push({
-      id: Date.now().toString(),
-      chapterId: currentChapter.id,
-      chapterTitle: currentChapter.title,
-      page: currentPageNum,
-      date: new Date().toISOString()
-    });
-  }
-  saveProgress();
-  renderPage();
-}
-
-// Reader panels
-function toggleReaderNotes() {
-  document.getElementById('notes-panel').classList.toggle('open');
-  document.getElementById('reader-overlay').classList.toggle('hidden', !document.getElementById('notes-panel').classList.contains('open'));
-}
-
-function toggleTOC() {
-  document.getElementById('toc-panel').classList.toggle('open');
-  document.getElementById('reader-overlay').classList.toggle('hidden', !document.getElementById('toc-panel').classList.contains('open'));
-  renderTOC();
-}
-
-function toggleSettings() {
-  document.getElementById('settings-drawer').classList.toggle('open');
-}
-
-function closeAllPanels() {
-  document.getElementById('notes-panel').classList.remove('open');
-  document.getElementById('toc-panel').classList.remove('open');
-  document.getElementById('reader-overlay').classList.add('hidden');
-}
-
-function renderChapterNotes() {
-  var notes = annotations.notes.filter(n => n.chapterId === currentChapter.id);
-  var highlights = annotations.highlights.filter(h => h.chapterId === currentChapter.id);
-  var all = [...notes.map(n => ({...n, type: 'note'})), ...highlights.map(h => ({...h, type: 'highlight'}))].sort((a, b) => a.page - b.page);
-  
-  if (all.length === 0) {
-    document.getElementById('chapter-notes-list').innerHTML = '<p class="text-slate-500 text-center">No notes yet. Select text to highlight or add notes.</p>';
-    return;
-  }
-  
-  var html = '';
-  all.forEach(n => {
-    html += `<div class="note-card cursor-pointer" onclick="goToPage(${n.page})">
-      <div class="text-xs text-slate-500 mb-1">Page ${n.page}</div>
-      ${n.quote ? `<div class="text-sm highlight-${n.color || 'yellow'} px-1 rounded">"${n.quote.substring(0, 60)}..."</div>` : ''}
-      ${n.text ? `<div class="text-sm mt-1">${n.text}</div>` : ''}
-    </div>`;
-  });
-  document.getElementById('chapter-notes-list').innerHTML = html;
-}
-
-function renderTOC() {
-  var bookmarks = annotations.bookmarks.filter(b => b.chapterId === currentChapter.id);
-  var html = '<div class="mb-4"><div class="font-medium text-sm text-slate-500 mb-2">Pages</div>';
-  for (var i = 1; i <= contentPages.length; i++) {
-    var hasBookmark = bookmarks.some(b => b.page === i);
-    html += `<div class="flex items-center justify-between py-2 px-3 rounded hover:bg-slate-100 cursor-pointer ${i === currentPageNum ? 'bg-slate-100' : ''}" onclick="goToPage(${i}); toggleTOC();">
-      <span>Page ${i}</span>
-      ${hasBookmark ? '<span class="text-red-500">🔖</span>' : ''}
-    </div>`;
-  }
-  html += '</div>';
-  document.getElementById('toc-list').innerHTML = html;
-}
-
-// Reader Settings
-function setTheme(t) { readerSettings.theme = t; saveReaderSettings(); applyReaderSettings(); }
-function setFont(f) { readerSettings.font = f; saveReaderSettings(); applyReaderSettings(); }
-function adjustFontSize(d) { readerSettings.fontSize = Math.max(14, Math.min(28, readerSettings.fontSize + d)); saveReaderSettings(); applyReaderSettings(); }
-function setLineHeight(h) { readerSettings.lineHeight = h; saveReaderSettings(); applyReaderSettings(); }
-
-function applyReaderSettings() {
-  var c = document.getElementById('reader-container');
-  c.className = `reader-container theme-${readerSettings.theme} font-${readerSettings.font}`;
-  var p = document.getElementById('reader-page');
-  p.style.fontSize = readerSettings.fontSize + 'px';
-  p.style.lineHeight = readerSettings.lineHeight;
-  document.getElementById('font-size-display').textContent = readerSettings.fontSize + 'px';
-  
-  // Update header/nav colors for dark themes
-  var header = document.getElementById('reader-header');
-  var nav = document.getElementById('page-nav');
-  if (readerSettings.theme === 'dark' || readerSettings.theme === 'night') {
-    header.style.background = 'rgba(30,30,30,0.95)';
-    header.style.borderColor = '#404040';
-    nav.style.background = 'rgba(30,30,30,0.95)';
-  } else {
-    header.style.background = 'rgba(255,255,255,0.95)';
-    header.style.borderColor = '#e5e7eb';
-    nav.style.background = 'rgba(255,255,255,0.95)';
-  }
-}
-
-// STUDY
-function loadStudyContent() {
-  var sg = currentCategory.id === 'fopt' ? FOPT_DATA[currentChapter.id]?.studyGuide : currentChapter.studyGuide;
-  if (!sg?.length) { document.getElementById('study-content').innerHTML = '<p class="text-slate-500">No study guide.</p>'; return; }
-  studyIndex = 0;
-  window._sg = sg;
-  renderStudyLesson();
-}
-
-function renderStudyLesson() {
-  var sg = window._sg;
-  var l = sg[studyIndex];
-  document.getElementById('study-content').innerHTML = `<div class="text-sm text-slate-500 mb-2">Part ${studyIndex+1} of ${sg.length}</div><h2 class="text-xl font-bold mb-4">${l.title}</h2><div class="lesson-content">${l.content}</div>`;
-  document.getElementById('study-prev').classList.toggle('hidden', studyIndex === 0);
-  document.getElementById('study-next').textContent = studyIndex === sg.length - 1 ? 'Complete ✓' : 'Next →';
-}
-
-document.getElementById('study-prev').onclick = () => { if (studyIndex > 0) { studyIndex--; renderStudyLesson(); } };
-document.getElementById('study-next').onclick = () => {
-  var sg = window._sg;
-  if (studyIndex < sg.length - 1) { studyIndex++; renderStudyLesson(); }
-  else { userProgress[currentCategory.id][currentChapter.id].studied = true; saveProgress(); switchTab('quiz'); }
-};
-
-// QUIZ
-function startQuiz() {
-  var q = currentCategory.id === 'fopt' ? FOPT_DATA[currentChapter.id]?.quizzes : currentChapter.quizzes;
-  if (!q?.length) { document.getElementById('quiz-container').innerHTML = '<p class="text-slate-500">No quiz.</p>'; return; }
-  window._q = q;
-  quizIndex = 0; quizScore = 0;
-  document.getElementById('quiz-container').classList.remove('hidden');
-  document.getElementById('quiz-results').classList.add('hidden');
-  renderQuizQuestion();
-}
-
-function renderQuizQuestion() {
-  var q = window._q[quizIndex];
-  document.getElementById('quiz-counter').textContent = `Question ${quizIndex+1} of ${window._q.length}`;
-  document.getElementById('quiz-question').textContent = q.q;
-  var html = '';
-  ['A','B','C','D'].forEach((l, i) => {
-    if (q.options[i]) html += `<button class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" onclick="selectAnswer(${i})" data-index="${i}"><span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">${l}</span><span>${q.options[i]}</span></button>`;
-  });
-  document.getElementById('quiz-options').innerHTML = html;
-  document.getElementById('quiz-feedback').classList.add('hidden');
-  document.getElementById('quiz-submit').classList.remove('hidden');
-  document.getElementById('quiz-submit').disabled = true;
-  document.getElementById('quiz-next').classList.add('hidden');
-  selectedAnswer = null;
-}
-
-function selectAnswer(i) {
-  selectedAnswer = i;
-  document.querySelectorAll('.quiz-option').forEach((b, idx) => b.classList.toggle('selected', idx === i));
-  document.getElementById('quiz-submit').disabled = false;
-}
-
-document.getElementById('quiz-submit').onclick = () => {
-  var q = window._q[quizIndex];
-  var correct = selectedAnswer === q.correct;
-  if (correct) quizScore++;
-  document.querySelectorAll('.quiz-option').forEach(b => {
-    var idx = parseInt(b.dataset.index);
-    b.onclick = null;
-    if (idx === q.correct) b.classList.add('correct');
-    else if (idx === selectedAnswer && !correct) b.classList.add('incorrect');
-  });
-  var fb = document.getElementById('quiz-feedback');
-  fb.classList.remove('hidden');
-  fb.className = 'mt-6 p-4 rounded-lg ' + (correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200');
-  fb.innerHTML = `<div class="font-medium ${correct ? 'text-green-800">✓ Correct!' : 'text-red-800">✗ Incorrect'}</div><div class="text-sm mt-1">${q.explanation}</div>`;
-  document.getElementById('quiz-submit').classList.add('hidden');
-  document.getElementById('quiz-next').classList.remove('hidden');
-  document.getElementById('quiz-next').textContent = quizIndex === window._q.length - 1 ? 'See Results' : 'Next →';
-};
-
-document.getElementById('quiz-next').onclick = () => {
-  if (quizIndex < window._q.length - 1) { quizIndex++; renderQuizQuestion(); }
-  else { showQuizResults(); }
-};
-
-async function showQuizResults() {
-  var pct = Math.round((quizScore / window._q.length) * 100);
-  var best = userProgress[currentCategory.id][currentChapter.id].quizScore || 0;
-  if (pct > best) userProgress[currentCategory.id][currentChapter.id].quizScore = pct;
-  await saveProgress();
-  document.getElementById('quiz-container').classList.add('hidden');
-  document.getElementById('quiz-results').classList.remove('hidden');
-  document.getElementById('results-icon').textContent = pct >= 80 ? '🎉' : '📚';
-  document.getElementById('results-title').textContent = pct >= 80 ? 'Great Job!' : 'Keep Studying';
-  document.getElementById('results-message').textContent = pct >= 80 ? `You passed with ${pct}%!` : `Need 80%. You got ${pct}%.`;
-  document.getElementById('results-correct').textContent = quizScore;
-  document.getElementById('results-incorrect').textContent = window._q.length - quizScore;
-  document.getElementById('results-percent').textContent = pct + '%';
-}
-
-function retakeQuiz() { startQuiz(); }
-
-// Events
-document.getElementById('btn-login').onclick = handleLogin;
-document.getElementById('btn-register').onclick = handleRegister;
-document.getElementById('btn-logout').onclick = handleLogout;
-document.getElementById('chapter-back').onclick = backToApp;
+// ========== INIT ==========
+document.getElementById('btn-login').onclick=handleLogin;
+document.getElementById('btn-register').onclick=handleRegister;
 </script>
 </body>
 </html>
