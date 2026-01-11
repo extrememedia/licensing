@@ -184,7 +184,6 @@
     </main>
   </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // SIMPLE TOGGLE - THIS RUNS IMMEDIATELY
 (function() {
@@ -208,16 +207,27 @@
   }
 })();
 
-// SUPABASE CONFIG
+// Load Supabase dynamically
+var supabase = null;
 var SUPABASE_URL = 'https://mvuvgecqxwuqfshqbtjf.supabase.co';
 var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXZnZWNxeHd1cWZzaHFidGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODQ4MTUsImV4cCI6MjA4MzY2MDgxNX0.6OezNuwN5Ip2a_Xw_SsuxoB80nn3WP7D5dnhAEE9A9o';
 
-var supabase = null;
-try {
-  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} catch(e) {
-  console.error('Supabase failed:', e);
+function initSupabase() {
+  if (window.supabase && window.supabase.createClient) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    console.log('Supabase ready!');
+    checkExistingSession();
+  } else {
+    console.error('Supabase not available');
+  }
 }
+
+// Load script
+var script = document.createElement('script');
+script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';
+script.onload = initSupabase;
+script.onerror = function() { console.error('Failed to load Supabase'); };
+document.head.appendChild(script);
 
 // COURSE DATA
 var DOMAINS = [
@@ -365,6 +375,11 @@ async function handleRegister() {
   if (!name || !email || !password) { showError('Please fill all fields'); return; }
   if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
   
+  if (!supabase) {
+    showError('Cloud service unavailable. Please refresh the page and try again.');
+    return;
+  }
+  
   hideError();
   showLoading(true);
   
@@ -392,6 +407,11 @@ async function handleLogin() {
   var password = document.getElementById('login-password').value;
   
   if (!email || !password) { showError('Please fill all fields'); return; }
+  
+  if (!supabase) {
+    showError('Cloud service unavailable. Please refresh the page and try again.');
+    return;
+  }
   
   hideError();
   showLoading(true);
@@ -718,15 +738,19 @@ document.getElementById('btn-retake').onclick = retakeQuiz;
 document.getElementById('btn-continue').onclick = backToApp;
 
 // CHECK SESSION ON LOAD
-if (supabase) {
-  supabase.auth.getSession().then(function(result) {
-    if (result.data.session) {
-      currentUser = result.data.session.user;
-      loadProgress().then(function() {
-        showApp();
-      });
-    }
-  });
+function checkExistingSession() {
+  if (supabase) {
+    supabase.auth.getSession().then(function(result) {
+      if (result.data.session) {
+        currentUser = result.data.session.user;
+        loadProgress().then(function() {
+          showApp();
+        });
+      }
+    }).catch(function(e) {
+      console.error('Session check error:', e);
+    });
+  }
 }
 </script>
 </body>
