@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Foursquare Licensing Tracker</title>
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
@@ -44,8 +43,8 @@
             <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
             <input type="password" id="login-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
           </div>
-          <button onclick="handleLogin()" id="btn-login" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
-          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <button type="button" onclick="showRegister()" class="text-blue-600 hover:underline">Create one</button></p>
+          <button id="btn-login" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
+          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <a href="#" id="link-register" class="text-blue-600 hover:underline">Create one</a></p>
         </div>
 
         <div id="register-form" class="hidden">
@@ -61,8 +60,8 @@
             <label class="block text-sm font-medium text-slate-700 mb-1">Password (min 6 characters)</label>
             <input type="password" id="reg-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
           </div>
-          <button onclick="handleRegister()" id="btn-register" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
-          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <button type="button" onclick="showLogin()" class="text-blue-600 hover:underline">Sign in</button></p>
+          <button id="btn-register" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
+          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <a href="#" id="link-login" class="text-blue-600 hover:underline">Sign in</a></p>
         </div>
 
         <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
@@ -89,7 +88,7 @@
         </div>
         <div class="flex items-center gap-4">
           <span id="save-status" class="text-xs text-green-300 hidden">✓ Saved</span>
-          <button onclick="handleLogout()" class="text-blue-200 hover:text-white text-sm">Sign Out</button>
+          <button id="btn-logout" class="text-blue-200 hover:text-white text-sm">Sign Out</button>
         </div>
       </div>
     </header>
@@ -118,7 +117,7 @@
   <div id="screen-lesson" class="screen">
     <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
       <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <button onclick="backToApp()" class="flex items-center gap-2 text-blue-200 hover:text-white">← Back</button>
+        <button id="lesson-back" class="flex items-center gap-2 text-blue-200 hover:text-white">← Back</button>
         <div class="text-center">
           <div class="text-sm text-blue-200" id="lesson-domain-label"></div>
           <div class="font-bold" id="lesson-title"></div>
@@ -130,8 +129,8 @@
       <div class="bg-white rounded-xl shadow-sm border p-6 md:p-8">
         <div id="lesson-content" class="lesson-content text-slate-700"></div>
         <div class="mt-8 pt-6 border-t flex justify-between">
-          <button onclick="prevLesson()" id="btn-prev" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50 hidden">← Previous</button>
-          <button onclick="nextLesson()" id="btn-next" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ml-auto">Continue →</button>
+          <button id="btn-prev" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50 hidden">← Previous</button>
+          <button id="btn-next" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ml-auto">Continue →</button>
         </div>
       </div>
     </main>
@@ -141,7 +140,7 @@
   <div id="screen-quiz" class="screen">
     <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
       <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <button onclick="backToApp()" class="flex items-center gap-2 text-blue-200 hover:text-white">← Exit</button>
+        <button id="quiz-back" class="flex items-center gap-2 text-blue-200 hover:text-white">← Exit</button>
         <div class="text-center">
           <div class="text-sm text-blue-200" id="quiz-domain-label"></div>
           <div class="font-bold">Knowledge Check</div>
@@ -155,8 +154,8 @@
         <div id="quiz-options" class="space-y-3"></div>
         <div id="quiz-feedback" class="hidden mt-6 p-4 rounded-lg"></div>
         <div class="mt-8 pt-6 border-t flex justify-end">
-          <button onclick="submitAnswer()" id="btn-submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" disabled>Check Answer</button>
-          <button onclick="nextQuestion()" id="btn-next-q" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 hidden">Next →</button>
+          <button id="btn-submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" disabled>Check Answer</button>
+          <button id="btn-next-q" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 hidden">Next →</button>
         </div>
       </div>
     </main>
@@ -178,19 +177,27 @@
           <div class="bg-blue-50 rounded-xl p-4"><div class="text-3xl font-bold text-blue-600" id="results-percent">0%</div><div class="text-sm text-blue-700">Score</div></div>
         </div>
         <div class="flex justify-center gap-4">
-          <button onclick="retakeQuiz()" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50">Retake Quiz</button>
-          <button onclick="backToApp()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Continue</button>
+          <button id="btn-retake" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50">Retake Quiz</button>
+          <button id="btn-continue" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Continue</button>
         </div>
       </div>
     </main>
   </div>
 
-<script>
-// SUPABASE CONFIG - EMBEDDED
+  <!-- Load Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <script>
+// SUPABASE CONFIG
 const SUPABASE_URL = 'https://mvuvgecqxwuqfshqbtjf.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXZnZWNxeHd1cWZzaHFidGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODQ4MTUsImV4cCI6MjA4MzY2MDgxNX0.6OezNuwN5Ip2a_Xw_SsuxoB80nn3WP7D5dnhAEE9A9o';
 
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) {
+  console.error('Supabase init failed:', e);
+}
 
 // COURSE DATA
 const DOMAINS = [
@@ -292,34 +299,59 @@ let currentQuizIndex = 0;
 let selectedAnswer = null;
 let quizScore = 0;
 
-// INIT
-document.addEventListener('DOMContentLoaded', async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    currentUser = session.user;
-    await loadProgress();
-    showApp();
-  }
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up event listeners
+  document.getElementById('link-register').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('register-form').classList.remove('hidden');
+    document.getElementById('login-error').classList.add('hidden');
+  });
+
+  document.getElementById('link-login').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('register-form').classList.add('hidden');
+    document.getElementById('login-form').classList.remove('hidden');
+    document.getElementById('login-error').classList.add('hidden');
+  });
+
+  document.getElementById('btn-login').addEventListener('click', handleLogin);
+  document.getElementById('btn-register').addEventListener('click', handleRegister);
+  document.getElementById('btn-logout').addEventListener('click', handleLogout);
+  document.getElementById('lesson-back').addEventListener('click', backToApp);
+  document.getElementById('quiz-back').addEventListener('click', backToApp);
+  document.getElementById('btn-prev').addEventListener('click', prevLesson);
+  document.getElementById('btn-next').addEventListener('click', nextLesson);
+  document.getElementById('btn-submit').addEventListener('click', submitAnswer);
+  document.getElementById('btn-next-q').addEventListener('click', nextQuestion);
+  document.getElementById('btn-retake').addEventListener('click', retakeQuiz);
+  document.getElementById('btn-continue').addEventListener('click', backToApp);
+
+  // Check for existing session
+  checkSession();
 });
 
-// AUTH
-function showRegister() {
-  console.log('showRegister called');
-  document.getElementById('login-form').classList.add('hidden');
-  document.getElementById('register-form').classList.remove('hidden');
-  document.getElementById('login-error').classList.add('hidden');
-}
-function showLogin() {
-  console.log('showLogin called');
-  document.getElementById('register-form').classList.add('hidden');
-  document.getElementById('login-form').classList.remove('hidden');
-  document.getElementById('login-error').classList.add('hidden');
+async function checkSession() {
+  if (!supabase) return;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      await loadProgress();
+      showApp();
+    }
+  } catch(e) {
+    console.error('Session check failed:', e);
+  }
 }
 
+// AUTH
 async function handleRegister() {
   const name = document.getElementById('reg-name').value.trim();
   const email = document.getElementById('reg-email').value.trim();
   const password = document.getElementById('reg-password').value;
+  
   if (!name || !email || !password) { showError('Please fill all fields'); return; }
   if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
   
@@ -346,6 +378,7 @@ async function handleRegister() {
 async function handleLogin() {
   const email = document.getElementById('login-email').value.trim();
   const password = document.getElementById('login-password').value;
+  
   if (!email || !password) { showError('Please fill all fields'); return; }
   
   showLoading(true);
@@ -375,13 +408,9 @@ function showError(msg) {
   el.textContent = msg;
   el.classList.remove('hidden');
 }
-function hideError() {
-  document.getElementById('login-error').classList.add('hidden');
-}
+
 function showLoading(show) {
   document.getElementById('login-loading').classList.toggle('hidden', !show);
-  document.getElementById('btn-login').disabled = show;
-  document.getElementById('btn-register').disabled = show;
 }
 
 // PROGRESS
@@ -408,7 +437,6 @@ async function loadProgress() {
   } catch (e) {
     userProgress = createDefaultProgress();
   }
-  // Ensure all domains exist
   DOMAINS.forEach(d => {
     if (!userProgress[d.id]) userProgress[d.id] = { lessonsCompleted: [], quizScores: [], completed: false };
   });
@@ -459,7 +487,7 @@ function renderDomainCards() {
     const pct = Math.round((done/total)*100);
     const locked = i > 0 && !userProgress[DOMAINS[i-1].id].completed;
     const complete = p.completed;
-    return `<div class="bg-white rounded-xl shadow-sm border p-6 ${locked?'opacity-60':''}">
+    return `<div class="bg-white rounded-xl shadow-sm border p-6 ${locked?'opacity-60':''}" data-domain="${d.id}">
       <div class="flex items-center justify-between mb-4">
         <div class="text-3xl">${d.icon}</div>
         ${complete?'<span class="text-green-500 text-xl">✓</span>':locked?'<span class="text-slate-400">🔒</span>':''}
@@ -471,11 +499,19 @@ function renderDomainCards() {
         <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-gradient-to-r ${d.color} h-2 rounded-full" style="width:${pct}%"></div></div>
       </div>
       ${locked?`<button disabled class="w-full py-2 rounded-lg border text-slate-400">Complete previous domain</button>`:
-        complete?`<div class="flex gap-2"><button onclick="startLessons('${d.id}')" class="flex-1 py-2 rounded-lg border hover:bg-slate-50">Review</button><button onclick="startQuiz('${d.id}')" class="flex-1 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700">Retake</button></div>`:
-        done===total?`<button onclick="startQuiz('${d.id}')" class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white">Take Quiz →</button>`:
-        `<button onclick="startLessons('${d.id}')" class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white">${done>0?'Continue':'Start'} →</button>`}
+        complete?`<div class="flex gap-2"><button class="flex-1 py-2 rounded-lg border hover:bg-slate-50 start-lessons-btn" data-id="${d.id}">Review</button><button class="flex-1 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 start-quiz-btn" data-id="${d.id}">Retake</button></div>`:
+        done===total?`<button class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white start-quiz-btn" data-id="${d.id}">Take Quiz →</button>`:
+        `<button class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white start-lessons-btn" data-id="${d.id}">${done>0?'Continue':'Start'} →</button>`}
     </div>`;
   }).join('');
+
+  // Add click handlers
+  document.querySelectorAll('.start-lessons-btn').forEach(btn => {
+    btn.addEventListener('click', () => startLessons(btn.dataset.id));
+  });
+  document.querySelectorAll('.start-quiz-btn').forEach(btn => {
+    btn.addEventListener('click', () => startQuiz(btn.dataset.id));
+  });
 }
 
 function updateOverallProgress() {
@@ -549,10 +585,16 @@ function showQuizQuestion() {
   document.getElementById('quiz-progress').textContent = `${currentQuizIndex+1}/${currentDomain.quizzes.length}`;
   document.getElementById('quiz-question').textContent = q.question;
   document.getElementById('quiz-options').innerHTML = q.options.map((o,i) => 
-    `<button onclick="selectQuizOption(${i})" class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3">
+    `<button class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" data-index="${i}">
       <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">${String.fromCharCode(65+i)}</span>
       <span>${o}</span>
     </button>`).join('');
+  
+  // Add click handlers to options
+  document.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.addEventListener('click', () => selectQuizOption(parseInt(opt.dataset.index)));
+  });
+  
   document.getElementById('quiz-feedback').classList.add('hidden');
   document.getElementById('btn-submit').classList.remove('hidden');
   document.getElementById('btn-submit').disabled = true;
@@ -572,9 +614,9 @@ function submitAnswer() {
   if(correct) quizScore++;
   document.querySelectorAll('.quiz-option').forEach((o,i)=>{
     o.classList.remove('selected');
-    if(i===q.correct) o.classList.add('correct');
-    else if(i===selectedAnswer && !correct) o.classList.add('incorrect');
-    o.onclick = null;
+    const idx = parseInt(o.dataset.index);
+    if(idx===q.correct) o.classList.add('correct');
+    else if(idx===selectedAnswer && !correct) o.classList.add('incorrect');
   });
   const fb = document.getElementById('quiz-feedback');
   fb.classList.remove('hidden');
@@ -612,6 +654,6 @@ async function showResults() {
 }
 
 function retakeQuiz() { startQuiz(currentDomain.id); }
-</script>
+  </script>
 </body>
 </html>
