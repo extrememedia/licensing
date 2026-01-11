@@ -41,16 +41,8 @@
     .reader-container.theme-dark { background: #1a1a1a; color: #e0e0e0; }
     .reader-container.theme-night { background: #0d1117; color: #c9d1d9; }
     
-    .reader-content { max-width: 720px; margin: 0 auto; padding: 2rem; }
-    .reader-content p { margin-bottom: 1.5em; text-indent: 1.5em; }
-    .reader-content p:first-of-type { text-indent: 0; }
-    .reader-content h1, .reader-content h2, .reader-content h3 { text-indent: 0; margin-top: 2em; margin-bottom: 1em; }
-    
-    .reader-toolbar { position: fixed; top: 0; left: 0; right: 0; z-index: 100; transition: transform 0.3s; }
-    .reader-toolbar.hidden { transform: translateY(-100%); }
-    
-    .reader-settings { position: fixed; bottom: 0; left: 0; right: 0; z-index: 100; transform: translateY(100%); transition: transform 0.3s; }
-    .reader-settings.open { transform: translateY(0); }
+    .reader-page { max-width: 720px; margin: 0 auto; padding: 1.5rem; min-height: calc(100vh - 140px); }
+    .reader-page p { margin-bottom: 1.2em; }
     
     .font-serif { font-family: 'Merriweather', Georgia, serif; }
     .font-sans { font-family: 'Open Sans', system-ui, sans-serif; }
@@ -59,16 +51,43 @@
     
     .reading-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(to right, #ef4444, #f59e0b); z-index: 101; transition: width 0.1s; }
     
-    .theme-btn { width: 40px; height: 40px; border-radius: 50%; border: 2px solid; cursor: pointer; transition: transform 0.2s; }
-    .theme-btn:hover { transform: scale(1.1); }
-    .theme-btn.active { border-width: 3px; box-shadow: 0 0 0 2px rgba(59,130,246,0.5); }
+    /* Highlights */
+    .highlight-yellow { background: rgba(250, 204, 21, 0.4); border-radius: 2px; cursor: pointer; }
+    .highlight-green { background: rgba(74, 222, 128, 0.4); border-radius: 2px; cursor: pointer; }
+    .highlight-blue { background: rgba(96, 165, 250, 0.4); border-radius: 2px; cursor: pointer; }
+    .highlight-pink { background: rgba(244, 114, 182, 0.4); border-radius: 2px; cursor: pointer; }
     
-    .font-btn { padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; transition: all 0.2s; }
-    .font-btn.active { background: #3b82f6; color: white; }
+    /* Selection popup */
+    .selection-popup { position: absolute; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 8px; display: none; z-index: 200; }
+    .selection-popup.show { display: flex; gap: 4px; }
+    .selection-popup button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
+    .selection-popup button:hover { transform: scale(1.1); }
     
-    /* Dark mode adjustments for settings panel */
-    .theme-dark .settings-panel, .theme-night .settings-panel { background: #2d2d2d; border-color: #404040; }
-    .theme-dark .settings-label, .theme-night .settings-label { color: #e0e0e0; }
+    /* Notes panel */
+    .notes-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 350px; background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.1); transform: translateX(100%); transition: transform 0.3s; z-index: 150; }
+    .notes-panel.open { transform: translateX(0); }
+    .theme-dark .notes-panel, .theme-night .notes-panel { background: #2d2d2d; color: #e0e0e0; }
+    
+    /* Page navigation */
+    .page-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-blur: 10px; border-top: 1px solid #e5e7eb; padding: 12px; z-index: 100; }
+    .theme-dark .page-nav, .theme-night .page-nav { background: rgba(30,30,30,0.95); border-color: #404040; }
+    
+    /* Bookmark indicator */
+    .bookmark-ribbon { position: absolute; right: 20px; top: -5px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #ef4444; }
+    
+    /* Note card */
+    .note-card { background: #f8fafc; border-left: 3px solid #3b82f6; padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+    .theme-dark .note-card, .theme-night .note-card { background: #374151; }
+    
+    /* Settings panel */
+    .settings-drawer { position: fixed; bottom: 60px; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; transform: translateY(100%); transition: transform 0.3s; z-index: 99; max-height: 50vh; overflow-y: auto; }
+    .settings-drawer.open { transform: translateY(0); }
+    .theme-dark .settings-drawer, .theme-night .settings-drawer { background: #1f2937; border-color: #374151; }
+    
+    /* TOC */
+    .toc-panel { position: fixed; left: 0; top: 0; bottom: 0; width: 300px; background: white; box-shadow: 4px 0 20px rgba(0,0,0,0.1); transform: translateX(-100%); transition: transform 0.3s; z-index: 150; overflow-y: auto; }
+    .toc-panel.open { transform: translateX(0); }
+    .theme-dark .toc-panel, .theme-night .toc-panel { background: #1f2937; }
   </style>
 </head>
 <body class="bg-slate-100 min-h-screen">
@@ -84,7 +103,6 @@
           <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing Tracker</h1>
           <p class="text-slate-500 mt-2">Ministry Preparation & Study</p>
         </div>
-
         <div id="login-form">
           <div class="mb-4">
             <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
@@ -97,7 +115,6 @@
           <button id="btn-login" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
           <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <span id="link-register" class="text-red-600 hover:underline cursor-pointer">Create one</span></p>
         </div>
-
         <div id="register-form" style="display:none;">
           <div class="mb-4">
             <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
@@ -114,7 +131,6 @@
           <button id="btn-register" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
           <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <span id="link-login" class="text-red-600 hover:underline cursor-pointer">Sign in</span></p>
         </div>
-
         <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
         <div id="login-loading" class="hidden mt-4 text-center text-slate-500">Loading...</div>
       </div>
@@ -142,6 +158,7 @@
     </header>
     
     <main class="max-w-4xl mx-auto px-4 py-6">
+      <!-- Progress Card -->
       <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
         <div class="flex items-center justify-between mb-3">
           <div>
@@ -157,7 +174,40 @@
           <div class="bg-gradient-to-r from-red-500 to-red-600 h-3 rounded-full transition-all" id="progress-bar" style="width:0%"></div>
         </div>
       </div>
+
+      <!-- My Notes & Highlights Card -->
+      <div id="notes-dashboard" class="bg-white rounded-xl shadow-sm border p-6 mb-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <span>📝</span> My Notes & Highlights
+          </h2>
+          <button onclick="toggleNotesDashboard()" class="text-sm text-red-600 hover:underline">View All →</button>
+        </div>
+        <div id="recent-notes" class="space-y-3"></div>
+      </div>
+
+      <!-- Categories -->
       <div id="categories-container" class="space-y-4"></div>
+    </main>
+  </div>
+
+  <!-- NOTES DASHBOARD SCREEN -->
+  <div id="screen-notes" class="screen">
+    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <button onclick="backToApp()" class="flex items-center gap-2 text-red-200 hover:text-white">← Back</button>
+        <h1 class="font-bold">My Notes & Highlights</h1>
+        <div></div>
+      </div>
+    </header>
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <div class="flex gap-2 mb-6">
+        <button onclick="filterNotes('all')" class="filter-btn px-4 py-2 rounded-lg bg-red-600 text-white">All</button>
+        <button onclick="filterNotes('notes')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Notes</button>
+        <button onclick="filterNotes('highlights')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Highlights</button>
+        <button onclick="filterNotes('bookmarks')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Bookmarks</button>
+      </div>
+      <div id="all-notes-list" class="space-y-4"></div>
     </main>
   </div>
 
@@ -187,11 +237,14 @@
           <p class="text-slate-500">Loading content...</p>
         </div>
         <div id="reading-preview" class="bg-white rounded-xl shadow-sm border p-6 hidden">
-          <div id="preview-text" class="prose max-w-none"></div>
-          <div class="mt-6 pt-6 border-t flex gap-3">
+          <div id="preview-text" class="prose max-w-none" style="max-height: 300px; overflow: hidden;"></div>
+          <div class="mt-6 pt-6 border-t flex flex-wrap gap-3">
             <button onclick="openReader()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
               Open Reader
+            </button>
+            <button onclick="resumeReading()" id="btn-resume" class="px-6 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 hidden">
+              📑 Resume (Page <span id="resume-page">1</span>)
             </button>
             <button onclick="markReadComplete()" class="px-6 py-3 border rounded-lg hover:bg-slate-50 flex items-center gap-2">✓ Mark as Read</button>
           </div>
@@ -237,94 +290,163 @@
     </main>
   </div>
 
-  <!-- FULL READER SCREEN (Kindle-style) -->
+  <!-- FULL READER SCREEN -->
   <div id="screen-reader" class="screen">
     <div id="reader-container" class="reader-container theme-light font-serif">
-      <!-- Reading Progress Bar -->
+      <!-- Progress bar -->
       <div class="reading-progress" id="reading-progress" style="width: 0%"></div>
       
-      <!-- Toolbar -->
-      <div id="reader-toolbar" class="reader-toolbar bg-white/95 backdrop-blur border-b shadow-sm">
-        <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-          <button onclick="closeReader()" class="flex items-center gap-2 text-slate-600 hover:text-slate-900">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
-            Back
+      <!-- Top toolbar -->
+      <div class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur border-b z-50" id="reader-header">
+        <div class="flex items-center justify-between px-4 py-3">
+          <button onclick="closeReader()" class="p-2 hover:bg-slate-100 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
           </button>
           <div class="text-center">
-            <div class="font-medium text-slate-800" id="reader-title"></div>
+            <div class="font-medium text-sm" id="reader-title"></div>
+            <div class="text-xs text-slate-500" id="reader-page-info">Page 1 of 1</div>
           </div>
-          <button onclick="toggleSettings()" class="p-2 rounded-lg hover:bg-slate-100">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m8.66-10l-5.2 3m-6.92 4l-5.2 3M22.66 17l-5.2-3m-6.92-4l-5.2-3"/></svg>
-          </button>
+          <div class="flex items-center gap-1">
+            <button onclick="toggleBookmark()" id="btn-bookmark" class="p-2 hover:bg-slate-100 rounded-lg" title="Bookmark">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </button>
+            <button onclick="toggleReaderNotes()" class="p-2 hover:bg-slate-100 rounded-lg" title="Notes">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </button>
+            <button onclick="toggleTOC()" class="p-2 hover:bg-slate-100 rounded-lg" title="Contents">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
         </div>
       </div>
       
-      <!-- Content -->
-      <div class="reader-content pt-20 pb-32" id="reader-text-container">
-        <div id="reader-text"></div>
+      <!-- Page content -->
+      <div class="pt-16 pb-24 px-4" id="reader-page-container">
+        <div class="reader-page" id="reader-page"></div>
       </div>
       
-      <!-- Settings Panel -->
-      <div id="reader-settings" class="reader-settings settings-panel bg-white border-t shadow-lg">
-        <div class="max-w-lg mx-auto p-6">
+      <!-- Selection popup for highlighting -->
+      <div class="selection-popup" id="selection-popup">
+        <button onclick="addHighlight('yellow')" class="bg-yellow-300 border-yellow-400" title="Yellow"></button>
+        <button onclick="addHighlight('green')" class="bg-green-300 border-green-400" title="Green"></button>
+        <button onclick="addHighlight('blue')" class="bg-blue-300 border-blue-400" title="Blue"></button>
+        <button onclick="addHighlight('pink')" class="bg-pink-300 border-pink-400" title="Pink"></button>
+        <button onclick="addNoteToSelection()" class="bg-white border-slate-300" title="Add Note">📝</button>
+      </div>
+      
+      <!-- Bottom navigation -->
+      <div class="page-nav" id="page-nav">
+        <div class="max-w-lg mx-auto">
+          <div class="flex items-center justify-between mb-2">
+            <button onclick="prevPage()" class="px-4 py-2 border rounded-lg hover:bg-slate-100 disabled:opacity-30" id="btn-prev-page">← Prev</button>
+            <div class="flex items-center gap-2">
+              <input type="number" id="page-input" class="w-16 text-center border rounded-lg py-2" min="1" onchange="goToPage(this.value)">
+              <span class="text-slate-500">/ <span id="total-pages">1</span></span>
+            </div>
+            <button onclick="nextPage()" class="px-4 py-2 border rounded-lg hover:bg-slate-100 disabled:opacity-30" id="btn-next-page">Next →</button>
+          </div>
+          <div class="flex justify-center gap-4">
+            <button onclick="toggleSettings()" class="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Settings
+            </button>
+            <button onclick="addPageNote()" class="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Add Note
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings drawer -->
+      <div class="settings-drawer" id="settings-drawer">
+        <div class="p-6 max-w-lg mx-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">Reading Settings</h3>
+            <button onclick="toggleSettings()" class="text-slate-500">✕</button>
+          </div>
           <!-- Theme -->
           <div class="mb-6">
-            <div class="settings-label text-sm font-medium text-slate-600 mb-3">Theme</div>
-            <div class="flex justify-center gap-4">
-              <button onclick="setTheme('light')" class="theme-btn bg-white border-slate-300" title="Light"></button>
-              <button onclick="setTheme('sepia')" class="theme-btn bg-[#f4ecd8] border-[#d4c4a8]" title="Sepia"></button>
-              <button onclick="setTheme('dark')" class="theme-btn bg-[#1a1a1a] border-[#404040]" title="Dark"></button>
-              <button onclick="setTheme('night')" class="theme-btn bg-[#0d1117] border-[#30363d]" title="Night"></button>
+            <div class="text-sm font-medium mb-3">Theme</div>
+            <div class="flex gap-3">
+              <button onclick="setTheme('light')" class="w-12 h-12 rounded-full bg-white border-2 border-slate-300" title="Light"></button>
+              <button onclick="setTheme('sepia')" class="w-12 h-12 rounded-full bg-[#f4ecd8] border-2 border-[#d4c4a8]" title="Sepia"></button>
+              <button onclick="setTheme('dark')" class="w-12 h-12 rounded-full bg-[#1a1a1a] border-2 border-[#404040]" title="Dark"></button>
+              <button onclick="setTheme('night')" class="w-12 h-12 rounded-full bg-[#0d1117] border-2 border-[#30363d]" title="Night"></button>
             </div>
           </div>
-          
-          <!-- Font Family -->
+          <!-- Font -->
           <div class="mb-6">
-            <div class="settings-label text-sm font-medium text-slate-600 mb-3">Font</div>
-            <div class="flex flex-wrap justify-center gap-2">
-              <button onclick="setFont('serif')" class="font-btn border font-serif">Merriweather</button>
-              <button onclick="setFont('classic')" class="font-btn border font-classic">Crimson</button>
-              <button onclick="setFont('modern')" class="font-btn border font-modern">Literata</button>
-              <button onclick="setFont('sans')" class="font-btn border font-sans">Open Sans</button>
+            <div class="text-sm font-medium mb-3">Font</div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="setFont('serif')" class="px-3 py-2 border rounded-lg font-serif">Merriweather</button>
+              <button onclick="setFont('classic')" class="px-3 py-2 border rounded-lg font-classic">Crimson</button>
+              <button onclick="setFont('modern')" class="px-3 py-2 border rounded-lg font-modern">Literata</button>
+              <button onclick="setFont('sans')" class="px-3 py-2 border rounded-lg font-sans">Open Sans</button>
             </div>
           </div>
-          
-          <!-- Font Size -->
+          <!-- Size -->
           <div class="mb-6">
-            <div class="settings-label text-sm font-medium text-slate-600 mb-3">Size</div>
-            <div class="flex items-center justify-center gap-4">
-              <button onclick="adjustFontSize(-1)" class="w-10 h-10 rounded-full border flex items-center justify-center text-lg hover:bg-slate-100">A-</button>
-              <span class="text-lg font-medium w-16 text-center" id="font-size-display">18px</span>
-              <button onclick="adjustFontSize(1)" class="w-10 h-10 rounded-full border flex items-center justify-center text-xl hover:bg-slate-100">A+</button>
+            <div class="text-sm font-medium mb-3">Font Size</div>
+            <div class="flex items-center gap-4">
+              <button onclick="adjustFontSize(-2)" class="w-10 h-10 border rounded-full text-lg">A-</button>
+              <span id="font-size-display" class="text-lg font-medium w-16 text-center">18px</span>
+              <button onclick="adjustFontSize(2)" class="w-10 h-10 border rounded-full text-xl">A+</button>
             </div>
           </div>
-          
-          <!-- Line Spacing -->
-          <div class="mb-6">
-            <div class="settings-label text-sm font-medium text-slate-600 mb-3">Line Spacing</div>
-            <div class="flex justify-center gap-2">
-              <button onclick="setLineHeight(1.6)" class="font-btn border">Compact</button>
-              <button onclick="setLineHeight(1.8)" class="font-btn border">Normal</button>
-              <button onclick="setLineHeight(2.2)" class="font-btn border">Relaxed</button>
+          <!-- Line Height -->
+          <div class="mb-4">
+            <div class="text-sm font-medium mb-3">Line Spacing</div>
+            <div class="flex gap-2">
+              <button onclick="setLineHeight(1.5)" class="px-4 py-2 border rounded-lg">Compact</button>
+              <button onclick="setLineHeight(1.8)" class="px-4 py-2 border rounded-lg">Normal</button>
+              <button onclick="setLineHeight(2.2)" class="px-4 py-2 border rounded-lg">Relaxed</button>
             </div>
           </div>
-          
-          <!-- Close Settings -->
-          <button onclick="toggleSettings()" class="w-full py-3 bg-slate-100 rounded-lg text-slate-700 font-medium hover:bg-slate-200">Done</button>
         </div>
+      </div>
+      
+      <!-- Notes panel -->
+      <div class="notes-panel" id="notes-panel">
+        <div class="p-4 border-b flex justify-between items-center">
+          <h3 class="font-bold">Notes & Highlights</h3>
+          <button onclick="toggleReaderNotes()" class="text-slate-500">✕</button>
+        </div>
+        <div class="p-4 overflow-y-auto" style="height: calc(100% - 60px);" id="chapter-notes-list"></div>
+      </div>
+      
+      <!-- TOC panel -->
+      <div class="toc-panel" id="toc-panel">
+        <div class="p-4 border-b flex justify-between items-center">
+          <h3 class="font-bold">Contents</h3>
+          <button onclick="toggleTOC()" class="text-slate-500">✕</button>
+        </div>
+        <div class="p-4" id="toc-list"></div>
+      </div>
+      
+      <!-- Overlay -->
+      <div class="fixed inset-0 bg-black/30 z-40 hidden" id="reader-overlay" onclick="closeAllPanels()"></div>
+    </div>
+  </div>
+
+  <!-- Note Modal -->
+  <div id="note-modal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full p-6">
+      <h3 class="font-bold text-lg mb-2">Add Note</h3>
+      <div class="text-sm text-slate-500 mb-4 italic" id="note-modal-quote"></div>
+      <textarea id="note-modal-text" class="w-full border rounded-lg p-3 h-32 resize-none" placeholder="Write your note..."></textarea>
+      <div class="flex justify-end gap-3 mt-4">
+        <button onclick="closeNoteModal()" class="px-4 py-2 border rounded-lg">Cancel</button>
+        <button onclick="saveNote()" class="px-4 py-2 bg-red-600 text-white rounded-lg">Save Note</button>
       </div>
     </div>
   </div>
 
 <script>
-// Toggle login/register forms
+// Toggle forms
 (function() {
-  var linkReg = document.getElementById('link-register');
-  var linkLog = document.getElementById('link-login');
-  var formLogin = document.getElementById('login-form');
-  var formReg = document.getElementById('register-form');
-  if (linkReg) linkReg.onclick = function() { formLogin.style.display = 'none'; formReg.style.display = 'block'; };
-  if (linkLog) linkLog.onclick = function() { formReg.style.display = 'none'; formLogin.style.display = 'block'; };
+  document.getElementById('link-register').onclick = function() { document.getElementById('login-form').style.display = 'none'; document.getElementById('register-form').style.display = 'block'; };
+  document.getElementById('link-login').onclick = function() { document.getElementById('register-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; };
 })();
 
 // Supabase
@@ -343,478 +465,20 @@ sbScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/u
 sbScript.onload = initSupabase;
 document.head.appendChild(sbScript);
 
-// Reader Settings (saved to localStorage)
-var readerSettings = {
-  theme: 'light',
-  font: 'serif',
-  fontSize: 18,
-  lineHeight: 1.8
-};
+// Settings
+var readerSettings = { theme: 'light', font: 'serif', fontSize: 18, lineHeight: 1.8 };
+try { var s = localStorage.getItem('readerSettings'); if (s) readerSettings = JSON.parse(s); } catch(e) {}
+function saveReaderSettings() { try { localStorage.setItem('readerSettings', JSON.stringify(readerSettings)); } catch(e) {} }
 
-function loadReaderSettings() {
-  try {
-    var saved = localStorage.getItem('readerSettings');
-    if (saved) readerSettings = JSON.parse(saved);
-  } catch(e) {}
-}
-
-function saveReaderSettings() {
-  try {
-    localStorage.setItem('readerSettings', JSON.stringify(readerSettings));
-  } catch(e) {}
-}
-
-loadReaderSettings();
-
-// Loaded content cache
+// Content cache
 var loadedContent = {};
 var currentReadingContent = '';
+var contentPages = [];
+var currentPageNum = 1;
+var CHARS_PER_PAGE = 3000;
 
-// ============ ALL DATA ============
-
-var CATEGORIES = [
-  {
-    id: 'heritage',
-    name: 'Heritage',
-    icon: '🏛️',
-    color: 'from-amber-500 to-orange-600',
-    description: 'The history and founding of the Foursquare Church',
-    type: 'domain',
-    chapters: [
-      {
-        id: 'heritage-1',
-        title: 'Aimee Semple McPherson',
-        reading: '<h2>Aimee Semple McPherson (1890-1944)</h2><p>Aimee Semple McPherson was born on October 9, 1890, near Ingersoll, Ontario, Canada. She became one of the most influential evangelists of the 20th century and founded the International Church of the Foursquare Gospel.</p><p>At age 17, Aimee attended a Pentecostal revival meeting where she heard Robert Semple preach. She was converted and later married Robert. Together they went as missionaries to China, where Robert died of malaria in 1910, leaving Aimee widowed with a newborn daughter.</p><p>After returning to America and a brief marriage to Harold McPherson, Aimee began her evangelistic ministry in earnest. She traveled across the country conducting revival meetings, becoming known for her dynamic preaching, dramatic illustrated sermons, and healing ministry.</p><p>Aimee was a pioneer in many ways. She was one of the first women to preach on the radio and the first woman to receive an FCC broadcast license. Her use of media to spread the gospel set a pattern that would be followed by many who came after her.</p><p>During the Great Depression, Angelus Temple\'s commissary fed an estimated 1.5 million people. Aimee believed that the gospel must be demonstrated through both word and deed, and her ministry reflected this conviction.</p><p>Aimee Semple McPherson went to be with the Lord on September 27, 1944. Her legacy continues through the International Church of the Foursquare Gospel, which she founded and which now ministers in over 150 nations worldwide.</p>',
-        studyGuide: [
-          { title: 'Early Life', content: '<p>Aimee was born October 9, 1890 in Canada. Converted at age 17 at a Pentecostal revival. Married Robert Semple and went to China as missionaries.</p>' },
-          { title: 'Ministry Begins', content: '<p>After Robert\'s death, Aimee returned to America. She began traveling evangelism, becoming famous for illustrated sermons and healing services.</p>' },
-          { title: 'Legacy', content: '<p>Founded Foursquare Church, Angelus Temple, LIFE Bible College, and KFSG radio. Fed 1.5 million during the Depression. Ministry continues in 150+ nations.</p>' }
-        ],
-        quizzes: [
-          {q: "When was Aimee Semple McPherson born?", options: ["1880", "1890", "1900", "1910"], correct: 1, explanation: "Aimee was born October 9, 1890."},
-          {q: "Where was Aimee born?", options: ["Los Angeles", "New York", "Canada", "England"], correct: 2, explanation: "She was born near Ingersoll, Ontario, Canada."},
-          {q: "Who was Aimee's first husband?", options: ["Harold McPherson", "Robert Semple", "Jack Hayford", "Guy Duffield"], correct: 1, explanation: "Robert Semple was her first husband."},
-          {q: "Where did Aimee and Robert go as missionaries?", options: ["Africa", "India", "China", "Brazil"], correct: 2, explanation: "They went to China as missionaries."},
-          {q: "What happened to Robert Semple?", options: ["He divorced Aimee", "He died of malaria", "He stayed in China", "He returned to Canada"], correct: 1, explanation: "Robert died of malaria in China in 1910."}
-        ]
-      },
-      {
-        id: 'heritage-2',
-        title: 'Angelus Temple',
-        reading: '<h2>Angelus Temple</h2><p>Angelus Temple was dedicated on January 1, 1923, in the Echo Park area of Los Angeles, California. This magnificent 5,300-seat auditorium became the headquarters of the Foursquare movement and remains so to this day.</p><p>The temple was built at a cost of $1.5 million, raised entirely through donations from people who believed in Aimee\'s ministry. Its distinctive dome became an iconic landmark in Los Angeles, visible from miles around.</p><p>The building featured state-of-the-art technology for its time, including a sophisticated lighting system that Aimee used for her famous illustrated sermons. These theatrical presentations of biblical stories drew thousands and made the gospel accessible to people from all walks of life.</p><p>Angelus Temple was more than a church building—it was a center of community service. During the Great Depression, the temple\'s commissary fed an estimated 1.5 million people and provided clothing, blankets, and other necessities to those in need. This practical demonstration of Christian love became a hallmark of Foursquare ministry.</p><p>Services were held seven days a week, with multiple services on Sundays. The temple became one of the first "megachurches" in America, drawing visitors from around the world who wanted to experience the dynamic worship and preaching.</p><p>Today, Angelus Temple continues as the flagship church of the Foursquare movement, hosting services, conferences, and special events that carry on the vision of its founder.</p>',
-        studyGuide: [
-          { title: 'The Building', content: '<p>Dedicated January 1, 1923. Located in Echo Park, Los Angeles. Cost $1.5 million, seats 5,300 people. Featured state-of-the-art technology.</p>' },
-          { title: 'Ministry Center', content: '<p>Services seven days a week. Illustrated sermons with dramatic presentations. Became a model for modern megachurches.</p>' },
-          { title: 'Community Service', content: '<p>During the Depression, fed 1.5 million people. Provided clothing, blankets, and necessities. Demonstrated practical Christianity.</p>' }
-        ],
-        quizzes: [
-          {q: "When was Angelus Temple dedicated?", options: ["1920", "1921", "1923", "1925"], correct: 2, explanation: "Angelus Temple was dedicated January 1, 1923."},
-          {q: "Where is Angelus Temple located?", options: ["New York", "Chicago", "Los Angeles", "San Francisco"], correct: 2, explanation: "It's in Echo Park, Los Angeles."},
-          {q: "How many people can Angelus Temple seat?", options: ["2,500", "3,500", "5,300", "10,000"], correct: 2, explanation: "The temple seats 5,300 people."},
-          {q: "How much did Angelus Temple cost to build?", options: ["$500,000", "$1 million", "$1.5 million", "$2 million"], correct: 2, explanation: "It cost $1.5 million to build."},
-          {q: "How many people were fed during the Depression?", options: ["500,000", "1 million", "1.5 million", "2 million"], correct: 2, explanation: "An estimated 1.5 million people were fed."}
-        ]
-      },
-      {
-        id: 'heritage-3',
-        title: 'KFSG Radio & LIFE Bible College',
-        reading: '<h2>KFSG Radio Station</h2><p>In 1924, Aimee Semple McPherson launched KFSG (Kall Four Square Gospel), making it the third radio station in Los Angeles. She was the first woman to receive an FCC broadcast license, a remarkable achievement for that era.</p><p>The radio station allowed Aimee\'s ministry to reach far beyond the walls of Angelus Temple. Families across Southern California and beyond could tune in to hear the Foursquare message, the music of the temple choir, and Aimee\'s compelling preaching.</p><p>KFSG pioneered Christian broadcasting and set a pattern that would be followed by countless ministries in the decades to come. Aimee understood the power of media to spread the gospel, and she embraced new technology as a tool for evangelism.</p><h2>L.I.F.E. Bible College</h2><p>Founded in 1923, L.I.F.E. (Lighthouse of International Foursquare Evangelism) Bible College was established to train ministers for the growing Foursquare movement.</p><p>From its earliest days, the school sent graduates to plant churches across America and around the world. The training combined solid biblical education with practical ministry experience, preparing men and women for effective service.</p><p>The school continues today as Life Pacific University, still training leaders for ministry and carrying on the vision of its founder to equip workers for the harvest.</p>',
-        studyGuide: [
-          { title: 'KFSG Radio', content: '<p>Launched 1924. Third radio station in LA. First woman with FCC broadcast license. "Kall Four Square Gospel."</p>' },
-          { title: 'LIFE Bible College', content: '<p>Founded 1923. L.I.F.E. = Lighthouse of International Foursquare Evangelism. Trains Foursquare ministers. Now Life Pacific University.</p>' },
-          { title: 'Media Pioneer', content: '<p>Aimee pioneered Christian media. Used technology to spread the gospel. Set pattern for modern Christian broadcasting.</p>' }
-        ],
-        quizzes: [
-          {q: "When was KFSG radio launched?", options: ["1920", "1922", "1924", "1926"], correct: 2, explanation: "KFSG was launched in 1924."},
-          {q: "What does KFSG stand for?", options: ["Keep Faith Strong in God", "Kall Four Square Gospel", "Kingdom of the Four Square Gospel", "King's Foursquare Gospel"], correct: 1, explanation: "KFSG = Kall Four Square Gospel."},
-          {q: "What was Aimee's broadcasting achievement?", options: ["First radio sermon", "First woman with FCC license", "First Christian TV", "First podcast"], correct: 1, explanation: "She was the first woman to receive an FCC broadcast license."},
-          {q: "When was LIFE Bible College founded?", options: ["1920", "1923", "1925", "1930"], correct: 1, explanation: "LIFE Bible College was founded in 1923."},
-          {q: "What does L.I.F.E. stand for?", options: ["Living In Faith Eternally", "Lighthouse of International Foursquare Evangelism", "Leaders In Foursquare Education", "Love In Faith Everyday"], correct: 1, explanation: "L.I.F.E. = Lighthouse of International Foursquare Evangelism."}
-        ]
-      }
-    ]
-  },
-  {
-    id: 'identity',
-    name: 'Identity',
-    icon: '✨',
-    color: 'from-purple-500 to-violet-600',
-    description: 'What makes Foursquare distinctive',
-    type: 'domain',
-    chapters: [
-      {
-        id: 'identity-1',
-        title: 'The Foursquare Gospel',
-        reading: '<h2>The Foursquare Gospel</h2><p>The name "Foursquare Gospel" came to Aimee Semple McPherson during a revival meeting in Oakland, California in 1922. While preaching on Ezekiel\'s vision of the four living creatures (Ezekiel 1:4-10), she saw in these four faces a picture of Jesus Christ.</p><p>The four faces represent four aspects of Christ\'s ministry to humanity:</p><p><strong>The Face of a Man</strong> — Jesus the Savior. As a man, Jesus came to save humanity from sin. He is the perfect sacrifice, the Lamb of God who takes away the sin of the world.</p><p><strong>The Face of a Lion</strong> — Jesus the Baptizer with the Holy Spirit. The lion represents royalty and power. Jesus baptizes His followers with the Holy Spirit, empowering them for service.</p><p><strong>The Face of an Ox</strong> — Jesus the Healer. The ox represents service and sacrifice. Jesus bore our sicknesses and carried our pains. By His stripes we are healed.</p><p><strong>The Face of an Eagle</strong> — Jesus the Soon-Coming King. The eagle soars above, looking to the horizon. Jesus is coming again in power and glory to establish His kingdom.</p><p>This "foursquare" message—Jesus as Savior, Baptizer, Healer, and Coming King—became the cornerstone of Foursquare theology and gave the movement its name.</p><p>The message is anchored in Hebrews 13:8: "Jesus Christ is the same yesterday, today, and forever." The Jesus who saved, healed, and empowered in Bible times is the same Jesus who ministers today.</p>',
-        studyGuide: [
-          { title: 'Origin of the Name', content: '<p>Revealed in Oakland, 1922. Based on Ezekiel 1:4-10. Four living creatures represent four aspects of Jesus\' ministry.</p>' },
-          { title: 'The Four Faces', content: '<p>Man = Savior. Lion = Baptizer with Holy Spirit. Ox = Healer. Eagle = Soon-Coming King.</p>' },
-          { title: 'Core Message', content: '<p>Jesus Christ is the same yesterday, today, forever (Heb 13:8). Full gospel for the whole person.</p>' }
-        ],
-        quizzes: [
-          {q: "Where did Aimee receive the 'Foursquare' vision?", options: ["Los Angeles", "Oakland", "San Francisco", "New York"], correct: 1, explanation: "The vision came in Oakland, California in 1922."},
-          {q: "What Bible passage inspired the Foursquare name?", options: ["Matthew 28", "John 3:16", "Ezekiel 1", "Revelation 4"], correct: 2, explanation: "Ezekiel 1:4-10, the vision of four living creatures."},
-          {q: "The face of a man represents Jesus as:", options: ["Healer", "Savior", "King", "Baptizer"], correct: 1, explanation: "The man represents Jesus the Savior."},
-          {q: "The face of a lion represents Jesus as:", options: ["Savior", "Healer", "Baptizer with Holy Spirit", "Coming King"], correct: 2, explanation: "The lion represents Jesus the Baptizer with the Holy Spirit."},
-          {q: "The face of an eagle represents Jesus as:", options: ["Savior", "Healer", "Baptizer", "Soon-Coming King"], correct: 3, explanation: "The eagle represents Jesus the Soon-Coming King."}
-        ]
-      },
-      {
-        id: 'identity-2',
-        title: 'Global Movement',
-        reading: '<h2>A Global Movement</h2><p>What began in Los Angeles has grown into a worldwide movement. Today, the International Church of the Foursquare Gospel has presence in over 150 nations with millions of members worldwide.</p><p>The Foursquare Church has always emphasized church planting and missions. From the earliest days, Aimee sent graduates of LIFE Bible College to plant churches across America and around the world. This vision for multiplication continues today.</p><p>Key characteristics of Foursquare identity include:</p><p><strong>Commitment to Scripture:</strong> The Bible is the inspired, inerrant Word of God and the final authority for faith and practice.</p><p><strong>Empowerment of Women:</strong> From its founding, Foursquare has affirmed women in ministry at all levels. This reflects the example of our founder and the biblical pattern of women in leadership.</p><p><strong>Spirit-Empowered Ministry:</strong> We believe in the baptism with the Holy Spirit with the initial evidence of speaking in tongues, and in the operation of spiritual gifts today.</p><p><strong>Church Planting:</strong> We are committed to multiplying healthy churches that make disciples who make disciples.</p><p><strong>Compassionate Outreach:</strong> Following Aimee\'s example, Foursquare churches engage their communities with practical demonstrations of God\'s love.</p>',
-        studyGuide: [
-          { title: 'Global Reach', content: '<p>Present in 150+ nations. Millions of members worldwide. Started from one church in LA.</p>' },
-          { title: 'Distinctive Values', content: '<p>Scripture authority. Women in ministry at all levels. Spirit-empowered evangelism. Church planting focus.</p>' },
-          { title: 'Missions Focus', content: '<p>From earliest days, sent out missionaries. LIFE graduates planted churches globally. Compassionate community outreach.</p>' }
-        ],
-        quizzes: [
-          {q: "In how many nations is Foursquare present?", options: ["50+", "100+", "150+", "200+"], correct: 2, explanation: "Foursquare is present in over 150 nations."},
-          {q: "What does Foursquare emphasize regarding women?", options: ["Women cannot lead", "Women in ministry at all levels", "Women only teach women", "No position stated"], correct: 1, explanation: "Foursquare empowers women in ministry at all levels."},
-          {q: "From where did Foursquare spread globally?", options: ["New York", "Chicago", "Los Angeles", "London"], correct: 2, explanation: "The movement spread from Los Angeles worldwide."},
-          {q: "What institution trained early missionaries?", options: ["UCLA", "LIFE Bible College", "Fuller Seminary", "Biola"], correct: 1, explanation: "LIFE Bible College trained and sent out missionaries."},
-          {q: "What is a key Foursquare value?", options: ["Political activism", "Spirit-empowered evangelism", "Isolationism", "Monasticism"], correct: 1, explanation: "Spirit-empowered evangelism is a key value."}
-        ]
-      }
-    ]
-  },
-  {
-    id: 'doctrine',
-    name: 'Doctrine',
-    icon: '📖',
-    color: 'from-blue-500 to-indigo-600',
-    description: 'Core Foursquare beliefs and Declaration of Faith',
-    type: 'domain',
-    chapters: [
-      {
-        id: 'doctrine-1',
-        title: 'Declaration of Faith Overview',
-        reading: '<h2>The Foursquare Declaration of Faith</h2><p>The Foursquare Declaration of Faith outlines the core doctrinal beliefs of the International Church of the Foursquare Gospel. These 22 statements cover the essential teachings of Scripture and define what we believe.</p><p>The Declaration addresses:</p><p><strong>The Holy Scriptures</strong> — We believe the Bible is the inspired Word of God, inerrant in its original manuscripts, and the final authority for faith and practice.</p><p><strong>The Eternal Godhead</strong> — We believe in one God, eternally existing in three persons: Father, Son, and Holy Spirit.</p><p><strong>The Fall of Man</strong> — We believe humanity was created in God\'s image but fell through sin, resulting in spiritual death and separation from God.</p><p><strong>The Plan of Redemption</strong> — We believe God\'s plan for salvation was provided through Jesus Christ, who died for our sins and rose again.</p><p><strong>Salvation Through Grace</strong> — We believe salvation is by grace through faith, not by works.</p><p><strong>The Baptism with the Holy Spirit</strong> — We believe in the baptism with the Holy Spirit as a distinct experience with the initial evidence of speaking in tongues.</p><p><strong>Divine Healing</strong> — We believe healing is provided in the atonement and is available to believers today.</p><p><strong>The Second Coming</strong> — We believe in the personal, imminent return of Jesus Christ.</p><p>All Foursquare doctrine is built on the foundation of Scripture\'s authority and reliability.</p>',
-        studyGuide: [
-          { title: 'What It Is', content: '<p>22 statements of core belief. Based on Scripture. Defines Foursquare theology.</p>' },
-          { title: 'Key Topics', content: '<p>Scripture, Trinity, Christ, Salvation, Holy Spirit, Spiritual Gifts, Healing, Second Coming, Eternity.</p>' },
-          { title: 'Foundation', content: '<p>All doctrine built on Scripture\'s authority. Bible is inspired, inerrant, and sufficient.</p>' }
-        ],
-        quizzes: [
-          {q: "How many statements in the Declaration of Faith?", options: ["10", "16", "22", "30"], correct: 2, explanation: "There are 22 statements in the Declaration of Faith."},
-          {q: "What is the foundation of Foursquare doctrine?", options: ["Tradition", "Experience", "Scripture", "Reason"], correct: 2, explanation: "All doctrine is built on Scripture's authority."},
-          {q: "Does Foursquare believe in the Trinity?", options: ["No", "Yes", "Partially", "Unclear"], correct: 1, explanation: "Yes, the Trinity is a core doctrine."},
-          {q: "Does Foursquare believe spiritual gifts are for today?", options: ["No, they ceased", "Yes, for today", "Only some gifts", "Undecided"], correct: 1, explanation: "Foursquare believes spiritual gifts are for today."},
-          {q: "What view does Foursquare hold on healing?", options: ["Not available", "In the atonement", "Only medical", "Rare"], correct: 1, explanation: "Divine healing is in the atonement."}
-        ]
-      },
-      {
-        id: 'doctrine-2',
-        title: 'The Trinity & Salvation',
-        reading: '<h2>The Trinity</h2><p>Foursquare affirms the historic Christian doctrine of the Trinity: one God eternally existing in three persons—Father, Son, and Holy Spirit. Each person is fully God, co-equal and co-eternal.</p><p>This is not three gods (tritheism), nor is it one God appearing in three different modes (modalism). It is one God in three distinct persons who exist in eternal relationship with one another.</p><p>The Father is God (1 Corinthians 8:6). The Son is God (John 1:1, 14). The Holy Spirit is God (Acts 5:3-4). Yet there is only one God (Deuteronomy 6:4).</p><h2>Salvation</h2><p>Salvation is by grace alone, through faith alone, in Christ alone. It cannot be earned by works or merit. When a person repents of sin and places their faith in Jesus Christ, they receive:</p><p><strong>Justification</strong> — God declares them righteous, not based on their own works but on the righteousness of Christ credited to their account.</p><p><strong>Regeneration</strong> — They are born again, receiving a new nature and becoming a child of God.</p><p><strong>Eternal Life</strong> — They pass from death to life and will never perish.</p><p>As Paul wrote: "For by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not of works, lest anyone should boast" (Ephesians 2:8-9).</p>',
-        studyGuide: [
-          { title: 'The Trinity', content: '<p>One God, three persons. Father, Son, Holy Spirit. Co-equal, co-eternal. Historic Christian doctrine.</p>' },
-          { title: 'Salvation', content: '<p>By grace through faith. Not by works. Through Christ alone. Includes justification, regeneration.</p>' },
-          { title: 'Results of Salvation', content: '<p>Declared righteous. Born again. Child of God. Eternal life. All by grace.</p>' }
-        ],
-        quizzes: [
-          {q: "The Trinity consists of:", options: ["Three gods", "One God in three persons", "God with two helpers", "Father only"], correct: 1, explanation: "One God eternally existing in three persons."},
-          {q: "Salvation is by:", options: ["Works", "Grace through faith", "Baptism", "Church membership"], correct: 1, explanation: "Salvation is by grace through faith."},
-          {q: "Can salvation be earned?", options: ["Yes, by good works", "No, it's a gift", "Partially earned", "Through rituals"], correct: 1, explanation: "Salvation cannot be earned—it's a gift of grace."},
-          {q: "What happens when someone believes?", options: ["Nothing yet", "They are justified and regenerated", "They must wait", "Uncertain"], correct: 1, explanation: "They are justified (declared righteous) and regenerated (born again)."},
-          {q: "Ephesians 2:8-9 teaches:", options: ["Work hard for salvation", "Grace through faith, not works", "Baptism saves", "Keep the law"], correct: 1, explanation: "'By grace through faith... not of works.'"}
-        ]
-      }
-    ]
-  },
-  {
-    id: 'polity',
-    name: 'Polity',
-    icon: '⚖️',
-    color: 'from-emerald-500 to-teal-600',
-    description: 'Church structure and governance',
-    type: 'domain',
-    chapters: [
-      {
-        id: 'polity-1',
-        title: 'Church Government',
-        reading: '<h2>Foursquare Church Government</h2><p>The Foursquare Church operates under a modified episcopal form of government with congregational elements. This structure provides both accountability and flexibility for local ministry.</p><p><strong>Foursquare Convention:</strong> The highest governing body of the organization, meeting annually. Delegates from churches across the movement gather to conduct business, receive vision, and make decisions that affect the whole.</p><p><strong>Board of Directors:</strong> Provides oversight and governance between conventions. Members are elected by the convention.</p><p><strong>President:</strong> The chief executive officer of the movement, providing spiritual leadership and administrative oversight.</p><p><strong>Districts:</strong> Regional groupings of churches, each with a district supervisor who provides pastoral care to ministers and oversight to churches in that region.</p><p><strong>Local Churches:</strong> Led by credentialed ministers who shepherd their congregations. Local churches have significant autonomy in how they conduct ministry while remaining connected to the larger movement.</p><p>This structure balances organizational accountability with local church autonomy, allowing for both unity and flexibility.</p>',
-        studyGuide: [
-          { title: 'Structure', content: '<p>Modified episcopal with congregational elements. Convention is highest body. Board provides oversight.</p>' },
-          { title: 'Leadership Levels', content: '<p>President (CEO). Districts with supervisors. Local churches with credentialed ministers.</p>' },
-          { title: 'Balance', content: '<p>Organizational accountability + local autonomy. Churches connected but flexible. Collaborative model.</p>' }
-        ],
-        quizzes: [
-          {q: "What is the highest governing body?", options: ["Board of Directors", "The President", "Foursquare Convention", "Local church"], correct: 2, explanation: "The Foursquare Convention is the highest governing body."},
-          {q: "How often does the Convention meet?", options: ["Monthly", "Quarterly", "Annually", "Every 4 years"], correct: 2, explanation: "The Convention meets annually."},
-          {q: "Who is the chief executive officer?", options: ["District Supervisor", "Local Pastor", "President", "Board Chair"], correct: 2, explanation: "The President is the chief executive officer."},
-          {q: "What provides regional oversight?", options: ["Convention", "Districts", "Local churches", "Board only"], correct: 1, explanation: "Districts provide regional groupings with supervisors."},
-          {q: "Foursquare balances:", options: ["Only central control", "Only local autonomy", "Accountability and autonomy", "No structure"], correct: 2, explanation: "Foursquare balances accountability with local autonomy."}
-        ]
-      },
-      {
-        id: 'polity-2',
-        title: 'Licensing & Ordination',
-        reading: '<h2>Credentialing in Foursquare</h2><p>The Foursquare Church has a clear pathway for ministry credentials, ensuring that those who minister are trained, accountable, and aligned with our beliefs and values.</p><p><strong>License:</strong> The initial credential for ministry. Candidates must complete approved training, pass written examinations, and successfully complete an oral interview with a licensing committee. Licensed ministers can perform ministerial functions under supervision.</p><p><strong>Ordination:</strong> Full credentials for experienced ministers. After time in licensed ministry and demonstrating faithfulness and fruitfulness, ministers may apply for ordination. This involves additional examination and a more extensive interview process.</p><p><strong>Requirements typically include:</strong></p><p>• Completion of approved Bible/ministry training<br>• Written doctrinal examination<br>• Oral interview with licensing committee<br>• Background check and references<br>• Demonstrated ministry involvement<br>• Commitment to Foursquare beliefs, practices, and accountability</p><p>The credentialing process is designed to ensure that ministers are prepared for effective ministry and committed to the values and doctrines of the Foursquare movement.</p>',
-        studyGuide: [
-          { title: 'License', content: '<p>Initial credential. Requires training, exam, interview. Can minister under supervision.</p>' },
-          { title: 'Ordination', content: '<p>Full credentials. Requires experience. Further examination. Demonstrated faithfulness.</p>' },
-          { title: 'Requirements', content: '<p>Bible training. Written exam. Oral interview. Background check. Ministry involvement. Commitment to Foursquare.</p>' }
-        ],
-        quizzes: [
-          {q: "What is the initial ministry credential?", options: ["Ordination", "License", "Certificate", "Degree"], correct: 1, explanation: "License is the initial credential for ministry."},
-          {q: "What comes after licensing?", options: ["Nothing", "Retirement", "Ordination", "License renewal only"], correct: 2, explanation: "Ordination follows licensing for experienced ministers."},
-          {q: "Is training required for licensing?", options: ["No", "Yes, approved training", "Optional", "Only for ordination"], correct: 1, explanation: "Approved Bible/ministry training is required."},
-          {q: "What type of exams are required?", options: ["Written only", "Oral only", "Written and oral", "No exams"], correct: 2, explanation: "Both written doctrinal exam and oral interview are required."},
-          {q: "Is background check required?", options: ["No", "Yes", "Only for senior pastors", "Optional"], correct: 1, explanation: "Yes, background checks are required."}
-        ]
-      }
-    ]
-  },
-  {
-    id: 'practice',
-    name: 'Ministry Practice',
-    icon: '🙏',
-    color: 'from-pink-500 to-rose-600',
-    description: 'Practical ministry and Christian living',
-    type: 'domain',
-    chapters: [
-      {
-        id: 'practice-1',
-        title: 'Ordinances',
-        reading: '<h2>The Ordinances</h2><p>Foursquare observes two ordinances instituted by Christ Himself. These are not sacraments that convey grace, but symbols that declare spiritual realities.</p><h3>Water Baptism</h3><p>Baptism is by immersion in water, symbolizing the believer\'s identification with Christ\'s death, burial, and resurrection. When we go under the water, we picture dying with Christ; when we come up, we picture rising to new life.</p><p>Baptism is an outward sign of an inward spiritual reality. It does not save—we are saved by grace through faith. But it is a public declaration of faith, a testimony to the world that we have been born again.</p><p>Jesus commanded His followers to be baptized (Matthew 28:19), and the early church practiced baptism from the beginning (Acts 2:38-41).</p><h3>The Lord\'s Supper (Communion)</h3><p>The Lord\'s Supper is observed regularly as a remembrance of Christ\'s sacrifice. When Jesus shared the final meal with His disciples, He took bread and said, "This is My body which is given for you; do this in remembrance of Me" (Luke 22:19).</p><p>The bread represents His body broken for us; the cup represents His blood shed for the remission of sins. As we partake, we proclaim the Lord\'s death until He comes (1 Corinthians 11:26).</p>',
-        studyGuide: [
-          { title: 'Water Baptism', content: '<p>By immersion. Symbolizes death, burial, resurrection with Christ. Public declaration of faith. Not the means of salvation.</p>' },
-          { title: 'Lord\'s Supper', content: '<p>Regular observance. Remembrance of Christ\'s sacrifice. Bread = body. Cup = blood.</p>' },
-          { title: 'Significance', content: '<p>Both are symbolic, not sacramental. Instituted by Christ. Commands for the church to observe.</p>' }
-        ],
-        quizzes: [
-          {q: "How many ordinances does Foursquare observe?", options: ["One", "Two", "Three", "Seven"], correct: 1, explanation: "Two ordinances: Baptism and Lord's Supper."},
-          {q: "How is baptism performed?", options: ["Sprinkling", "Pouring", "Immersion", "Any method"], correct: 2, explanation: "Baptism is by immersion."},
-          {q: "What does baptism symbolize?", options: ["Washing sins", "Death, burial, resurrection with Christ", "Joining church", "Original sin"], correct: 1, explanation: "It symbolizes identification with Christ's death, burial, and resurrection."},
-          {q: "Is baptism the means of salvation?", options: ["Yes", "No, it's a declaration of faith", "Partially", "For infants only"], correct: 1, explanation: "Baptism is not the means of salvation but a public declaration."},
-          {q: "What does the bread represent?", options: ["Jesus' words", "Jesus' body", "The church", "Heaven"], correct: 1, explanation: "The bread represents Christ's body broken for us."}
-        ]
-      },
-      {
-        id: 'practice-2',
-        title: 'Christian Living',
-        reading: '<h2>Christian Living</h2><p>Foursquare emphasizes practical holiness and Spirit-led living. Our faith is not just about what we believe but how we live.</p><h3>Soul Winning</h3><p>Every believer is called to share the gospel. Evangelism is not optional but essential to the Christian life. Jesus\' final command was to "go and make disciples of all nations" (Matthew 28:19). This is our mission.</p><h3>Tithing & Stewardship</h3><p>Believers are encouraged to tithe (give 10% of income) and practice generous stewardship of all resources. Everything we have comes from God, and we are managers of His resources. Generous giving honors God and supports the work of the church.</p><h3>Prayer</h3><p>Personal and corporate prayer are vital to spiritual growth and ministry effectiveness. We are called to "pray without ceasing" (1 Thessalonians 5:17) and to gather for prayer as a community of faith.</p><h3>Moderation</h3><p>Believers are called to avoid excess and live balanced lives that honor God. We are temples of the Holy Spirit and should treat our bodies and our lives with respect.</p><h3>Separation from Worldliness</h3><p>While engaging culture, believers maintain distinct values and lifestyle. We are in the world but not of it, called to be salt and light wherever God has placed us.</p>',
-        studyGuide: [
-          { title: 'Soul Winning', content: '<p>Every believer called to share gospel. Evangelism is essential, not optional.</p>' },
-          { title: 'Stewardship', content: '<p>Tithing encouraged (10%). Generous giving. Stewardship of all resources.</p>' },
-          { title: 'Lifestyle', content: '<p>Prayer vital. Moderation in all things. Distinct from worldliness while engaging culture.</p>' }
-        ],
-        quizzes: [
-          {q: "Who is called to share the gospel?", options: ["Pastors only", "Evangelists only", "Every believer", "Missionaries only"], correct: 2, explanation: "Every believer is called to share the gospel."},
-          {q: "What is tithing?", options: ["Giving 5%", "Giving 10%", "Giving everything", "Optional amount"], correct: 1, explanation: "Tithing is giving 10% of income."},
-          {q: "Is prayer important in Foursquare?", options: ["No", "Only for pastors", "Yes, vital", "Optional"], correct: 2, explanation: "Personal and corporate prayer are vital."},
-          {q: "What does 'moderation' mean?", options: ["Avoiding all pleasure", "Balanced living, avoid excess", "No rules", "Strict rules"], correct: 1, explanation: "Avoiding excess and living balanced lives."},
-          {q: "How should believers relate to culture?", options: ["Isolate completely", "Conform fully", "Engage with distinct values", "Ignore it"], correct: 2, explanation: "Engage culture while maintaining distinct values."}
-        ]
-      }
-    ]
-  },
-  {
-    id: 'fopt',
-    name: 'Foundations of Pentecostal Theology',
-    icon: '📚',
-    color: 'from-indigo-500 to-purple-600',
-    description: 'Complete textbook by Duffield & Van Cleave (10 Chapters)',
-    type: 'book',
-    chapters: [
-      { id: 'ch1', num: 1, title: 'The Doctrine of Scripture (Bibliology)', hasFullText: true },
-      { id: 'ch2', num: 2, title: 'The Doctrine of God (Theology)', hasFullText: true },
-      { id: 'ch3', num: 3, title: 'The Doctrine of Humankind (Anthropology)', hasFullText: true },
-      { id: 'ch4', num: 4, title: 'The Doctrine of Sin (Hamartiology)', hasFullText: true },
-      { id: 'ch5', num: 5, title: 'The Doctrine of Salvation (Soteriology)', hasFullText: true },
-      { id: 'ch6', num: 6, title: 'The Doctrine of the Holy Spirit (Pneumatology)', hasFullText: true },
-      { id: 'ch7', num: 7, title: 'The Doctrine of Divine Healing', hasFullText: true },
-      { id: 'ch8', num: 8, title: 'The Doctrine of the Church (Ecclesiology)', hasFullText: true },
-      { id: 'ch9', num: 9, title: 'The Doctrine of Angels (Angelology)', hasFullText: true },
-      { id: 'ch10', num: 10, title: 'The Doctrine of Last Things (Eschatology)', hasFullText: true }
-    ]
-  },
-  {
-    id: 'aimee-bio',
-    name: 'Aimee: Life Story',
-    icon: '👩',
-    color: 'from-rose-400 to-pink-500',
-    description: 'Biography of Aimee Semple McPherson',
-    type: 'book',
-    comingSoon: true,
-    chapters: []
-  },
-  {
-    id: 'women-ministry',
-    name: 'Women in Ministry Leadership',
-    icon: '👩‍🏫',
-    color: 'from-fuchsia-400 to-purple-500',
-    description: 'Biblical position on women in ministry',
-    type: 'book',
-    comingSoon: true,
-    chapters: []
-  },
-  {
-    id: 'disciples-nations',
-    name: 'Disciples of All Nations',
-    icon: '🌍',
-    color: 'from-cyan-400 to-blue-500',
-    description: 'Missions and evangelism',
-    type: 'book',
-    comingSoon: true,
-    chapters: []
-  },
-  {
-    id: 'identity-keystones',
-    name: 'Foursquare Identity Keystones',
-    icon: '🔑',
-    color: 'from-amber-400 to-orange-500',
-    description: 'Five key areas of Foursquare identity',
-    type: 'book',
-    comingSoon: true,
-    chapters: []
-  }
-];
-
-// FOPT Study Guides and Quizzes
-var FOPT_DATA = {
-  ch1: {
-    studyGuide: [
-      { title: 'Introduction', content: '<p>God reveals Himself through Scripture. The Bible is God-breathed (theopneustos). 66 books, 40+ authors, 1500+ years—yet one unified message.</p>' },
-      { title: 'Inspiration', content: '<p><strong>Verbal Plenary Inspiration:</strong> Every word inspired, not just the ideas. <strong>Inerrancy:</strong> Without error in original manuscripts.</p><div class="scripture">"All Scripture is given by inspiration of God." — 2 Timothy 3:16</div>' },
-      { title: 'Canon', content: '<p>Canon = rule/standard. The church recognized (not created) which books God inspired. 39 OT + 27 NT = 66 books.</p>' }
-    ],
-    quizzes: [
-      {q: "What does 'theopneustos' mean?", options: ["Holy book", "God-breathed", "Divine scroll", "Sacred text"], correct: 1, explanation: "Theopneustos means 'God-breathed.'"},
-      {q: "How many books in the Bible?", options: ["39", "27", "66", "73"], correct: 2, explanation: "66 books: 39 OT + 27 NT."},
-      {q: "What is verbal plenary inspiration?", options: ["Ideas inspired", "Every word inspired", "Some parts inspired", "None inspired"], correct: 1, explanation: "Every word (verbal) and all parts (plenary) inspired."},
-      {q: "What does 'canon' mean?", options: ["Large book", "Rule/standard", "Church law", "Sacred scroll"], correct: 1, explanation: "Canon means rule or standard."},
-      {q: "2 Timothy 3:16 says Scripture is:", options: ["Helpful", "Inspired by God", "Historical", "Symbolic"], correct: 1, explanation: "'All Scripture is given by inspiration of God.'"}
-    ]
-  },
-  ch2: {
-    studyGuide: [
-      { title: 'Nature of God', content: '<p>God is Spirit, perfect, personal, One. Knowable yet beyond full comprehension.</p><div class="scripture">"God is Spirit, and those who worship Him must worship in spirit and truth." — John 4:24</div>' },
-      { title: 'Attributes', content: '<p><strong>Absolute:</strong> Self-existence, immutability, omnipresence, omniscience, omnipotence.</p><p><strong>Moral:</strong> Holiness, love, righteousness, justice, truth, mercy, grace.</p>' },
-      { title: 'Trinity', content: '<p>One God in three persons: Father, Son, Holy Spirit. Co-equal, co-eternal, distinct yet one.</p>' }
-    ],
-    quizzes: [
-      {q: "John 4:24 says God is:", options: ["Love", "Spirit", "Light", "Fire"], correct: 1, explanation: "God is Spirit."},
-      {q: "What does omniscient mean?", options: ["All-powerful", "All-knowing", "Everywhere", "Eternal"], correct: 1, explanation: "Omniscient = all-knowing."},
-      {q: "How many persons in the Trinity?", options: ["One", "Two", "Three", "Four"], correct: 2, explanation: "Three persons: Father, Son, Holy Spirit."},
-      {q: "What does immutability mean?", options: ["Invisible", "Never changes", "Immortal", "Infinite"], correct: 1, explanation: "Immutability = God never changes."},
-      {q: "Is the Holy Spirit a person?", options: ["No, just a force", "Yes, third person of Trinity", "Unclear", "An angel"], correct: 1, explanation: "The Holy Spirit is the third person of the Trinity."}
-    ]
-  },
-  ch3: {
-    studyGuide: [
-      { title: 'Created by God', content: '<p>Humans created by God, not evolved. Special creation in God\'s image (Imago Dei).</p>' },
-      { title: 'Image of God', content: '<p>Not physical. Personal: intellect, emotion, will. Moral: conscience. Spiritual capacity for relationship with God.</p>' },
-      { title: 'Constitution', content: '<p>Trichotomous: body, soul, spirit (1 Thess 5:23). Soul is immortal—continues after physical death.</p>' }
-    ],
-    quizzes: [
-      {q: "What is Imago Dei?", options: ["Image of man", "Image of God", "God's creation", "Divine nature"], correct: 1, explanation: "Imago Dei = Image of God."},
-      {q: "Is God's image physical?", options: ["Yes", "No, personal/moral", "Partially", "Unknown"], correct: 1, explanation: "Not physical; it's personal and moral."},
-      {q: "1 Thess 5:23 mentions:", options: ["Body and soul", "Body, soul, spirit", "Mind and heart", "Flesh and spirit"], correct: 1, explanation: "Spirit, soul, and body."},
-      {q: "Did humans evolve?", options: ["Yes", "No, special creation", "Partially", "FOPT doesn't say"], correct: 1, explanation: "FOPT teaches special creation."},
-      {q: "Is the soul immortal?", options: ["No", "Yes", "Only believers'", "Uncertain"], correct: 1, explanation: "The soul is immortal."}
-    ]
-  },
-  ch4: {
-    studyGuide: [
-      { title: 'Origin', content: '<p>Sin began with Satan\'s rebellion. Entered humanity through Adam (Genesis 3).</p>' },
-      { title: 'Nature', content: '<p>Hamartia = missing the mark. Original sin = inherited nature. Total depravity = sin affects all parts of human nature.</p>' },
-      { title: 'Penalty', content: '<p>Wages of sin is death: spiritual, physical, eternal (Romans 6:23).</p>' }
-    ],
-    quizzes: [
-      {q: "Where did sin originate?", options: ["Adam", "Satan's rebellion", "Eve", "Cain"], correct: 1, explanation: "Sin began with Satan's rebellion."},
-      {q: "What does hamartia mean?", options: ["Evil deed", "Missing the mark", "Rebellion", "Curse"], correct: 1, explanation: "Hamartia = missing the mark."},
-      {q: "What is original sin?", options: ["Adam's first sin", "Inherited sinful nature", "The worst sin", "Satan's sin"], correct: 1, explanation: "The inherited sinful nature from Adam."},
-      {q: "Romans 6:23 says wages of sin is:", options: ["Sickness", "Poverty", "Death", "Suffering"], correct: 2, explanation: "The wages of sin is death."},
-      {q: "Total depravity means:", options: ["Completely evil", "Sin affects all parts", "Cannot be saved", "Only body is sinful"], correct: 1, explanation: "Sin affects every part of human nature."}
-    ]
-  },
-  ch5: {
-    studyGuide: [
-      { title: 'Atonement', content: '<p>Christ died in our place (substitution). Paid sin\'s penalty. Satisfied God\'s wrath (propitiation). Purchased us (redemption).</p>' },
-      { title: 'Grace & Faith', content: '<p>Salvation by grace through faith, not works (Eph 2:8-9). Repentance = turning from sin to God.</p>' },
-      { title: 'Results', content: '<p>Justification (declared righteous). Regeneration (born again). Sanctification (growing holy). Glorification (future completion).</p>' }
-    ],
-    quizzes: [
-      {q: "Ephesians 2:8-9 says salvation is by:", options: ["Works", "Grace through faith", "Baptism", "Law-keeping"], correct: 1, explanation: "By grace through faith, not works."},
-      {q: "What is propitiation?", options: ["Forgiveness", "Satisfying God's wrath", "New birth", "Good works"], correct: 1, explanation: "Christ's sacrifice satisfied God's wrath."},
-      {q: "What is justification?", options: ["Made sinless", "Declared righteous", "Becoming God", "Baptism"], correct: 1, explanation: "Declared righteous by God."},
-      {q: "What is regeneration?", options: ["Healing", "Born again/new birth", "Church membership", "Confirmation"], correct: 1, explanation: "Regeneration = born again."},
-      {q: "What proves Christ's victory?", options: ["His teachings", "His miracles", "His resurrection", "His popularity"], correct: 2, explanation: "The resurrection proves victory over death."}
-    ]
-  },
-  ch6: {
-    studyGuide: [
-      { title: 'Person of Spirit', content: '<p>Third person of Trinity. Not a force—a Person with intellect, emotion, will. Fully God.</p>' },
-      { title: 'Spirit Baptism', content: '<p>Distinct from salvation. Power for witness (Acts 1:8). Initial evidence: speaking in tongues.</p>' },
-      { title: 'Fruit & Gifts', content: '<p>Fruit (Gal 5:22-23): character—love, joy, peace, etc. Gifts (1 Cor 12): supernatural abilities for ministry.</p>' }
-    ],
-    quizzes: [
-      {q: "The Holy Spirit is:", options: ["A force", "Third person of Trinity", "An angel", "God's power only"], correct: 1, explanation: "The Holy Spirit is the third person of the Trinity."},
-      {q: "Purpose of Spirit baptism:", options: ["Salvation", "Power for witness", "Forgiveness", "Sanctification"], correct: 1, explanation: "Power for witness (Acts 1:8)."},
-      {q: "Initial evidence of Spirit baptism:", options: ["Joy", "Prophecy", "Tongues", "Healing"], correct: 2, explanation: "Speaking in tongues is the initial evidence."},
-      {q: "How many fruit of the Spirit?", options: ["7", "9", "12", "3"], correct: 1, explanation: "Nine fruit listed in Galatians 5:22-23."},
-      {q: "Gifts are for:", options: ["Character", "Ministry/service", "Salvation", "Pride"], correct: 1, explanation: "Gifts are supernatural abilities for ministry."}
-    ]
-  },
-  ch7: {
-    studyGuide: [
-      { title: 'In the Atonement', content: '<p>"By His stripes we are healed" (Isaiah 53:5). Healing is provided in Christ\'s atoning sacrifice.</p>' },
-      { title: 'Jesus Heals', content: '<p>Jesus healed all who came. He is the same yesterday, today, forever (Heb 13:8).</p>' },
-      { title: 'For Today', content: '<p>James 5:14-15: Call elders, anoint with oil, pray in faith. God is sovereign—faith is important but not a formula.</p>' }
-    ],
-    quizzes: [
-      {q: "Isaiah 53:5 says:", options: ["God is love", "By His stripes we are healed", "Repent and believe", "Fear not"], correct: 1, explanation: "By His stripes we are healed."},
-      {q: "Hebrews 13:8 says Jesus is:", options: ["In heaven", "Same yesterday, today, forever", "Coming soon", "Our judge"], correct: 1, explanation: "Jesus Christ is the same yesterday, today, and forever."},
-      {q: "James 5:14 says call:", options: ["Doctors", "Elders of the church", "Faith healers", "Family"], correct: 1, explanation: "Call for the elders of the church."},
-      {q: "Does healing negate medicine?", options: ["Yes", "No, both can be used", "Medicine is sin", "Only medicine works"], correct: 1, explanation: "Both divine healing and medicine can be used."},
-      {q: "Is healing guaranteed by faith?", options: ["Yes, always", "No, God is sovereign", "Only with enough faith", "Never happens"], correct: 1, explanation: "Faith is important but God remains sovereign."}
-    ]
-  },
-  ch8: {
-    studyGuide: [
-      { title: 'Definition', content: '<p>Ekklesia = called-out assembly. Universal church: all believers everywhere. Local church: believers gathered in one place.</p>' },
-      { title: 'Leadership', content: '<p>Fivefold ministry (Eph 4:11): apostles, prophets, evangelists, pastors, teachers. Also elders and deacons.</p>' },
-      { title: 'Ordinances', content: '<p>Two: Baptism by immersion and Lord\'s Supper. Both symbolic, not sacramental.</p>' }
-    ],
-    quizzes: [
-      {q: "What does ekklesia mean?", options: ["Holy building", "Called-out assembly", "Sacred place", "Worship center"], correct: 1, explanation: "Ekklesia = called-out assembly."},
-      {q: "Who is Head of the church?", options: ["Pope", "Pastor", "Christ", "Elders"], correct: 2, explanation: "Christ is Head of the church."},
-      {q: "How many ordinances?", options: ["One", "Two", "Three", "Seven"], correct: 1, explanation: "Two: Baptism and Lord's Supper."},
-      {q: "Baptism is by:", options: ["Sprinkling", "Pouring", "Immersion", "Any method"], correct: 2, explanation: "Baptism is by immersion."},
-      {q: "Ephesians 4:11 lists:", options: ["Fruits of Spirit", "Fivefold ministry", "Ten Commandments", "Beatitudes"], correct: 1, explanation: "The fivefold ministry gifts."}
-    ]
-  },
-  ch9: {
-    studyGuide: [
-      { title: 'Holy Angels', content: '<p>Created beings, not eternal. Ministering spirits serving God and believers (Heb 1:14). Innumerable, organized in ranks.</p>' },
-      { title: 'Notable Angels', content: '<p>Michael: archangel, warrior, leads God\'s armies. Gabriel: messenger, announced Christ\'s birth.</p>' },
-      { title: 'Satan & Demons', content: '<p>Satan: fallen angel (Lucifer). Demons: angels who followed Satan. Powerful but defeated foe!</p>' }
-    ],
-    quizzes: [
-      {q: "Are angels eternal?", options: ["Yes", "No, created beings", "Some are", "Unknown"], correct: 1, explanation: "Angels are created beings, not eternal."},
-      {q: "Hebrews 1:14 calls angels:", options: ["Gods", "Ministering spirits", "Judges", "Creators"], correct: 1, explanation: "Ministering spirits sent to serve."},
-      {q: "Who is the archangel warrior?", options: ["Gabriel", "Michael", "Lucifer", "Raphael"], correct: 1, explanation: "Michael is the warrior archangel."},
-      {q: "Who announced Christ's birth?", options: ["Michael", "Gabriel", "Raphael", "Uriel"], correct: 1, explanation: "Gabriel announced to Mary."},
-      {q: "Is Satan equal to God?", options: ["Yes", "No, created being", "Almost", "Unknown"], correct: 1, explanation: "Satan is a created being, not equal to God."}
-    ]
-  },
-  ch10: {
-    studyGuide: [
-      { title: 'Second Coming', content: '<p>Personal, visible, bodily return. Imminent—could be any time. No one knows the day or hour.</p>' },
-      { title: 'Rapture & Tribulation', content: '<p>Rapture: believers caught up to meet Lord (1 Thess 4:16-17). Tribulation: 7 years of judgment on earth.</p>' },
-      { title: 'Millennium & Eternity', content: '<p>1,000-year reign of Christ on earth. Premillennialism: Christ returns before Millennium. Heaven and Hell are eternal, real places.</p>' }
-    ],
-    quizzes: [
-      {q: "Christ's return will be:", options: ["Secret", "Personal, visible, bodily", "Symbolic only", "Already happened"], correct: 1, explanation: "Personal, visible, bodily return."},
-      {q: "What is the Rapture?", options: ["Death", "Believers caught up", "Final judgment", "Tribulation"], correct: 1, explanation: "Believers caught up to meet the Lord."},
-      {q: "How long is the Tribulation?", options: ["3.5 years", "7 years", "1,000 years", "Eternity"], correct: 1, explanation: "Seven years of tribulation."},
-      {q: "What is the Millennium?", options: ["10 years", "100 years", "1,000-year reign", "Eternity"], correct: 2, explanation: "Christ's 1,000-year reign on earth."},
-      {q: "Do we know when Christ returns?", options: ["Yes, 2030", "No one knows", "Pastors know", "It's in Revelation"], correct: 1, explanation: "No one knows the day or hour."}
-    ]
-  }
-};
+// Annotations (highlights, notes, bookmarks)
+var annotations = { highlights: [], notes: [], bookmarks: [] };
 
 // STATE
 var currentUser = null;
@@ -826,29 +490,80 @@ var quizIndex = 0;
 var selectedAnswer = null;
 var quizScore = 0;
 var expandedCategories = {};
-var settingsOpen = false;
-var toolbarVisible = true;
-var toolbarTimeout = null;
+var pendingSelection = null;
+
+// DATA - Categories and chapters (keeping compact for space)
+var CATEGORIES = [
+  { id: 'heritage', name: 'Heritage', icon: '🏛️', color: 'from-amber-500 to-orange-600', description: 'The history and founding of the Foursquare Church', type: 'domain',
+    chapters: [
+      { id: 'heritage-1', title: 'Aimee Semple McPherson', reading: '<h2>Aimee Semple McPherson (1890-1944)</h2><p>Aimee Semple McPherson was born on October 9, 1890, near Ingersoll, Ontario, Canada. She became one of the most influential evangelists of the 20th century and founded the International Church of the Foursquare Gospel.</p><p>At age 17, Aimee attended a Pentecostal revival meeting where she heard Robert Semple preach. She was converted and later married Robert. Together they went as missionaries to China, where Robert died of malaria in 1910, leaving Aimee widowed with a newborn daughter.</p><p>After returning to America and a brief marriage to Harold McPherson, Aimee began her evangelistic ministry in earnest. She traveled across the country conducting revival meetings, becoming known for her dynamic preaching, dramatic illustrated sermons, and healing ministry.</p><p>Aimee was a pioneer in many ways. She was one of the first women to preach on the radio and the first woman to receive an FCC broadcast license.</p>', studyGuide: [{ title: 'Early Life', content: '<p>Born October 9, 1890 in Canada. Converted at 17. Married Robert Semple, went to China.</p>' }], quizzes: [{q: "When was Aimee born?", options: ["1880", "1890", "1900", "1910"], correct: 1, explanation: "1890"}] },
+      { id: 'heritage-2', title: 'Angelus Temple', reading: '<h2>Angelus Temple</h2><p>Angelus Temple was dedicated on January 1, 1923, in Echo Park, Los Angeles. This 5,300-seat auditorium became the headquarters of the Foursquare movement.</p><p>Built at a cost of $1.5 million, its distinctive dome became iconic. During the Great Depression, the commissary fed 1.5 million people.</p>', studyGuide: [{ title: 'The Building', content: '<p>Dedicated Jan 1, 1923. Seats 5,300. Cost $1.5 million.</p>' }], quizzes: [{q: "When was Angelus Temple dedicated?", options: ["1920", "1923", "1925", "1930"], correct: 1, explanation: "Jan 1, 1923"}] }
+    ]
+  },
+  { id: 'identity', name: 'Identity', icon: '✨', color: 'from-purple-500 to-violet-600', description: 'What makes Foursquare distinctive', type: 'domain',
+    chapters: [
+      { id: 'identity-1', title: 'The Foursquare Gospel', reading: '<h2>The Foursquare Gospel</h2><p>The name came to Aimee in Oakland, 1922, while preaching on Ezekiel 1. The four faces represent: Man = Savior, Lion = Baptizer, Ox = Healer, Eagle = Coming King.</p><p>Hebrews 13:8: "Jesus Christ is the same yesterday, today, and forever."</p>', studyGuide: [{ title: 'The Four Faces', content: '<p>Man=Savior, Lion=Baptizer, Ox=Healer, Eagle=King</p>' }], quizzes: [{q: "Where did Aimee receive the vision?", options: ["LA", "Oakland", "SF", "NY"], correct: 1, explanation: "Oakland, 1922"}] }
+    ]
+  },
+  { id: 'doctrine', name: 'Doctrine', icon: '📖', color: 'from-blue-500 to-indigo-600', description: 'Core Foursquare beliefs', type: 'domain',
+    chapters: [
+      { id: 'doctrine-1', title: 'Declaration of Faith', reading: '<h2>Declaration of Faith</h2><p>22 statements of core belief covering Scripture, Trinity, salvation, Holy Spirit, healing, and Second Coming.</p>', studyGuide: [{ title: 'Overview', content: '<p>22 statements based on Scripture.</p>' }], quizzes: [{q: "How many statements?", options: ["10", "22", "30", "40"], correct: 1, explanation: "22"}] }
+    ]
+  },
+  { id: 'polity', name: 'Polity', icon: '⚖️', color: 'from-emerald-500 to-teal-600', description: 'Church structure and governance', type: 'domain',
+    chapters: [
+      { id: 'polity-1', title: 'Church Government', reading: '<h2>Church Government</h2><p>Modified episcopal with congregational elements. Convention is highest body. Districts provide regional oversight.</p>', studyGuide: [{ title: 'Structure', content: '<p>Convention > Board > President > Districts > Local</p>' }], quizzes: [{q: "Highest governing body?", options: ["Board", "President", "Convention", "Local"], correct: 2, explanation: "Convention"}] }
+    ]
+  },
+  { id: 'practice', name: 'Ministry Practice', icon: '🙏', color: 'from-pink-500 to-rose-600', description: 'Practical ministry', type: 'domain',
+    chapters: [
+      { id: 'practice-1', title: 'Ordinances', reading: '<h2>Ordinances</h2><p>Two ordinances: Water Baptism by immersion and Lord\'s Supper. Both symbolic, not sacramental.</p>', studyGuide: [{ title: 'Two Ordinances', content: '<p>Baptism and Communion</p>' }], quizzes: [{q: "How many ordinances?", options: ["1", "2", "3", "7"], correct: 1, explanation: "Two"}] }
+    ]
+  },
+  { id: 'fopt', name: 'Foundations of Pentecostal Theology', icon: '📚', color: 'from-indigo-500 to-purple-600', description: 'Complete textbook (10 Chapters)', type: 'book',
+    chapters: [
+      { id: 'ch1', num: 1, title: 'The Doctrine of Scripture', hasFullText: true },
+      { id: 'ch2', num: 2, title: 'The Doctrine of God', hasFullText: true },
+      { id: 'ch3', num: 3, title: 'The Doctrine of Humankind', hasFullText: true },
+      { id: 'ch4', num: 4, title: 'The Doctrine of Sin', hasFullText: true },
+      { id: 'ch5', num: 5, title: 'The Doctrine of Salvation', hasFullText: true },
+      { id: 'ch6', num: 6, title: 'The Doctrine of the Holy Spirit', hasFullText: true },
+      { id: 'ch7', num: 7, title: 'The Doctrine of Divine Healing', hasFullText: true },
+      { id: 'ch8', num: 8, title: 'The Doctrine of the Church', hasFullText: true },
+      { id: 'ch9', num: 9, title: 'The Doctrine of Angels', hasFullText: true },
+      { id: 'ch10', num: 10, title: 'The Doctrine of Last Things', hasFullText: true }
+    ]
+  },
+  { id: 'aimee-bio', name: 'Aimee: Life Story', icon: '👩', color: 'from-rose-400 to-pink-500', description: 'Biography', type: 'book', comingSoon: true, chapters: [] },
+  { id: 'women-ministry', name: 'Women in Ministry', icon: '👩‍🏫', color: 'from-fuchsia-400 to-purple-500', description: 'Biblical position', type: 'book', comingSoon: true, chapters: [] },
+  { id: 'disciples-nations', name: 'Disciples of All Nations', icon: '🌍', color: 'from-cyan-400 to-blue-500', description: 'Missions', type: 'book', comingSoon: true, chapters: [] },
+  { id: 'identity-keystones', name: 'Foursquare Keystones', icon: '🔑', color: 'from-amber-400 to-orange-500', description: 'Five key areas', type: 'book', comingSoon: true, chapters: [] }
+];
+
+var FOPT_DATA = {
+  ch1: { studyGuide: [{ title: 'Scripture', content: '<p>God-breathed. 66 books. Verbal plenary inspiration.</p>' }], quizzes: [{q: "Books in Bible?", options: ["39","27","66","73"], correct: 2, explanation: "66"}] },
+  ch2: { studyGuide: [{ title: 'God', content: '<p>Trinity. One God, three persons.</p>' }], quizzes: [{q: "Persons in Trinity?", options: ["1","2","3","4"], correct: 2, explanation: "3"}] },
+  ch3: { studyGuide: [{ title: 'Humanity', content: '<p>Imago Dei. Body, soul, spirit.</p>' }], quizzes: [{q: "Imago Dei means?", options: ["Image of man","Image of God","Creation","Nature"], correct: 1, explanation: "Image of God"}] },
+  ch4: { studyGuide: [{ title: 'Sin', content: '<p>Hamartia = missing mark. Wages = death.</p>' }], quizzes: [{q: "Wages of sin?", options: ["Sickness","Poverty","Death","Suffering"], correct: 2, explanation: "Death"}] },
+  ch5: { studyGuide: [{ title: 'Salvation', content: '<p>By grace through faith. Not works.</p>' }], quizzes: [{q: "Salvation by?", options: ["Works","Grace","Baptism","Law"], correct: 1, explanation: "Grace through faith"}] },
+  ch6: { studyGuide: [{ title: 'Holy Spirit', content: '<p>Third person. Spirit baptism with tongues.</p>' }], quizzes: [{q: "Initial evidence?", options: ["Joy","Prophecy","Tongues","Healing"], correct: 2, explanation: "Tongues"}] },
+  ch7: { studyGuide: [{ title: 'Healing', content: '<p>In the atonement. Isaiah 53:5.</p>' }], quizzes: [{q: "Isaiah 53:5?", options: ["God is love","By stripes healed","Repent","Fear not"], correct: 1, explanation: "By His stripes"}] },
+  ch8: { studyGuide: [{ title: 'Church', content: '<p>Ekklesia = called out. Two ordinances.</p>' }], quizzes: [{q: "Ekklesia means?", options: ["Building","Called-out","Sacred","Worship"], correct: 1, explanation: "Called-out assembly"}] },
+  ch9: { studyGuide: [{ title: 'Angels', content: '<p>Created beings. Satan = fallen angel.</p>' }], quizzes: [{q: "Angels are?", options: ["Eternal","Created","Gods","Myths"], correct: 1, explanation: "Created beings"}] },
+  ch10: { studyGuide: [{ title: 'Last Things', content: '<p>Second coming. Rapture. Millennium.</p>' }], quizzes: [{q: "Millennium?", options: ["10 yrs","100 yrs","1000 yrs","Eternity"], correct: 2, explanation: "1000 years"}] }
+};
 
 // HELPERS
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
-  document.getElementById('screen-' + id).classList.add('active');
-}
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-' + id).classList.add('active'); }
 function showError(msg) { document.getElementById('login-error').textContent = msg; document.getElementById('login-error').classList.remove('hidden'); }
 function hideError() { document.getElementById('login-error').classList.add('hidden'); }
-function showLoading(show) { document.getElementById('login-loading').classList.toggle('hidden', !show); }
-function showSaveStatus() { var el = document.getElementById('save-status'); el.classList.remove('hidden'); setTimeout(function() { el.classList.add('hidden'); }, 2000); }
+function showSaveStatus() { var el = document.getElementById('save-status'); el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 2000); }
 
 function createDefaultProgress() {
-  var p = {};
-  CATEGORIES.forEach(function(cat) {
+  var p = { annotations: { highlights: [], notes: [], bookmarks: [] } };
+  CATEGORIES.forEach(cat => {
     p[cat.id] = {};
-    if (cat.chapters) {
-      cat.chapters.forEach(function(ch) {
-        p[cat.id][ch.id] = { read: false, studied: false, quizScore: 0 };
-      });
-    }
+    if (cat.chapters) cat.chapters.forEach(ch => { p[cat.id][ch.id] = { read: false, studied: false, quizScore: 0, lastPage: 1 }; });
   });
   return p;
 }
@@ -857,226 +572,235 @@ function createDefaultProgress() {
 async function handleRegister() {
   var name = document.getElementById('reg-name').value.trim();
   var email = document.getElementById('reg-email').value.trim();
-  var password = document.getElementById('reg-password').value;
-  if (!name || !email || !password) { showError('Please fill all fields'); return; }
-  if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
-  if (!supabase) { showError('Connecting... try again.'); return; }
-  hideError(); showLoading(true);
+  var pw = document.getElementById('reg-password').value;
+  if (!name || !email || !pw) return showError('Fill all fields');
+  if (pw.length < 6) return showError('Password min 6 chars');
+  if (!supabase) return showError('Connecting...');
+  hideError();
   try {
-    var result = await supabase.auth.signUp({ email: email, password: password, options: { data: { name: name } } });
-    if (result.error) throw result.error;
-    if (result.data.user) { currentUser = result.data.user; userProgress = createDefaultProgress(); await saveProgress(); showApp(); }
+    var r = await supabase.auth.signUp({ email, password: pw, options: { data: { name } } });
+    if (r.error) throw r.error;
+    currentUser = r.data.user; userProgress = createDefaultProgress(); await saveProgress(); showApp();
   } catch (e) { showError(e.message); }
-  showLoading(false);
 }
 
 async function handleLogin() {
   var email = document.getElementById('login-email').value.trim();
-  var password = document.getElementById('login-password').value;
-  if (!email || !password) { showError('Please fill all fields'); return; }
-  if (!supabase) { showError('Connecting... try again.'); return; }
-  hideError(); showLoading(true);
+  var pw = document.getElementById('login-password').value;
+  if (!email || !pw) return showError('Fill all fields');
+  if (!supabase) return showError('Connecting...');
+  hideError();
   try {
-    var result = await supabase.auth.signInWithPassword({ email: email, password: password });
-    if (result.error) throw result.error;
-    currentUser = result.data.user; await loadProgress(); showApp();
+    var r = await supabase.auth.signInWithPassword({ email, password: pw });
+    if (r.error) throw r.error;
+    currentUser = r.data.user; await loadProgress(); showApp();
   } catch (e) { showError(e.message); }
-  showLoading(false);
 }
 
 async function handleLogout() { if (supabase) await supabase.auth.signOut(); currentUser = null; userProgress = null; showScreen('login'); }
 
 async function loadProgress() {
   try {
-    var result = await supabase.from('progress').select('data').eq('user_id', currentUser.id).single();
-    if (result.data && result.data.data) { userProgress = result.data.data; }
-    else { userProgress = createDefaultProgress(); await saveProgress(); }
+    var r = await supabase.from('progress').select('data').eq('user_id', currentUser.id).single();
+    userProgress = r.data?.data || createDefaultProgress();
   } catch (e) { userProgress = createDefaultProgress(); }
-  CATEGORIES.forEach(function(cat) {
+  if (!userProgress.annotations) userProgress.annotations = { highlights: [], notes: [], bookmarks: [] };
+  CATEGORIES.forEach(cat => {
     if (!userProgress[cat.id]) userProgress[cat.id] = {};
-    if (cat.chapters) {
-      cat.chapters.forEach(function(ch) {
-        if (!userProgress[cat.id][ch.id]) userProgress[cat.id][ch.id] = { read: false, studied: false, quizScore: 0 };
-      });
-    }
+    if (cat.chapters) cat.chapters.forEach(ch => {
+      if (!userProgress[cat.id][ch.id]) userProgress[cat.id][ch.id] = { read: false, studied: false, quizScore: 0, lastPage: 1 };
+    });
   });
+  annotations = userProgress.annotations;
 }
 
 async function saveProgress() {
+  userProgress.annotations = annotations;
   try { await supabase.from('progress').upsert({ user_id: currentUser.id, data: userProgress, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); showSaveStatus(); }
-  catch (e) { console.error('Save failed:', e); }
+  catch (e) { console.error(e); }
 }
 
 function checkExistingSession() {
-  if (supabase) {
-    supabase.auth.getSession().then(function(result) {
-      if (result.data.session) { currentUser = result.data.session.user; loadProgress().then(showApp); }
-    }).catch(console.error);
-  }
+  supabase?.auth.getSession().then(r => { if (r.data.session) { currentUser = r.data.session.user; loadProgress().then(showApp); } }).catch(console.error);
 }
 
 // APP
 function showApp() {
   showScreen('app');
-  var name = currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || 'Student';
-  document.getElementById('user-greeting').textContent = 'Welcome, ' + name + '!';
+  document.getElementById('user-greeting').textContent = 'Welcome, ' + (currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || 'Student') + '!';
   renderCategories();
   updateOverallProgress();
+  renderNotesDashboard();
 }
 
 function backToApp() { showApp(); }
 
 function renderCategories() {
   var html = '';
-  CATEGORIES.forEach(function(cat) {
-    var isExpanded = expandedCategories[cat.id];
-    var progress = getCategoryProgress(cat);
-    
-    html += '<div class="bg-white rounded-xl shadow-sm border overflow-hidden">';
-    html += '<div class="category-header p-5 flex items-center justify-between" onclick="toggleCategory(\'' + cat.id + '\')">';
-    html += '<div class="flex items-center gap-4">';
-    html += '<div class="w-12 h-12 rounded-xl bg-gradient-to-br ' + cat.color + ' flex items-center justify-center text-2xl text-white shadow">' + cat.icon + '</div>';
-    html += '<div><h3 class="font-bold text-slate-800 text-lg">' + cat.name + '</h3>';
-    html += '<p class="text-sm text-slate-500">' + cat.description + '</p></div></div>';
-    html += '<div class="flex items-center gap-4">';
-    if (cat.comingSoon) {
-      html += '<span class="px-3 py-1 bg-slate-100 text-slate-500 text-sm rounded-full">Coming Soon</span>';
-    } else {
-      html += '<div class="text-right mr-2"><div class="text-lg font-bold text-slate-700">' + progress + '%</div><div class="text-xs text-slate-400">Complete</div></div>';
-    }
-    html += '<svg class="chevron w-5 h-5 text-slate-400 ' + (isExpanded ? 'rotated' : '') + '" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>';
-    html += '</div></div>';
-    
-    html += '<div class="category-content ' + (isExpanded ? 'expanded' : '') + '">';
-    if (!cat.comingSoon && cat.chapters && cat.chapters.length > 0) {
+  CATEGORIES.forEach(cat => {
+    var isExp = expandedCategories[cat.id];
+    var prog = getCategoryProgress(cat);
+    html += `<div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div class="category-header p-5 flex items-center justify-between" onclick="toggleCategory('${cat.id}')">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-2xl text-white shadow">${cat.icon}</div>
+          <div><h3 class="font-bold text-slate-800 text-lg">${cat.name}</h3><p class="text-sm text-slate-500">${cat.description}</p></div>
+        </div>
+        <div class="flex items-center gap-4">
+          ${cat.comingSoon ? '<span class="px-3 py-1 bg-slate-100 text-slate-500 text-sm rounded-full">Coming Soon</span>' : `<div class="text-right mr-2"><div class="text-lg font-bold text-slate-700">${prog}%</div><div class="text-xs text-slate-400">Complete</div></div>`}
+          <svg class="chevron w-5 h-5 text-slate-400 ${isExp ? 'rotated' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+      <div class="category-content ${isExp ? 'expanded' : ''}">`;
+    if (!cat.comingSoon && cat.chapters?.length) {
       html += '<div class="border-t px-5 py-4 space-y-2">';
-      cat.chapters.forEach(function(ch) {
-        var chProgress = userProgress[cat.id]?.[ch.id] || {};
-        var complete = chProgress.read && chProgress.studied && chProgress.quizScore >= 80;
-        var title = ch.num ? 'Ch. ' + ch.num + ': ' + ch.title : ch.title;
-        
-        html += '<div class="chapter-card flex items-center justify-between p-3 bg-slate-50 rounded-lg cursor-pointer" onclick="openChapter(\'' + cat.id + '\', \'' + ch.id + '\')">';
-        html += '<div class="flex items-center gap-3">';
-        if (complete) {
-          html += '<div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">✓</div>';
-        } else {
-          html += '<div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm">' + (ch.num || '•') + '</div>';
-        }
-        html += '<span class="font-medium text-slate-700">' + title + '</span></div>';
-        html += '<div class="flex items-center gap-2 text-xs">';
-        html += '<span class="' + (chProgress.read ? 'text-green-600' : 'text-slate-400') + '">📖</span>';
-        html += '<span class="' + (chProgress.studied ? 'text-green-600' : 'text-slate-400') + '">📝</span>';
-        html += '<span class="' + (chProgress.quizScore >= 80 ? 'text-green-600' : 'text-slate-400') + '">✅' + (chProgress.quizScore > 0 ? chProgress.quizScore + '%' : '') + '</span>';
-        html += '<svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
-        html += '</div></div>';
+      cat.chapters.forEach(ch => {
+        var p = userProgress[cat.id]?.[ch.id] || {};
+        var done = p.read && p.studied && p.quizScore >= 80;
+        var title = ch.num ? `Ch. ${ch.num}: ${ch.title}` : ch.title;
+        html += `<div class="chapter-card flex items-center justify-between p-3 bg-slate-50 rounded-lg cursor-pointer" onclick="openChapter('${cat.id}','${ch.id}')">
+          <div class="flex items-center gap-3">
+            ${done ? '<div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">✓</div>' : `<div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm">${ch.num||'•'}</div>`}
+            <span class="font-medium text-slate-700">${title}</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="${p.read ? 'text-green-600' : 'text-slate-400'}">📖</span>
+            <span class="${p.studied ? 'text-green-600' : 'text-slate-400'}">📝</span>
+            <span class="${p.quizScore >= 80 ? 'text-green-600' : 'text-slate-400'}">✅${p.quizScore > 0 ? p.quizScore+'%' : ''}</span>
+          </div>
+        </div>`;
       });
       html += '</div>';
     } else if (cat.comingSoon) {
-      html += '<div class="border-t px-5 py-8 text-center text-slate-400"><p>This content is coming soon!</p></div>';
+      html += '<div class="border-t px-5 py-8 text-center text-slate-400">Coming soon!</div>';
     }
     html += '</div></div>';
   });
   document.getElementById('categories-container').innerHTML = html;
 }
 
-function toggleCategory(catId) {
-  expandedCategories[catId] = !expandedCategories[catId];
-  renderCategories();
-}
+function toggleCategory(id) { expandedCategories[id] = !expandedCategories[id]; renderCategories(); }
 
 function getCategoryProgress(cat) {
-  if (cat.comingSoon || !cat.chapters || cat.chapters.length === 0) return 0;
-  var total = cat.chapters.length * 3;
-  var done = 0;
-  cat.chapters.forEach(function(ch) {
-    var p = userProgress[cat.id]?.[ch.id] || {};
-    if (p.read) done++;
-    if (p.studied) done++;
-    if (p.quizScore >= 80) done++;
-  });
-  return Math.round((done / total) * 100);
+  if (cat.comingSoon || !cat.chapters?.length) return 0;
+  var t = cat.chapters.length * 3, d = 0;
+  cat.chapters.forEach(ch => { var p = userProgress[cat.id]?.[ch.id] || {}; if (p.read) d++; if (p.studied) d++; if (p.quizScore >= 80) d++; });
+  return Math.round((d / t) * 100);
 }
 
 function updateOverallProgress() {
-  var totalItems = 0;
-  var doneItems = 0;
-  CATEGORIES.forEach(function(cat) {
-    if (!cat.comingSoon && cat.chapters) {
-      cat.chapters.forEach(function(ch) {
-        totalItems += 3;
-        var p = userProgress[cat.id]?.[ch.id] || {};
-        if (p.read) doneItems++;
-        if (p.studied) doneItems++;
-        if (p.quizScore >= 80) doneItems++;
-      });
-    }
+  var t = 0, d = 0;
+  CATEGORIES.forEach(cat => {
+    if (!cat.comingSoon && cat.chapters) cat.chapters.forEach(ch => { t += 3; var p = userProgress[cat.id]?.[ch.id] || {}; if (p.read) d++; if (p.studied) d++; if (p.quizScore >= 80) d++; });
   });
-  var pct = totalItems > 0 ? Math.round((doneItems / totalItems) * 100) : 0;
+  var pct = t > 0 ? Math.round((d / t) * 100) : 0;
   document.getElementById('overall-progress').textContent = pct + '%';
   document.getElementById('progress-bar').style.width = pct + '%';
 }
 
+// Notes Dashboard
+function renderNotesDashboard() {
+  var all = [...annotations.notes, ...annotations.highlights, ...annotations.bookmarks].sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (all.length === 0) { document.getElementById('notes-dashboard').classList.add('hidden'); return; }
+  document.getElementById('notes-dashboard').classList.remove('hidden');
+  var recent = all.slice(0, 3);
+  var html = '';
+  recent.forEach(n => {
+    var icon = n.type === 'note' ? '📝' : n.type === 'highlight' ? '🖍️' : '🔖';
+    html += `<div class="note-card"><div class="flex items-start gap-2"><span>${icon}</span><div class="flex-1"><div class="text-sm font-medium">${n.chapterTitle || 'Unknown'}</div><div class="text-xs text-slate-500">${n.text?.substring(0, 80) || 'Page ' + n.page}${n.text?.length > 80 ? '...' : ''}</div></div></div></div>`;
+  });
+  document.getElementById('recent-notes').innerHTML = html;
+}
+
+function toggleNotesDashboard() {
+  showScreen('notes');
+  filterNotes('all');
+}
+
+function filterNotes(type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-red-600', 'text-white'));
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-slate-100', 'text-slate-700'));
+  event.target.classList.remove('bg-slate-100', 'text-slate-700');
+  event.target.classList.add('bg-red-600', 'text-white');
+  
+  var items = [];
+  if (type === 'all' || type === 'notes') items = items.concat(annotations.notes.map(n => ({...n, type: 'note'})));
+  if (type === 'all' || type === 'highlights') items = items.concat(annotations.highlights.map(h => ({...h, type: 'highlight'})));
+  if (type === 'all' || type === 'bookmarks') items = items.concat(annotations.bookmarks.map(b => ({...b, type: 'bookmark'})));
+  items.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  var html = '';
+  if (items.length === 0) html = '<p class="text-slate-500 text-center py-8">No items yet</p>';
+  items.forEach(n => {
+    var icon = n.type === 'note' ? '📝' : n.type === 'highlight' ? '🖍️' : '🔖';
+    var color = n.color ? `highlight-${n.color}` : '';
+    html += `<div class="bg-white rounded-xl border p-4">
+      <div class="flex items-start gap-3">
+        <span class="text-xl">${icon}</span>
+        <div class="flex-1">
+          <div class="font-medium">${n.chapterTitle || 'Chapter'}</div>
+          <div class="text-sm text-slate-500 mb-2">Page ${n.page} • ${new Date(n.date).toLocaleDateString()}</div>
+          ${n.quote ? `<div class="text-sm ${color} px-2 py-1 rounded mb-2">"${n.quote}"</div>` : ''}
+          ${n.text ? `<div class="text-sm">${n.text}</div>` : ''}
+        </div>
+        <button onclick="deleteAnnotation('${n.type}', '${n.id}')" class="text-slate-400 hover:text-red-500">✕</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('all-notes-list').innerHTML = html;
+}
+
+function deleteAnnotation(type, id) {
+  if (type === 'note') annotations.notes = annotations.notes.filter(n => n.id !== id);
+  if (type === 'highlight') annotations.highlights = annotations.highlights.filter(h => h.id !== id);
+  if (type === 'bookmark') annotations.bookmarks = annotations.bookmarks.filter(b => b.id !== id);
+  saveProgress();
+  filterNotes('all');
+}
+
 // CHAPTER VIEW
 function openChapter(catId, chId) {
-  currentCategory = CATEGORIES.find(function(c) { return c.id === catId; });
-  currentChapter = currentCategory.chapters.find(function(ch) { return ch.id === chId; });
-  studyIndex = 0;
-  quizIndex = 0;
-  quizScore = 0;
-  selectedAnswer = null;
-  
+  currentCategory = CATEGORIES.find(c => c.id === catId);
+  currentChapter = currentCategory.chapters.find(c => c.id === chId);
+  studyIndex = 0; quizIndex = 0; quizScore = 0;
   showScreen('chapter');
   document.getElementById('chapter-category').textContent = currentCategory.name;
-  var title = currentChapter.num ? 'Chapter ' + currentChapter.num + ': ' + currentChapter.title : currentChapter.title;
-  document.getElementById('chapter-title').textContent = title;
+  document.getElementById('chapter-title').textContent = currentChapter.num ? `Chapter ${currentChapter.num}: ${currentChapter.title}` : currentChapter.title;
   updateChapterBadge();
   switchTab('read');
 }
 
 function updateChapterBadge() {
   var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
-  var badge = p.quizScore > 0 ? 'Quiz: ' + p.quizScore + '%' : '';
-  document.getElementById('chapter-badge').textContent = badge;
+  document.getElementById('chapter-badge').textContent = p.quizScore > 0 ? `Quiz: ${p.quizScore}%` : '';
 }
 
 function switchTab(tab) {
-  document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.toggle('active', btn.dataset.tab === tab); });
-  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.add('hidden'); });
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
   document.getElementById('tab-' + tab).classList.remove('hidden');
-  
   if (tab === 'read') loadReadContent();
   else if (tab === 'study') loadStudyContent();
   else if (tab === 'quiz') startQuiz();
 }
 
-// READ TAB
+// READ
 function loadReadContent() {
   document.getElementById('reading-loading').classList.remove('hidden');
   document.getElementById('reading-preview').classList.add('hidden');
   
   if (currentCategory.id === 'fopt' && currentChapter.hasFullText) {
     var chId = currentChapter.id;
-    if (loadedContent[chId]) {
-      displayReadPreview(loadedContent[chId]);
-    } else {
-      var script = document.createElement('script');
-      script.src = 'chapters/' + chId + '.js';
-      script.onload = function() {
-        var varName = 'FOPT_' + chId.toUpperCase();
-        if (window[varName]) {
-          loadedContent[chId] = window[varName].content;
-          displayReadPreview(loadedContent[chId]);
-        }
-      };
-      script.onerror = function() {
-        document.getElementById('reading-loading').innerHTML = '<p class="text-red-500">Failed to load. Make sure chapters/ folder is uploaded.</p>';
-      };
-      document.head.appendChild(script);
-    }
+    if (loadedContent[chId]) return displayReadPreview(loadedContent[chId]);
+    var s = document.createElement('script');
+    s.src = 'chapters/' + chId + '.js';
+    s.onload = () => { var v = 'FOPT_' + chId.toUpperCase(); if (window[v]) { loadedContent[chId] = window[v].content; displayReadPreview(loadedContent[chId]); } };
+    s.onerror = () => { document.getElementById('reading-loading').innerHTML = '<p class="text-red-500">Failed to load chapter file.</p>'; };
+    document.head.appendChild(s);
   } else if (currentChapter.reading) {
     displayReadPreview(currentChapter.reading);
   } else {
-    document.getElementById('reading-loading').innerHTML = '<p class="text-slate-500">No reading content available.</p>';
+    document.getElementById('reading-loading').innerHTML = '<p class="text-slate-500">No content available.</p>';
   }
 }
 
@@ -1084,232 +808,323 @@ function displayReadPreview(content) {
   currentReadingContent = content;
   document.getElementById('reading-loading').classList.add('hidden');
   document.getElementById('reading-preview').classList.remove('hidden');
+  var preview = content.substring(0, 800).replace(/\n\n/g, '</p><p>');
+  document.getElementById('preview-text').innerHTML = '<p>' + preview + '...</p>';
   
-  // Show preview (first 500 chars)
-  var preview = content;
-  if (!content.includes('<')) {
-    preview = content.substring(0, 1000) + '...';
-    preview = '<p>' + preview.replace(/\n\n/g, '</p><p>') + '</p>';
+  var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
+  if (p.lastPage > 1) {
+    document.getElementById('btn-resume').classList.remove('hidden');
+    document.getElementById('resume-page').textContent = p.lastPage;
   } else {
-    // Just show beginning
-    preview = content.substring(0, 1500) + '...';
+    document.getElementById('btn-resume').classList.add('hidden');
   }
-  document.getElementById('preview-text').innerHTML = preview;
 }
 
 function markReadComplete() {
-  if (!userProgress[currentCategory.id]) userProgress[currentCategory.id] = {};
-  if (!userProgress[currentCategory.id][currentChapter.id]) userProgress[currentCategory.id][currentChapter.id] = {};
   userProgress[currentCategory.id][currentChapter.id].read = true;
   saveProgress();
-  updateChapterBadge();
   alert('Marked as read! ✓');
 }
 
-// FULL READER
+// READER
 function openReader() {
   showScreen('reader');
+  paginateContent();
+  currentPageNum = 1;
   applyReaderSettings();
-  
-  var title = currentChapter.num ? 'Chapter ' + currentChapter.num : currentChapter.title;
-  document.getElementById('reader-title').textContent = title;
-  
-  // Format content
-  var content = currentReadingContent;
-  if (!content.includes('<')) {
-    content = content.split('\n\n').map(function(p) {
-      return '<p>' + p.trim().replace(/\n/g, '<br>') + '</p>';
-    }).join('');
-  }
-  document.getElementById('reader-text').innerHTML = content;
-  
-  // Setup scroll listener for progress
-  var container = document.getElementById('reader-text-container');
-  container.onscroll = updateReadingProgress;
-  
-  // Show toolbar on tap
-  container.onclick = function() {
-    toggleToolbar();
-  };
+  document.getElementById('reader-title').textContent = currentChapter.num ? `Chapter ${currentChapter.num}` : currentChapter.title;
+  renderPage();
+  setupTextSelection();
+}
+
+function resumeReading() {
+  var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
+  openReader();
+  currentPageNum = p.lastPage || 1;
+  renderPage();
 }
 
 function closeReader() {
+  userProgress[currentCategory.id][currentChapter.id].lastPage = currentPageNum;
+  saveProgress();
   showScreen('chapter');
 }
 
-function toggleToolbar() {
-  var toolbar = document.getElementById('reader-toolbar');
-  toolbarVisible = !toolbarVisible;
-  toolbar.classList.toggle('hidden', !toolbarVisible);
+function paginateContent() {
+  var text = currentReadingContent;
+  // Split into paragraphs
+  var paras = text.split(/\n\n+/);
+  contentPages = [];
+  var currentPage = '';
+  var charCount = 0;
   
-  // Auto-hide after 3 seconds
-  if (toolbarVisible) {
-    clearTimeout(toolbarTimeout);
-    toolbarTimeout = setTimeout(function() {
-      if (!settingsOpen) {
-        toolbar.classList.add('hidden');
-        toolbarVisible = false;
-      }
-    }, 3000);
+  paras.forEach(p => {
+    if (charCount + p.length > CHARS_PER_PAGE && currentPage) {
+      contentPages.push(currentPage);
+      currentPage = '';
+      charCount = 0;
+    }
+    currentPage += '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+    charCount += p.length;
+  });
+  if (currentPage) contentPages.push(currentPage);
+  if (contentPages.length === 0) contentPages = ['<p>No content</p>'];
+  
+  document.getElementById('total-pages').textContent = contentPages.length;
+}
+
+function renderPage() {
+  var page = contentPages[currentPageNum - 1] || '';
+  // Apply highlights
+  var chapterHighlights = annotations.highlights.filter(h => h.chapterId === currentChapter.id && h.page === currentPageNum);
+  chapterHighlights.forEach(h => {
+    if (h.quote) {
+      var regex = new RegExp(escapeRegex(h.quote), 'gi');
+      page = page.replace(regex, `<span class="highlight-${h.color}" data-highlight-id="${h.id}">${h.quote}</span>`);
+    }
+  });
+  
+  document.getElementById('reader-page').innerHTML = page;
+  document.getElementById('page-input').value = currentPageNum;
+  document.getElementById('reader-page-info').textContent = `Page ${currentPageNum} of ${contentPages.length}`;
+  document.getElementById('btn-prev-page').disabled = currentPageNum <= 1;
+  document.getElementById('btn-next-page').disabled = currentPageNum >= contentPages.length;
+  document.getElementById('reading-progress').style.width = ((currentPageNum / contentPages.length) * 100) + '%';
+  
+  // Check bookmark
+  var hasBookmark = annotations.bookmarks.some(b => b.chapterId === currentChapter.id && b.page === currentPageNum);
+  document.getElementById('btn-bookmark').innerHTML = hasBookmark ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+  
+  renderChapterNotes();
+}
+
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function prevPage() { if (currentPageNum > 1) { currentPageNum--; renderPage(); } }
+function nextPage() { if (currentPageNum < contentPages.length) { currentPageNum++; renderPage(); } }
+function goToPage(n) { n = parseInt(n); if (n >= 1 && n <= contentPages.length) { currentPageNum = n; renderPage(); } }
+
+// Text Selection for Highlighting
+function setupTextSelection() {
+  document.getElementById('reader-page').addEventListener('mouseup', handleSelection);
+  document.getElementById('reader-page').addEventListener('touchend', handleSelection);
+}
+
+function handleSelection(e) {
+  var sel = window.getSelection();
+  var text = sel.toString().trim();
+  if (text.length > 0) {
+    pendingSelection = text;
+    var range = sel.getRangeAt(0);
+    var rect = range.getBoundingClientRect();
+    var popup = document.getElementById('selection-popup');
+    popup.style.top = (rect.top + window.scrollY - 50) + 'px';
+    popup.style.left = (rect.left + rect.width/2 - 80) + 'px';
+    popup.classList.add('show');
+  } else {
+    document.getElementById('selection-popup').classList.remove('show');
   }
+}
+
+function addHighlight(color) {
+  if (!pendingSelection) return;
+  annotations.highlights.push({
+    id: Date.now().toString(),
+    chapterId: currentChapter.id,
+    chapterTitle: currentChapter.title,
+    page: currentPageNum,
+    quote: pendingSelection,
+    color: color,
+    date: new Date().toISOString()
+  });
+  saveProgress();
+  document.getElementById('selection-popup').classList.remove('show');
+  window.getSelection().removeAllRanges();
+  renderPage();
+}
+
+function addNoteToSelection() {
+  if (!pendingSelection) return;
+  document.getElementById('note-modal-quote').textContent = '"' + pendingSelection.substring(0, 100) + (pendingSelection.length > 100 ? '...' : '') + '"';
+  document.getElementById('note-modal-text').value = '';
+  document.getElementById('note-modal').classList.remove('hidden');
+  document.getElementById('selection-popup').classList.remove('show');
+}
+
+function addPageNote() {
+  pendingSelection = '';
+  document.getElementById('note-modal-quote').textContent = 'Note for Page ' + currentPageNum;
+  document.getElementById('note-modal-text').value = '';
+  document.getElementById('note-modal').classList.remove('hidden');
+}
+
+function closeNoteModal() {
+  document.getElementById('note-modal').classList.add('hidden');
+  pendingSelection = null;
+}
+
+function saveNote() {
+  var text = document.getElementById('note-modal-text').value.trim();
+  if (!text) return;
+  annotations.notes.push({
+    id: Date.now().toString(),
+    chapterId: currentChapter.id,
+    chapterTitle: currentChapter.title,
+    page: currentPageNum,
+    quote: pendingSelection || null,
+    text: text,
+    date: new Date().toISOString()
+  });
+  saveProgress();
+  closeNoteModal();
+  renderPage();
+}
+
+// Bookmarks
+function toggleBookmark() {
+  var existing = annotations.bookmarks.findIndex(b => b.chapterId === currentChapter.id && b.page === currentPageNum);
+  if (existing >= 0) {
+    annotations.bookmarks.splice(existing, 1);
+  } else {
+    annotations.bookmarks.push({
+      id: Date.now().toString(),
+      chapterId: currentChapter.id,
+      chapterTitle: currentChapter.title,
+      page: currentPageNum,
+      date: new Date().toISOString()
+    });
+  }
+  saveProgress();
+  renderPage();
+}
+
+// Reader panels
+function toggleReaderNotes() {
+  document.getElementById('notes-panel').classList.toggle('open');
+  document.getElementById('reader-overlay').classList.toggle('hidden', !document.getElementById('notes-panel').classList.contains('open'));
+}
+
+function toggleTOC() {
+  document.getElementById('toc-panel').classList.toggle('open');
+  document.getElementById('reader-overlay').classList.toggle('hidden', !document.getElementById('toc-panel').classList.contains('open'));
+  renderTOC();
 }
 
 function toggleSettings() {
-  settingsOpen = !settingsOpen;
-  document.getElementById('reader-settings').classList.toggle('open', settingsOpen);
-  updateSettingsUI();
+  document.getElementById('settings-drawer').classList.toggle('open');
 }
 
-function updateReadingProgress() {
-  var container = document.getElementById('reader-text-container');
-  var scrollTop = container.scrollTop;
-  var scrollHeight = container.scrollHeight - container.clientHeight;
-  var progress = scrollHeight > 0 ? (scrollTop / scrollHeight) * 100 : 0;
-  document.getElementById('reading-progress').style.width = progress + '%';
+function closeAllPanels() {
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('toc-panel').classList.remove('open');
+  document.getElementById('reader-overlay').classList.add('hidden');
 }
 
-// READER SETTINGS
-function setTheme(theme) {
-  readerSettings.theme = theme;
-  saveReaderSettings();
-  applyReaderSettings();
+function renderChapterNotes() {
+  var notes = annotations.notes.filter(n => n.chapterId === currentChapter.id);
+  var highlights = annotations.highlights.filter(h => h.chapterId === currentChapter.id);
+  var all = [...notes.map(n => ({...n, type: 'note'})), ...highlights.map(h => ({...h, type: 'highlight'}))].sort((a, b) => a.page - b.page);
+  
+  if (all.length === 0) {
+    document.getElementById('chapter-notes-list').innerHTML = '<p class="text-slate-500 text-center">No notes yet. Select text to highlight or add notes.</p>';
+    return;
+  }
+  
+  var html = '';
+  all.forEach(n => {
+    html += `<div class="note-card cursor-pointer" onclick="goToPage(${n.page})">
+      <div class="text-xs text-slate-500 mb-1">Page ${n.page}</div>
+      ${n.quote ? `<div class="text-sm highlight-${n.color || 'yellow'} px-1 rounded">"${n.quote.substring(0, 60)}..."</div>` : ''}
+      ${n.text ? `<div class="text-sm mt-1">${n.text}</div>` : ''}
+    </div>`;
+  });
+  document.getElementById('chapter-notes-list').innerHTML = html;
 }
 
-function setFont(font) {
-  readerSettings.font = font;
-  saveReaderSettings();
-  applyReaderSettings();
+function renderTOC() {
+  var bookmarks = annotations.bookmarks.filter(b => b.chapterId === currentChapter.id);
+  var html = '<div class="mb-4"><div class="font-medium text-sm text-slate-500 mb-2">Pages</div>';
+  for (var i = 1; i <= contentPages.length; i++) {
+    var hasBookmark = bookmarks.some(b => b.page === i);
+    html += `<div class="flex items-center justify-between py-2 px-3 rounded hover:bg-slate-100 cursor-pointer ${i === currentPageNum ? 'bg-slate-100' : ''}" onclick="goToPage(${i}); toggleTOC();">
+      <span>Page ${i}</span>
+      ${hasBookmark ? '<span class="text-red-500">🔖</span>' : ''}
+    </div>`;
+  }
+  html += '</div>';
+  document.getElementById('toc-list').innerHTML = html;
 }
 
-function adjustFontSize(delta) {
-  readerSettings.fontSize = Math.max(14, Math.min(28, readerSettings.fontSize + (delta * 2)));
-  saveReaderSettings();
-  applyReaderSettings();
-}
-
-function setLineHeight(lh) {
-  readerSettings.lineHeight = lh;
-  saveReaderSettings();
-  applyReaderSettings();
-}
+// Reader Settings
+function setTheme(t) { readerSettings.theme = t; saveReaderSettings(); applyReaderSettings(); }
+function setFont(f) { readerSettings.font = f; saveReaderSettings(); applyReaderSettings(); }
+function adjustFontSize(d) { readerSettings.fontSize = Math.max(14, Math.min(28, readerSettings.fontSize + d)); saveReaderSettings(); applyReaderSettings(); }
+function setLineHeight(h) { readerSettings.lineHeight = h; saveReaderSettings(); applyReaderSettings(); }
 
 function applyReaderSettings() {
-  var container = document.getElementById('reader-container');
-  var textEl = document.getElementById('reader-text');
-  
-  // Theme
-  container.className = 'reader-container theme-' + readerSettings.theme + ' font-' + readerSettings.font;
-  
-  // Font size
-  textEl.style.fontSize = readerSettings.fontSize + 'px';
+  var c = document.getElementById('reader-container');
+  c.className = `reader-container theme-${readerSettings.theme} font-${readerSettings.font}`;
+  var p = document.getElementById('reader-page');
+  p.style.fontSize = readerSettings.fontSize + 'px';
+  p.style.lineHeight = readerSettings.lineHeight;
   document.getElementById('font-size-display').textContent = readerSettings.fontSize + 'px';
   
-  // Line height
-  textEl.style.lineHeight = readerSettings.lineHeight;
-  
-  updateSettingsUI();
-}
-
-function updateSettingsUI() {
-  // Update theme buttons
-  document.querySelectorAll('.theme-btn').forEach(function(btn) {
-    btn.classList.remove('active');
-  });
-  
-  // Update font buttons
-  document.querySelectorAll('.font-btn').forEach(function(btn) {
-    btn.classList.remove('active');
-  });
-}
-
-// STUDY TAB
-function loadStudyContent() {
-  var studyGuide = null;
-  if (currentCategory.id === 'fopt' && FOPT_DATA[currentChapter.id]) {
-    studyGuide = FOPT_DATA[currentChapter.id].studyGuide;
-  } else if (currentChapter.studyGuide) {
-    studyGuide = currentChapter.studyGuide;
-  }
-  
-  if (!studyGuide || studyGuide.length === 0) {
-    document.getElementById('study-content').innerHTML = '<p class="text-slate-500">No study guide available.</p>';
-    document.getElementById('study-prev').classList.add('hidden');
-    document.getElementById('study-next').classList.add('hidden');
-    return;
-  }
-  
-  studyIndex = 0;
-  renderStudyLesson(studyGuide);
-}
-
-function renderStudyLesson(studyGuide) {
-  var lesson = studyGuide[studyIndex];
-  var html = '<div class="text-sm text-slate-500 mb-2">Part ' + (studyIndex + 1) + ' of ' + studyGuide.length + '</div>';
-  html += '<h2 class="text-xl font-bold text-slate-800 mb-4">' + lesson.title + '</h2>';
-  html += '<div class="lesson-content">' + lesson.content + '</div>';
-  document.getElementById('study-content').innerHTML = html;
-  
-  document.getElementById('study-prev').classList.toggle('hidden', studyIndex === 0);
-  document.getElementById('study-next').textContent = studyIndex === studyGuide.length - 1 ? 'Complete Study ✓' : 'Next →';
-  
-  window._currentStudyGuide = studyGuide;
-}
-
-document.getElementById('study-prev').onclick = function() {
-  if (studyIndex > 0) { studyIndex--; renderStudyLesson(window._currentStudyGuide); }
-};
-
-document.getElementById('study-next').onclick = function() {
-  var sg = window._currentStudyGuide;
-  if (!sg) return;
-  if (studyIndex < sg.length - 1) {
-    studyIndex++;
-    renderStudyLesson(sg);
+  // Update header/nav colors for dark themes
+  var header = document.getElementById('reader-header');
+  var nav = document.getElementById('page-nav');
+  if (readerSettings.theme === 'dark' || readerSettings.theme === 'night') {
+    header.style.background = 'rgba(30,30,30,0.95)';
+    header.style.borderColor = '#404040';
+    nav.style.background = 'rgba(30,30,30,0.95)';
   } else {
-    if (!userProgress[currentCategory.id]) userProgress[currentCategory.id] = {};
-    if (!userProgress[currentCategory.id][currentChapter.id]) userProgress[currentCategory.id][currentChapter.id] = {};
-    userProgress[currentCategory.id][currentChapter.id].studied = true;
-    saveProgress();
-    updateChapterBadge();
-    switchTab('quiz');
+    header.style.background = 'rgba(255,255,255,0.95)';
+    header.style.borderColor = '#e5e7eb';
+    nav.style.background = 'rgba(255,255,255,0.95)';
   }
+}
+
+// STUDY
+function loadStudyContent() {
+  var sg = currentCategory.id === 'fopt' ? FOPT_DATA[currentChapter.id]?.studyGuide : currentChapter.studyGuide;
+  if (!sg?.length) { document.getElementById('study-content').innerHTML = '<p class="text-slate-500">No study guide.</p>'; return; }
+  studyIndex = 0;
+  window._sg = sg;
+  renderStudyLesson();
+}
+
+function renderStudyLesson() {
+  var sg = window._sg;
+  var l = sg[studyIndex];
+  document.getElementById('study-content').innerHTML = `<div class="text-sm text-slate-500 mb-2">Part ${studyIndex+1} of ${sg.length}</div><h2 class="text-xl font-bold mb-4">${l.title}</h2><div class="lesson-content">${l.content}</div>`;
+  document.getElementById('study-prev').classList.toggle('hidden', studyIndex === 0);
+  document.getElementById('study-next').textContent = studyIndex === sg.length - 1 ? 'Complete ✓' : 'Next →';
+}
+
+document.getElementById('study-prev').onclick = () => { if (studyIndex > 0) { studyIndex--; renderStudyLesson(); } };
+document.getElementById('study-next').onclick = () => {
+  var sg = window._sg;
+  if (studyIndex < sg.length - 1) { studyIndex++; renderStudyLesson(); }
+  else { userProgress[currentCategory.id][currentChapter.id].studied = true; saveProgress(); switchTab('quiz'); }
 };
 
-// QUIZ TAB
+// QUIZ
 function startQuiz() {
-  var quizzes = null;
-  if (currentCategory.id === 'fopt' && FOPT_DATA[currentChapter.id]) {
-    quizzes = FOPT_DATA[currentChapter.id].quizzes;
-  } else if (currentChapter.quizzes) {
-    quizzes = currentChapter.quizzes;
-  }
-  
-  if (!quizzes || quizzes.length === 0) {
-    document.getElementById('quiz-container').innerHTML = '<p class="text-slate-500">No quiz available.</p>';
-    return;
-  }
-  
-  window._currentQuizzes = quizzes;
-  quizIndex = 0;
-  quizScore = 0;
-  selectedAnswer = null;
+  var q = currentCategory.id === 'fopt' ? FOPT_DATA[currentChapter.id]?.quizzes : currentChapter.quizzes;
+  if (!q?.length) { document.getElementById('quiz-container').innerHTML = '<p class="text-slate-500">No quiz.</p>'; return; }
+  window._q = q;
+  quizIndex = 0; quizScore = 0;
   document.getElementById('quiz-container').classList.remove('hidden');
   document.getElementById('quiz-results').classList.add('hidden');
   renderQuizQuestion();
 }
 
 function renderQuizQuestion() {
-  var quizzes = window._currentQuizzes;
-  var q = quizzes[quizIndex];
-  document.getElementById('quiz-counter').textContent = 'Question ' + (quizIndex + 1) + ' of ' + quizzes.length;
+  var q = window._q[quizIndex];
+  document.getElementById('quiz-counter').textContent = `Question ${quizIndex+1} of ${window._q.length}`;
   document.getElementById('quiz-question').textContent = q.q;
-  
-  var letters = ['A', 'B', 'C', 'D'];
   var html = '';
-  q.options.forEach(function(opt, i) {
-    html += '<button class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" onclick="selectAnswer(' + i + ')" data-index="' + i + '">';
-    html += '<span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">' + letters[i] + '</span>';
-    html += '<span>' + opt + '</span></button>';
+  ['A','B','C','D'].forEach((l, i) => {
+    if (q.options[i]) html += `<button class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" onclick="selectAnswer(${i})" data-index="${i}"><span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">${l}</span><span>${q.options[i]}</span></button>`;
   });
   document.getElementById('quiz-options').innerHTML = html;
   document.getElementById('quiz-feedback').classList.add('hidden');
@@ -1321,70 +1136,52 @@ function renderQuizQuestion() {
 
 function selectAnswer(i) {
   selectedAnswer = i;
-  document.querySelectorAll('.quiz-option').forEach(function(btn, idx) {
-    btn.classList.toggle('selected', idx === i);
-  });
+  document.querySelectorAll('.quiz-option').forEach((b, idx) => b.classList.toggle('selected', idx === i));
   document.getElementById('quiz-submit').disabled = false;
 }
 
-document.getElementById('quiz-submit').onclick = function() {
-  var q = window._currentQuizzes[quizIndex];
+document.getElementById('quiz-submit').onclick = () => {
+  var q = window._q[quizIndex];
   var correct = selectedAnswer === q.correct;
   if (correct) quizScore++;
-  
-  document.querySelectorAll('.quiz-option').forEach(function(btn) {
-    var idx = parseInt(btn.dataset.index);
-    btn.onclick = null;
-    if (idx === q.correct) btn.classList.add('correct');
-    else if (idx === selectedAnswer && !correct) btn.classList.add('incorrect');
+  document.querySelectorAll('.quiz-option').forEach(b => {
+    var idx = parseInt(b.dataset.index);
+    b.onclick = null;
+    if (idx === q.correct) b.classList.add('correct');
+    else if (idx === selectedAnswer && !correct) b.classList.add('incorrect');
   });
-  
   var fb = document.getElementById('quiz-feedback');
   fb.classList.remove('hidden');
   fb.className = 'mt-6 p-4 rounded-lg ' + (correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200');
-  fb.innerHTML = '<div class="font-medium ' + (correct ? 'text-green-800">✓ Correct!' : 'text-red-800">✗ Incorrect') + '</div><div class="text-sm mt-1">' + q.explanation + '</div>';
-  
+  fb.innerHTML = `<div class="font-medium ${correct ? 'text-green-800">✓ Correct!' : 'text-red-800">✗ Incorrect'}</div><div class="text-sm mt-1">${q.explanation}</div>`;
   document.getElementById('quiz-submit').classList.add('hidden');
   document.getElementById('quiz-next').classList.remove('hidden');
-  document.getElementById('quiz-next').textContent = quizIndex === window._currentQuizzes.length - 1 ? 'See Results' : 'Next →';
+  document.getElementById('quiz-next').textContent = quizIndex === window._q.length - 1 ? 'See Results' : 'Next →';
 };
 
-document.getElementById('quiz-next').onclick = function() {
-  if (quizIndex < window._currentQuizzes.length - 1) {
-    quizIndex++;
-    renderQuizQuestion();
-  } else {
-    showQuizResults();
-  }
+document.getElementById('quiz-next').onclick = () => {
+  if (quizIndex < window._q.length - 1) { quizIndex++; renderQuizQuestion(); }
+  else { showQuizResults(); }
 };
 
 async function showQuizResults() {
-  var total = window._currentQuizzes.length;
-  var pct = Math.round((quizScore / total) * 100);
-  var passed = pct >= 80;
-  
-  if (!userProgress[currentCategory.id]) userProgress[currentCategory.id] = {};
-  if (!userProgress[currentCategory.id][currentChapter.id]) userProgress[currentCategory.id][currentChapter.id] = {};
-  var currentBest = userProgress[currentCategory.id][currentChapter.id].quizScore || 0;
-  if (pct > currentBest) {
-    userProgress[currentCategory.id][currentChapter.id].quizScore = pct;
-  }
+  var pct = Math.round((quizScore / window._q.length) * 100);
+  var best = userProgress[currentCategory.id][currentChapter.id].quizScore || 0;
+  if (pct > best) userProgress[currentCategory.id][currentChapter.id].quizScore = pct;
   await saveProgress();
-  updateChapterBadge();
-  
   document.getElementById('quiz-container').classList.add('hidden');
   document.getElementById('quiz-results').classList.remove('hidden');
-  document.getElementById('results-icon').textContent = passed ? '🎉' : '📚';
-  document.getElementById('results-title').textContent = passed ? 'Great Job!' : 'Keep Studying';
-  document.getElementById('results-message').textContent = passed ? 'You passed with ' + pct + '%!' : 'Need 80% to pass. You got ' + pct + '%.';
+  document.getElementById('results-icon').textContent = pct >= 80 ? '🎉' : '📚';
+  document.getElementById('results-title').textContent = pct >= 80 ? 'Great Job!' : 'Keep Studying';
+  document.getElementById('results-message').textContent = pct >= 80 ? `You passed with ${pct}%!` : `Need 80%. You got ${pct}%.`;
   document.getElementById('results-correct').textContent = quizScore;
-  document.getElementById('results-incorrect').textContent = total - quizScore;
+  document.getElementById('results-incorrect').textContent = window._q.length - quizScore;
   document.getElementById('results-percent').textContent = pct + '%';
 }
 
 function retakeQuiz() { startQuiz(); }
 
-// EVENT LISTENERS
+// Events
 document.getElementById('btn-login').onclick = handleLogin;
 document.getElementById('btn-register').onclick = handleRegister;
 document.getElementById('btn-logout').onclick = handleLogout;
