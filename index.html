@@ -1,33 +1,659 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Test</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Foursquare Licensing Tracker</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
+    .screen { display: none; }
+    .screen.active { display: block; }
+    .lesson-content { line-height: 1.8; }
+    .lesson-content p { margin-bottom: 1rem; }
+    .scripture { background: #fef3c7; padding: 1rem; border-left: 4px solid #f59e0b; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
+    .quiz-option { transition: all 0.2s; cursor: pointer; }
+    .quiz-option:hover:not(:disabled) { transform: translateX(4px); }
+    .quiz-option.selected { border-color: #3b82f6 !important; background: #eff6ff !important; }
+    .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
+    .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
+  </style>
 </head>
-<body>
-  <div id="login-form">
-    <h1>Login Form</h1>
-    <p>Don't have an account? <a href="#" id="link-register">Create one</a></p>
+<body class="bg-slate-50 min-h-screen">
+
+  <!-- LOGIN SCREEN -->
+  <div id="screen-login" class="screen active">
+    <div class="min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          </div>
+          <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing Tracker</h1>
+          <p class="text-slate-500 mt-2">Study & prepare for your licensing interview</p>
+        </div>
+
+        <div id="login-form">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" id="login-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
+          </div>
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <input type="password" id="login-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+          </div>
+          <button id="btn-login" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
+          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <a href="#" id="link-register" class="text-blue-600 hover:underline">Create one</a></p>
+        </div>
+
+        <div id="register-form" class="hidden">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+            <input type="text" id="reg-name" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="John Smith">
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" id="reg-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="your@email.com">
+          </div>
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Password (min 6 characters)</label>
+            <input type="password" id="reg-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500" placeholder="••••••••">
+          </div>
+          <button id="btn-register" class="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
+          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <a href="#" id="link-login" class="text-blue-600 hover:underline">Sign in</a></p>
+        </div>
+
+        <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
+        <div id="login-loading" class="hidden mt-4 text-center text-slate-500">
+          <div class="inline-block w-5 h-5 border-2 border-blue-600 border-t-transparent rounded-full animate-spin mr-2"></div>
+          Loading...
+        </div>
+      </div>
+    </div>
   </div>
+
+  <!-- MAIN APP -->
+  <div id="screen-app" class="screen">
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
+      <div class="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold">Foursquare Licensing Tracker</h1>
+            <p class="text-blue-200 text-sm" id="user-greeting">Welcome!</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <span id="save-status" class="text-xs text-green-300 hidden">✓ Saved</span>
+          <button id="btn-logout" class="text-blue-200 hover:text-white text-sm">Sign Out</button>
+        </div>
+      </div>
+    </header>
+    <main class="max-w-6xl mx-auto px-4 py-6">
+      <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+        <div class="flex items-center justify-between mb-4">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">Your Learning Journey</h2>
+            <p class="text-sm text-slate-500">☁️ Progress saved to cloud</p>
+          </div>
+          <div class="text-right">
+            <div class="text-2xl font-bold text-blue-600" id="overall-progress">0%</div>
+            <div class="text-sm text-slate-500">Complete</div>
+          </div>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3 mb-4">
+          <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all" id="progress-bar" style="width:0%"></div>
+        </div>
+        <p class="text-slate-600 text-sm">Complete all 5 domains. Study lessons, then pass each quiz (80%+) to advance.</p>
+      </div>
+      <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-4" id="domain-cards"></div>
+    </main>
+  </div>
+
+  <!-- LESSON SCREEN -->
+  <div id="screen-lesson" class="screen">
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <button id="lesson-back" class="flex items-center gap-2 text-blue-200 hover:text-white">← Back</button>
+        <div class="text-center">
+          <div class="text-sm text-blue-200" id="lesson-domain-label"></div>
+          <div class="font-bold" id="lesson-title"></div>
+        </div>
+        <div class="text-sm text-blue-200" id="lesson-progress"></div>
+      </div>
+    </header>
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <div class="bg-white rounded-xl shadow-sm border p-6 md:p-8">
+        <div id="lesson-content" class="lesson-content text-slate-700"></div>
+        <div class="mt-8 pt-6 border-t flex justify-between">
+          <button id="btn-prev" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50 hidden">← Previous</button>
+          <button id="btn-next" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ml-auto">Continue →</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="screen-quiz" class="screen">
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <button id="quiz-back" class="flex items-center gap-2 text-blue-200 hover:text-white">← Exit</button>
+        <div class="text-center">
+          <div class="text-sm text-blue-200" id="quiz-domain-label"></div>
+          <div class="font-bold">Knowledge Check</div>
+        </div>
+        <div class="text-sm text-blue-200" id="quiz-progress"></div>
+      </div>
+    </header>
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <div class="bg-white rounded-xl shadow-sm border p-6 md:p-8">
+        <div id="quiz-question" class="text-xl font-medium text-slate-800 mb-6"></div>
+        <div id="quiz-options" class="space-y-3"></div>
+        <div id="quiz-feedback" class="hidden mt-6 p-4 rounded-lg"></div>
+        <div class="mt-8 pt-6 border-t flex justify-end">
+          <button id="btn-submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" disabled>Check Answer</button>
+          <button id="btn-next-q" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 hidden">Next →</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen">
+    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
+      <div class="max-w-4xl mx-auto px-4 py-4 text-center"><h1 class="text-xl font-bold">Quiz Complete!</h1></div>
+    </header>
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <div class="bg-white rounded-xl shadow-sm border p-8 text-center">
+        <div id="results-icon" class="text-6xl mb-4">🎉</div>
+        <h2 class="text-2xl font-bold text-slate-800 mb-2" id="results-title">Great Job!</h2>
+        <p class="text-slate-600 mb-6" id="results-message"></p>
+        <div class="flex justify-center gap-4 mb-8">
+          <div class="bg-green-50 rounded-xl p-4"><div class="text-3xl font-bold text-green-600" id="results-correct">0</div><div class="text-sm text-green-700">Correct</div></div>
+          <div class="bg-red-50 rounded-xl p-4"><div class="text-3xl font-bold text-red-600" id="results-incorrect">0</div><div class="text-sm text-red-700">Incorrect</div></div>
+          <div class="bg-blue-50 rounded-xl p-4"><div class="text-3xl font-bold text-blue-600" id="results-percent">0%</div><div class="text-sm text-blue-700">Score</div></div>
+        </div>
+        <div class="flex justify-center gap-4">
+          <button id="btn-retake" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50">Retake Quiz</button>
+          <button id="btn-continue" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Continue</button>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Load Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
-  <div id="register-form" style="display:none;">
-    <h1>Register Form</h1>
-    <p>Already have an account? <a href="#" id="link-login">Sign in</a></p>
-  </div>
-
   <script>
-    document.getElementById('link-register').addEventListener('click', function(e) {
-      e.preventDefault();
-      alert('Create one clicked!');
-      document.getElementById('login-form').style.display = 'none';
-      document.getElementById('register-form').style.display = 'block';
-    });
+// SUPABASE CONFIG
+const SUPABASE_URL = 'https://mvuvgecqxwuqfshqbtjf.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXZnZWNxeHd1cWZzaHFidGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODQ4MTUsImV4cCI6MjA4MzY2MDgxNX0.6OezNuwN5Ip2a_Xw_SsuxoB80nn3WP7D5dnhAEE9A9o';
 
-    document.getElementById('link-login').addEventListener('click', function(e) {
-      e.preventDefault();
-      alert('Sign in clicked!');
-      document.getElementById('register-form').style.display = 'none';
-      document.getElementById('login-form').style.display = 'block';
+let supabase;
+try {
+  supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+} catch(e) {
+  console.error('Supabase init failed:', e);
+}
+
+// COURSE DATA
+const DOMAINS = [
+  {
+    id: 'heritage', name: 'Heritage', icon: '📜', color: 'from-amber-500 to-orange-600',
+    description: 'Learn about Foursquare history and Aimee Semple McPherson.',
+    lessons: [
+      { title: 'The Founder: Aimee Semple McPherson', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Aimee Semple McPherson (1890-1944)</h3><p>Aimee Elizabeth Kennedy was born on October 9, 1890, in Ontario, Canada. At age 17, she attended a revival led by Robert Semple. After three days of spiritual wrestling, Aimee accepted Christ. She married Robert and they went to China as missionaries.</p><p><strong>Tragedy and Triumph:</strong> Robert died of malaria in China, leaving Aimee pregnant and alone. Despite this loss, she felt God's call to preach and began traveling across America, holding tent revivals that drew massive crowds - sometimes over 30,000 people.</p><div class="scripture"><strong>Key Point:</strong> Sister Aimee's life exemplified God's miraculous mercy - turning tragedy into triumph.</div>` },
+      { title: 'The Founding of Angelus Temple', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Building a House Unto the Lord</h3><p>In 1918, Aimee felt God leading her to Los Angeles to "build a house unto the Lord." Not wanting to incur debt, she raised funds "by faith," beginning with just $5,000.</p><p><strong>January 1, 1923:</strong> Angelus Temple was dedicated in Echo Park, Los Angeles. The 5,300-seat auditorium was filled three times daily, seven days a week.</p><div class="scripture"><strong>Historic Fact:</strong> Angelus Temple is considered the first megachurch in the United States. Its 125-foot dome was the largest in North America. The temple received 40 million visitors in its first seven years.</div><p>Eight thousand converts knelt at the altars in the first six months, and 1,500 were baptized. The cornerstone reads: "Dedicated unto the cause of inter-denominational and worldwide evangelism."</p>` },
+      { title: 'The Foursquare Gospel Vision', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">The Vision That Named a Movement</h3><p>In October 1922, while preaching in Oakland, California, Aimee received a vision based on Ezekiel chapter 1.</p><p><strong>The Foursquare Gospel represents Jesus Christ as:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li><strong>Savior</strong> - Jesus saves us from sin</li><li><strong>Baptizer with the Holy Spirit</strong> - Jesus fills us with power</li><li><strong>Healer</strong> - Jesus heals our bodies and souls</li><li><strong>Soon-Coming King</strong> - Jesus will return again</li></ul><div class="scripture"><strong>Ezekiel 1:10:</strong> "Each had the face of a man; each of the four had the face of a lion on the right side, the face of an ox on the left side, and the face of an eagle."</div><p>In 1927, Aimee incorporated the International Church of the Foursquare Gospel (ICFG).</p>` },
+      { title: 'Pioneer in Media Ministry', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">First Woman to Preach on Radio</h3><p>Aimee Semple McPherson pioneered using media for ministry.</p><p><strong>KFSG Radio Station:</strong> In February 1924, Aimee founded KFSG (Kall FourSquare Gospel), making her the first woman to preach on radio. The broadcast reached the Cape Verde islands off Africa!</p><p>She also created "illustrated sermons" - dramatic presentations using stage techniques near Hollywood to bring the gospel to life.</p><div class="scripture"><strong>Historic Impact:</strong> In her time, Aimee was the most publicized Protestant evangelist in America.</div>` },
+      { title: 'Compassion in Action', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Feeding 1.5 Million During the Great Depression</h3><p>In 1927, Aimee opened a commissary at Angelus Temple offering food, clothing, and blankets.</p><p>During the Great Depression, Sister Aimee fed an estimated <strong>1.5 million people</strong>. When the government shut down the free school-lunch program, McPherson took it over.</p><p><strong>Radical Inclusion:</strong> Unlike other organizations, Aimee did not distinguish between "deserving" and "undeserving" poor.</p><div class="scripture"><strong>Legacy:</strong> Aimee passed away September 27, 1944. Her son Rolf became president for 44 years. Today, Foursquare has millions of members in over 150 countries.</div>` }
+    ],
+    quizzes: [
+      { question: "In what year was Angelus Temple dedicated?", options: ["1918", "1923", "1927", "1932"], correct: 1, explanation: "Angelus Temple was dedicated on January 1, 1923." },
+      { question: "What does the 'Foursquare Gospel' represent?", options: ["Four books of the Bible", "Four founding churches", "Jesus as Savior, Baptizer, Healer, and Coming King", "Four steps to salvation"], correct: 2, explanation: "The Foursquare Gospel represents Christ's fourfold ministry." },
+      { question: "Where did Aimee receive the Foursquare vision?", options: ["Los Angeles", "Canada", "Oakland, California", "China"], correct: 2, explanation: "Aimee received the vision while preaching in Oakland in October 1922." },
+      { question: "What was the name of Foursquare's radio station?", options: ["KFSG", "WFSG", "KFOUR", "WGOD"], correct: 0, explanation: "KFSG (Kall FourSquare Gospel) was founded in February 1924." },
+      { question: "How many people did Angelus Temple feed during the Great Depression?", options: ["100,000", "500,000", "1.5 million", "5 million"], correct: 2, explanation: "Angelus Temple fed an estimated 1.5 million people." }
+    ]
+  },
+  {
+    id: 'identity', name: 'Identity', icon: '🎯', color: 'from-blue-500 to-indigo-600',
+    description: 'Understand Foursquare distinctives and global mission.',
+    lessons: [
+      { title: 'The Four Corners of Our Gospel', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Jesus Christ: The Same Yesterday, Today, and Forever</h3><p><strong>The Four Corners:</strong></p><p><strong>1. Jesus Christ the Savior</strong> - Jesus saves us from sin through His death and resurrection.</p><p><strong>2. Jesus Christ the Baptizer with the Holy Spirit</strong> - Jesus fills believers with power for service.</p><p><strong>3. Jesus Christ the Healer</strong> - Jesus heals in answer to believing prayer.</p><p><strong>4. Jesus Christ the Soon-Coming King</strong> - Jesus will return personally and imminently.</p><div class="scripture"><strong>Hebrews 13:8:</strong> "Jesus Christ is the same yesterday, today, and forever." This verse is inscribed behind the pulpit at Angelus Temple.</div>` },
+      { title: 'Our Mission and Values', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Foursquare's Mission</h3><p>The Foursquare Church exists to glorify God by proclaiming the Gospel and making disciples of all nations.</p><p><strong>Core Values:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li><strong>Spirit Empowerment</strong> - Depend on the Holy Spirit</li><li><strong>Kingdom Partnership</strong> - Work together as one body</li><li><strong>Healthy Multiplication</strong> - Plant churches and develop leaders</li><li><strong>Sound Doctrine</strong> - Hold firmly to biblical truth</li></ul><div class="scripture"><strong>Matthew 28:19-20:</strong> "Go therefore and make disciples of all the nations."</div>` },
+      { title: 'Women in Ministry Leadership', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">A Founding Distinctive</h3><p>From its beginning, Foursquare has affirmed women in ministry leadership.</p><p><strong>Biblical Foundation:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Acts 2:17 - "Your sons AND your daughters shall prophesy"</li><li>Galatians 3:28 - "There is neither male nor female, for you are all one in Christ"</li></ul><div class="scripture"><strong>Foursquare Position:</strong> God calls and gifts both men and women for all forms of ministry leadership, including senior pastoral roles.</div>` },
+      { title: 'A Global Family', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">From Echo Park to Every Nation</h3><p><strong>Global Presence:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Over 90,000 churches worldwide</li><li>Present in more than 150 nations</li><li>Millions of members globally</li></ul><div class="scripture"><strong>Revelation 7:9:</strong> "A great multitude of all nations, tribes, peoples, and tongues."</div>` }
+    ],
+    quizzes: [
+      { question: "Which is NOT one of the four aspects of the Foursquare Gospel?", options: ["Jesus the Savior", "Jesus the Teacher", "Jesus the Healer", "Jesus the Coming King"], correct: 1, explanation: "The four are: Savior, Baptizer, Healer, Coming King." },
+      { question: "What is Foursquare's position on women in ministry?", options: ["Support roles only", "Affirmed in all ministry leadership", "Local church decision", "Children's ministry only"], correct: 1, explanation: "Foursquare affirms women in all ministry leadership." },
+      { question: "In how many countries is Foursquare present?", options: ["50", "100", "150+", "200+"], correct: 2, explanation: "Foursquare is in more than 150 nations." },
+      { question: "What verse is behind the Angelus Temple pulpit?", options: ["John 3:16", "Hebrews 13:8", "Matthew 28:19", "Acts 1:8"], correct: 1, explanation: "Hebrews 13:8 is inscribed there." },
+      { question: "What school did Aimee found?", options: ["Fuller Seminary", "L.I.F.E. Bible College", "Angelus Academy", "Foursquare University"], correct: 1, explanation: "L.I.F.E. Bible College (now Life Pacific University)." }
+    ]
+  },
+  {
+    id: 'doctrine', name: 'Doctrine', icon: '📖', color: 'from-purple-500 to-violet-600',
+    description: 'Study the Declaration of Faith.',
+    lessons: [
+      { title: 'The Holy Scriptures', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article I: The Holy Scriptures</h3><p><strong>We believe the Holy Bible is the Word of the living God;</strong> true, immutable, steadfast, unchangeable.</p><p>Scripture is described as:</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>A <strong>lighted lamp</strong> to guide feet</li><li>An <strong>unclouded mirror</strong> revealing Christ</li><li>A <strong>plumb line</strong> to make straight the life</li><li>A <strong>sharp two-edged sword</strong> to convict of sin</li><li>A <strong>cord of love</strong> to draw to Christ</li></ul><div class="scripture"><strong>2 Timothy 3:16-17:</strong> "All Scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness."</div>` },
+      { title: 'The Eternal Godhead', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article II: The Trinity</h3><p><strong>We believe there is but one true and living God</strong> - In the Godhead there are three, equal in every divine perfection:</p><p><strong>The Father</strong> — Gave His only Son.<br><strong>The Son</strong> — Purchased redemption by His blood.<br><strong>The Holy Spirit</strong> — Convicts, draws, baptizes with power.</p><div class="scripture"><strong>1 John 5:7:</strong> "The Father, the Word, and the Holy Spirit; and these three are one."</div>` },
+      { title: 'Salvation Through Grace', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Fall, Redemption, New Birth</h3><p><strong>The Fall:</strong> Man fell through disobedience. All are sinners.</p><p><strong>Redemption:</strong> Christ died for us, fully paying sin's penalty.</p><p><strong>Salvation by Grace:</strong> We must throw ourselves upon God's mercy.</p><div class="scripture"><strong>Ephesians 2:8-9:</strong> "For by grace you have been saved through faith... not of works."</div><p><strong>The New Birth:</strong> The change at conversion is very real - old things pass away; all things become new.</p>` },
+      { title: 'The Baptism of the Holy Spirit', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article X</h3><p><strong>The baptism of the Holy Spirit</strong> is the incoming of the promised Comforter to endue the believer with power from on high.</p><p><strong>Purposes:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>To glorify the Lord Jesus</li><li>To give inspired utterance in witnessing</li><li>To foster prayer, holiness, sobriety</li><li>To equip for Spirit-filled soul-winning</li></ul><div class="scripture"><strong>Acts 1:8:</strong> "You shall receive power when the Holy Spirit has come upon you."</div>` },
+      { title: 'Divine Healing and Second Coming', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Articles XIV-XV</h3><p><strong>Divine Healing:</strong> We believe divine healing is the power of Christ to heal the sick in answer to believing prayer. He is the same yesterday, today, and forever.</p><div class="scripture"><strong>James 5:14-15:</strong> "Is anyone among you sick? Let him call for the elders of the church, and let them pray over him, anointing him with oil in the name of the Lord."</div><p><strong>Second Coming:</strong> We believe Christ's return is personal and imminent. He will descend from Heaven in clouds of glory. The dead in Christ shall rise, and the living shall be caught up to meet the Lord.</p><div class="scripture"><strong>1 Thessalonians 4:16-17:</strong> "The Lord Himself will descend from heaven with a shout."</div>` }
+    ],
+    quizzes: [
+      { question: "How many persons in the Godhead?", options: ["One", "Two", "Three", "Four"], correct: 2, explanation: "Three: Father, Son, Holy Spirit." },
+      { question: "How is salvation received?", options: ["Good works", "Grace by faith", "Church membership", "Baptism alone"], correct: 1, explanation: "Through grace by faith." },
+      { question: "Purpose of Spirit Baptism?", options: ["Guarantee salvation", "Replace water baptism", "Endue with power", "Eliminate Scripture need"], correct: 2, explanation: "To endue with power from on high." },
+      { question: "Foursquare belief on divine healing?", options: ["Ended with apostles", "Replaces medical care", "Jesus still heals in answer to prayer", "Guaranteed for all"], correct: 2, explanation: "Jesus heals in answer to believing prayer." },
+      { question: "Christ's second coming is?", options: ["Symbolic only", "Already fulfilled", "Personal and imminent", "Uncertain"], correct: 2, explanation: "Personal and imminent." }
+    ]
+  },
+  {
+    id: 'polity', name: 'Polity', icon: '⚖️', color: 'from-emerald-500 to-teal-600',
+    description: 'Learn Foursquare governance.',
+    lessons: [
+      { title: 'Foursquare Governance', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Church Government</h3><p>Foursquare has an "episcopal character" - governance flows through designated leaders with accountability.</p><p><strong>The Foursquare Convention:</strong> Chief decision-making body, meeting annually.</p><p><strong>Board of Directors:</strong> 12-24 directors managing the Church.</p><p><strong>The President:</strong> Provides overall leadership and vision.</p><div class="scripture"><strong>Key Principle:</strong> Balance connectional accountability with local church empowerment.</div>` },
+      { title: 'Districts and Local Churches', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Structure</h3><p><strong>Districts:</strong> The U.S. is divided into districts, each overseen by a District Supervisor who provides pastoral care and accountability.</p><p><strong>District Supervisor Responsibilities:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Pastoral oversight of ministers and churches</li><li>Coaching and developing leaders</li><li>Church planting encouragement</li><li>Credential oversight</li></ul><p><strong>Local Church:</strong> Each church has a Church Council working with the senior pastor.</p><div class="scripture"><strong>Property:</strong> Churches hold property in trust for ICFG.</div>` },
+      { title: 'Licensing and Ordination', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Credentialing</h3><p><strong>Why Licensing Matters:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li><strong>Endorsement</strong> - Represents ICFG as licensed minister</li><li><strong>Authorization</strong> - Legal authority for weddings, ministerial duties</li><li><strong>Tax Benefits</strong> - Housing allowance available only to licensed ministers</li></ul><p><strong>Licensing and Appointment:</strong> Mutually dependent - you need a license for an appointment, and an appointment to maintain a license.</p><div class="scripture"><strong>Ordination:</strong> After two years of faithful service maintaining credential in good standing.</div>` },
+      { title: 'Financial Accountability', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Stewardship</h3><p><strong>Church Financial Responsibilities:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Pay to ICFG a tithe of tithes and general offerings</li><li>Give to Foursquare missions</li><li>File monthly financial reports</li><li>Use funds with integrity for the Gospel</li></ul><div class="scripture"><strong>Malachi 3:10:</strong> "Bring all the tithes into the storehouse."</div>` }
+    ],
+    quizzes: [
+      { question: "Chief decision-making body?", options: ["Board of Directors", "The President", "The Foursquare Convention", "District Supervisors"], correct: 2, explanation: "The Convention." },
+      { question: "Licensing and appointment relationship?", options: ["Unrelated", "Licensing first", "Mutually dependent", "Appointment replaces"], correct: 2, explanation: "Mutually dependent." },
+      { question: "Church financial obligation to ICFG?", options: ["None", "Tithe of tithes", "50% of income", "Missions only"], correct: 1, explanation: "Tithe of tithes and offerings." },
+      { question: "Who provides regional oversight?", options: ["President", "Board", "District Supervisor", "Convention"], correct: 2, explanation: "District Supervisors." },
+      { question: "Years before ordination eligibility?", options: ["One", "Two", "Five", "Ten"], correct: 1, explanation: "Two years." }
+    ]
+  },
+  {
+    id: 'practice', name: 'Ministry Practice', icon: '🙏', color: 'from-rose-500 to-pink-600',
+    description: 'Apply ministry principles.',
+    lessons: [
+      { title: 'The Ordinances', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Baptism and Lord's Supper</h3><p><strong>Water Baptism:</strong> Baptism in the name of Father, Son, and Holy Ghost is a blessed outward sign of an inward work.</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>As Christ died, we reckon ourselves dead to sin</li><li>As He was buried, we are buried with Him</li><li>As He rose, we walk in newness of life</li></ul><div class="scripture"><strong>Romans 6:4:</strong> "Buried with Him through baptism into death."</div><p><strong>Lord's Supper:</strong> The broken bread (Christ's body) and juice of the vine (His blood) - remembering Christ until He comes.</p>` },
+      { title: 'Spirit-Empowered Ministry', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">The Spirit-Filled Life</h3><p>The Holy Spirit is both a mighty rushing wind AND a gentle dove, easily grieved by impiety.</p><p><strong>Living in the Spirit:</strong></p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Moment by moment dependence on God</li><li>Patient, loving, truthful, sincere, prayerful</li><li>Serving the Lord in season and out</li></ul><div class="scripture"><strong>Galatians 5:16:</strong> "Walk in the Spirit, and you shall not fulfill the lust of the flesh."</div>` },
+      { title: 'Evangelism and Pastoral Care', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Soul Winning</h3><p><strong>Article XXI:</strong> Soul winning is the one big business of the Church. We should rise and shine as a light that cannot be hid.</p><div class="scripture"><strong>Proverbs 11:30:</strong> "He who wins souls is wise."</div><p><strong>Pastoral Care:</strong> Following Sister Aimee, we combine proclamation with compassion - preach AND serve, baptize AND feed, teach AND counsel.</p><p><strong>Article XIII - Moderation:</strong> Our experience should be sober, balanced, forgiving, zealous, and Christ-like - never extreme or fanatical.</p>` },
+      { title: 'Church Life', content: `<h3 class="text-xl font-bold text-slate-800 mb-4">Article XVI: Church Relationship</h3><p>Having accepted Christ, it is our sacred duty to <strong>identify with and labor for the visible church</strong>.</p><p><strong>The Visible Church:</strong> Believers associated in fellowship:</p><ul class="list-disc pl-6 mb-4 space-y-2"><li>Observing Christ's ordinances</li><li>Worshipping in holiness</li><li>Reading and proclaiming His Word</li><li>Laboring for souls</li><li>Edifying one another</li></ul><div class="scripture"><strong>Hebrews 10:25:</strong> "Not forsaking the assembling of ourselves together."</div>` }
+    ],
+    quizzes: [
+      { question: "What ordinances does Foursquare practice?", options: ["Foot washing", "Water baptism and Lord's Supper", "Confession", "Infant baptism"], correct: 1, explanation: "Water baptism and Lord's Supper." },
+      { question: "'One big business' of the Church?", options: ["Building", "Soul winning", "Politics", "Finance"], correct: 1, explanation: "Soul winning." },
+      { question: "Article XIII teaches?", options: ["Extremes", "Sober, balanced moderation", "Emotion primary", "Doctrine unimportant"], correct: 1, explanation: "Sober, balanced, Christ-like." },
+      { question: "Water baptism is?", options: ["For salvation", "Outward sign of inward work", "For infants", "Optional"], correct: 1, explanation: "Outward sign of inward work." },
+      { question: "Why identify with visible church?", options: ["Status", "Optional", "Sacred duty for Christ's Kingdom", "Ministers only"], correct: 2, explanation: "Sacred duty." }
+    ]
+  }
+];
+
+// STATE
+let currentUser = null;
+let userProgress = null;
+let currentDomain = null;
+let currentLessonIndex = 0;
+let currentQuizIndex = 0;
+let selectedAnswer = null;
+let quizScore = 0;
+
+// Wait for DOM to be ready
+document.addEventListener('DOMContentLoaded', function() {
+  // Set up event listeners
+  document.getElementById('link-register').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('login-form').classList.add('hidden');
+    document.getElementById('register-form').classList.remove('hidden');
+    document.getElementById('login-error').classList.add('hidden');
+  });
+
+  document.getElementById('link-login').addEventListener('click', function(e) {
+    e.preventDefault();
+    document.getElementById('register-form').classList.add('hidden');
+    document.getElementById('login-form').classList.remove('hidden');
+    document.getElementById('login-error').classList.add('hidden');
+  });
+
+  document.getElementById('btn-login').addEventListener('click', handleLogin);
+  document.getElementById('btn-register').addEventListener('click', handleRegister);
+  document.getElementById('btn-logout').addEventListener('click', handleLogout);
+  document.getElementById('lesson-back').addEventListener('click', backToApp);
+  document.getElementById('quiz-back').addEventListener('click', backToApp);
+  document.getElementById('btn-prev').addEventListener('click', prevLesson);
+  document.getElementById('btn-next').addEventListener('click', nextLesson);
+  document.getElementById('btn-submit').addEventListener('click', submitAnswer);
+  document.getElementById('btn-next-q').addEventListener('click', nextQuestion);
+  document.getElementById('btn-retake').addEventListener('click', retakeQuiz);
+  document.getElementById('btn-continue').addEventListener('click', backToApp);
+
+  // Check for existing session
+  checkSession();
+});
+
+async function checkSession() {
+  if (!supabase) return;
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      currentUser = session.user;
+      await loadProgress();
+      showApp();
+    }
+  } catch(e) {
+    console.error('Session check failed:', e);
+  }
+}
+
+// AUTH
+async function handleRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const password = document.getElementById('reg-password').value;
+  
+  if (!name || !email || !password) { showError('Please fill all fields'); return; }
+  if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
+  
+  showLoading(true);
+  try {
+    const { data, error } = await supabase.auth.signUp({ 
+      email, 
+      password,
+      options: { data: { name } }
     });
+    if (error) throw error;
+    if (data.user) {
+      currentUser = data.user;
+      userProgress = createDefaultProgress();
+      await saveProgress();
+      showApp();
+    }
+  } catch (e) {
+    showError(e.message);
+  }
+  showLoading(false);
+}
+
+async function handleLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  
+  if (!email || !password) { showError('Please fill all fields'); return; }
+  
+  showLoading(true);
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    currentUser = data.user;
+    await loadProgress();
+    showApp();
+  } catch (e) {
+    showError(e.message);
+  }
+  showLoading(false);
+}
+
+async function handleLogout() {
+  await supabase.auth.signOut();
+  currentUser = null;
+  userProgress = null;
+  showScreen('login');
+  document.getElementById('login-email').value = '';
+  document.getElementById('login-password').value = '';
+}
+
+function showError(msg) {
+  const el = document.getElementById('login-error');
+  el.textContent = msg;
+  el.classList.remove('hidden');
+}
+
+function showLoading(show) {
+  document.getElementById('login-loading').classList.toggle('hidden', !show);
+}
+
+// PROGRESS
+function createDefaultProgress() {
+  const p = {};
+  DOMAINS.forEach(d => { p[d.id] = { lessonsCompleted: [], quizScores: [], completed: false }; });
+  return p;
+}
+
+async function loadProgress() {
+  try {
+    const { data } = await supabase
+      .from('progress')
+      .select('data')
+      .eq('user_id', currentUser.id)
+      .single();
+    
+    if (data && data.data) {
+      userProgress = data.data;
+    } else {
+      userProgress = createDefaultProgress();
+      await saveProgress();
+    }
+  } catch (e) {
+    userProgress = createDefaultProgress();
+  }
+  DOMAINS.forEach(d => {
+    if (!userProgress[d.id]) userProgress[d.id] = { lessonsCompleted: [], quizScores: [], completed: false };
+  });
+}
+
+async function saveProgress() {
+  try {
+    await supabase.from('progress').upsert({
+      user_id: currentUser.id,
+      data: userProgress,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'user_id' });
+    showSaveStatus();
+  } catch (e) {
+    console.error('Save failed:', e);
+  }
+}
+
+function showSaveStatus() {
+  const el = document.getElementById('save-status');
+  el.classList.remove('hidden');
+  setTimeout(() => el.classList.add('hidden'), 2000);
+}
+
+// NAV
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function showApp() {
+  showScreen('app');
+  const name = currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || 'Student';
+  document.getElementById('user-greeting').textContent = 'Welcome, ' + name + '!';
+  renderDomainCards();
+  updateOverallProgress();
+}
+
+function backToApp() { showApp(); }
+
+// DOMAIN CARDS
+function renderDomainCards() {
+  const c = document.getElementById('domain-cards');
+  c.innerHTML = DOMAINS.map((d, i) => {
+    const p = userProgress[d.id];
+    const done = p.lessonsCompleted.length;
+    const total = d.lessons.length;
+    const pct = Math.round((done/total)*100);
+    const locked = i > 0 && !userProgress[DOMAINS[i-1].id].completed;
+    const complete = p.completed;
+    return `<div class="bg-white rounded-xl shadow-sm border p-6 ${locked?'opacity-60':''}" data-domain="${d.id}">
+      <div class="flex items-center justify-between mb-4">
+        <div class="text-3xl">${d.icon}</div>
+        ${complete?'<span class="text-green-500 text-xl">✓</span>':locked?'<span class="text-slate-400">🔒</span>':''}
+      </div>
+      <h3 class="text-lg font-bold text-slate-800 mb-1">${d.name}</h3>
+      <p class="text-slate-500 text-sm mb-4">${d.description}</p>
+      <div class="mb-4">
+        <div class="flex justify-between text-sm mb-1"><span>Progress</span><span>${done}/${total}</span></div>
+        <div class="w-full bg-slate-100 rounded-full h-2"><div class="bg-gradient-to-r ${d.color} h-2 rounded-full" style="width:${pct}%"></div></div>
+      </div>
+      ${locked?`<button disabled class="w-full py-2 rounded-lg border text-slate-400">Complete previous domain</button>`:
+        complete?`<div class="flex gap-2"><button class="flex-1 py-2 rounded-lg border hover:bg-slate-50 start-lessons-btn" data-id="${d.id}">Review</button><button class="flex-1 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 start-quiz-btn" data-id="${d.id}">Retake</button></div>`:
+        done===total?`<button class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white start-quiz-btn" data-id="${d.id}">Take Quiz →</button>`:
+        `<button class="w-full py-2 rounded-lg bg-gradient-to-r ${d.color} text-white start-lessons-btn" data-id="${d.id}">${done>0?'Continue':'Start'} →</button>`}
+    </div>`;
+  }).join('');
+
+  // Add click handlers
+  document.querySelectorAll('.start-lessons-btn').forEach(btn => {
+    btn.addEventListener('click', () => startLessons(btn.dataset.id));
+  });
+  document.querySelectorAll('.start-quiz-btn').forEach(btn => {
+    btn.addEventListener('click', () => startQuiz(btn.dataset.id));
+  });
+}
+
+function updateOverallProgress() {
+  let total=0, done=0;
+  DOMAINS.forEach(d => { total+=d.lessons.length; done+=userProgress[d.id].lessonsCompleted.length; });
+  const pct = Math.round((done/total)*100);
+  document.getElementById('overall-progress').textContent = pct+'%';
+  document.getElementById('progress-bar').style.width = pct+'%';
+}
+
+// LESSONS
+function startLessons(id) {
+  currentDomain = DOMAINS.find(d=>d.id===id);
+  const p = userProgress[id];
+  currentLessonIndex = 0;
+  for(let i=0;i<currentDomain.lessons.length;i++) { 
+    if(!p.lessonsCompleted.includes(i)){
+      currentLessonIndex=i;
+      break;
+    } 
+    currentLessonIndex=i; 
+  }
+  showLesson();
+}
+
+function showLesson() {
+  showScreen('lesson');
+  const l = currentDomain.lessons[currentLessonIndex];
+  document.getElementById('lesson-domain-label').textContent = currentDomain.name;
+  document.getElementById('lesson-title').textContent = l.title;
+  document.getElementById('lesson-progress').textContent = `${currentLessonIndex+1}/${currentDomain.lessons.length}`;
+  document.getElementById('lesson-content').innerHTML = l.content;
+  document.getElementById('btn-prev').classList.toggle('hidden', currentLessonIndex===0);
+  document.getElementById('btn-next').textContent = currentLessonIndex===currentDomain.lessons.length-1 ? 'Take Quiz →' : 'Continue →';
+}
+
+function prevLesson() { 
+  if(currentLessonIndex>0){
+    currentLessonIndex--;
+    showLesson();
+  } 
+}
+
+async function nextLesson() {
+  const p = userProgress[currentDomain.id];
+  if(!p.lessonsCompleted.includes(currentLessonIndex)) { 
+    p.lessonsCompleted.push(currentLessonIndex); 
+    await saveProgress(); 
+  }
+  if(currentLessonIndex < currentDomain.lessons.length-1) { 
+    currentLessonIndex++; 
+    showLesson(); 
+  } else { 
+    startQuiz(currentDomain.id); 
+  }
+}
+
+// QUIZ
+function startQuiz(id) {
+  currentDomain = DOMAINS.find(d=>d.id===id);
+  currentQuizIndex = 0; 
+  selectedAnswer = null; 
+  quizScore = 0;
+  showQuizQuestion();
+}
+
+function showQuizQuestion() {
+  showScreen('quiz');
+  const q = currentDomain.quizzes[currentQuizIndex];
+  document.getElementById('quiz-domain-label').textContent = currentDomain.name;
+  document.getElementById('quiz-progress').textContent = `${currentQuizIndex+1}/${currentDomain.quizzes.length}`;
+  document.getElementById('quiz-question').textContent = q.question;
+  document.getElementById('quiz-options').innerHTML = q.options.map((o,i) => 
+    `<button class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" data-index="${i}">
+      <span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">${String.fromCharCode(65+i)}</span>
+      <span>${o}</span>
+    </button>`).join('');
+  
+  // Add click handlers to options
+  document.querySelectorAll('.quiz-option').forEach(opt => {
+    opt.addEventListener('click', () => selectQuizOption(parseInt(opt.dataset.index)));
+  });
+  
+  document.getElementById('quiz-feedback').classList.add('hidden');
+  document.getElementById('btn-submit').classList.remove('hidden');
+  document.getElementById('btn-submit').disabled = true;
+  document.getElementById('btn-next-q').classList.add('hidden');
+  selectedAnswer = null;
+}
+
+function selectQuizOption(i) {
+  selectedAnswer = i;
+  document.querySelectorAll('.quiz-option').forEach((o,j)=>o.classList.toggle('selected',j===i));
+  document.getElementById('btn-submit').disabled = false;
+}
+
+function submitAnswer() {
+  const q = currentDomain.quizzes[currentQuizIndex];
+  const correct = selectedAnswer === q.correct;
+  if(correct) quizScore++;
+  document.querySelectorAll('.quiz-option').forEach((o,i)=>{
+    o.classList.remove('selected');
+    const idx = parseInt(o.dataset.index);
+    if(idx===q.correct) o.classList.add('correct');
+    else if(idx===selectedAnswer && !correct) o.classList.add('incorrect');
+  });
+  const fb = document.getElementById('quiz-feedback');
+  fb.classList.remove('hidden');
+  fb.className = `mt-6 p-4 rounded-lg ${correct?'bg-green-50 border border-green-200':'bg-red-50 border border-red-200'}`;
+  fb.innerHTML = `<div class="font-medium ${correct?'text-green-800':'text-red-800'}">${correct?'✓ Correct!':'✗ Incorrect'}</div><div class="text-sm mt-1">${q.explanation}</div>`;
+  document.getElementById('btn-submit').classList.add('hidden');
+  document.getElementById('btn-next-q').classList.remove('hidden');
+  document.getElementById('btn-next-q').textContent = currentQuizIndex===currentDomain.quizzes.length-1?'See Results':'Next →';
+}
+
+function nextQuestion() {
+  if(currentQuizIndex < currentDomain.quizzes.length-1) { 
+    currentQuizIndex++; 
+    showQuizQuestion(); 
+  } else { 
+    showResults(); 
+  }
+}
+
+async function showResults() {
+  showScreen('results');
+  const total = currentDomain.quizzes.length;
+  const pct = Math.round((quizScore/total)*100);
+  const passed = pct >= 80;
+  const p = userProgress[currentDomain.id];
+  p.quizScores.push(pct);
+  if(passed && !p.completed) p.completed = true;
+  await saveProgress();
+  document.getElementById('results-icon').textContent = passed?'🎉':'📚';
+  document.getElementById('results-title').textContent = passed?'Great Job!':'Keep Studying';
+  document.getElementById('results-message').textContent = passed?`You passed with ${quizScore}/${total}!`:`${quizScore}/${total} - Need 80% to pass.`;
+  document.getElementById('results-correct').textContent = quizScore;
+  document.getElementById('results-incorrect').textContent = total-quizScore;
+  document.getElementById('results-percent').textContent = pct+'%';
+}
+
+function retakeQuiz() { startQuiz(currentDomain.id); }
   </script>
 </body>
 </html>
