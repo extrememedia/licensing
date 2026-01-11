@@ -8,65 +8,1184 @@
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,400&family=Open+Sans:wght@400;500;600&family=Literata:opsz,wght@7..72,400;7..72,500;7..72,600&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; background: #f8fafc; }
+    body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
     .screen { display: none; }
     .screen.active { display: block; }
-    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; z-index: 100; padding-bottom: env(safe-area-inset-bottom); }
-    .nav-item { flex: 1; padding: 8px 4px; text-align: center; color: #64748b; transition: color 0.2s; }
-    .nav-item.active { color: #dc2626; }
-    .nav-item svg { width: 24px; height: 24px; margin: 0 auto 2px; }
-    .main-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden; margin-bottom: 16px; }
-    .section-header { padding: 20px; cursor: pointer; transition: background 0.2s; }
-    .section-header:hover { background: #f8fafc; }
-    .section-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
-    .section-content.expanded { max-height: 5000px; }
-    .chapter-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: background 0.2s; }
-    .chapter-item:hover { background: #f8fafc; }
-    .chapter-item:last-child { border-bottom: none; }
-    .progress-ring { transform: rotate(-90deg); }
-    .progress-ring-circle { transition: stroke-dashoffset 0.3s; }
-    .metric-card { background: linear-gradient(135deg, #fff 0%, #f8fafc 100%); border-radius: 12px; padding: 16px; text-align: center; border: 1px solid #e5e7eb; }
+    .category-header { cursor: pointer; transition: all 0.2s; }
+    .category-header:hover { background: #f8fafc; }
+    .category-content { max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+    .category-content.expanded { max-height: 2000px; }
+    .chapter-card { transition: all 0.2s; }
+    .chapter-card:hover { transform: translateX(4px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+    .lesson-content { line-height: 1.8; }
+    .lesson-content ul { margin: 1rem 0; padding-left: 1.5rem; }
+    .lesson-content li { margin-bottom: 0.5rem; }
+    .key-point { background: #fef3c7; padding: 1rem; border-left: 4px solid #f59e0b; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
+    .scripture { background: #dbeafe; padding: 0.75rem; border-radius: 0.5rem; font-style: italic; margin: 0.5rem 0; }
+    .quiz-option { transition: all 0.2s; cursor: pointer; }
+    .quiz-option:hover:not(:disabled) { transform: translateX(4px); }
+    .quiz-option.selected { border-color: #3b82f6 !important; background: #eff6ff !important; }
+    .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
+    .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
+    .tab-btn { padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent; }
+    .tab-btn.active { border-bottom-color: #3b82f6; color: #3b82f6; font-weight: 600; }
+    .loading-spinner { border: 3px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .chevron { transition: transform 0.3s; }
+    .chevron.rotated { transform: rotate(180deg); }
+    
+    /* READER STYLES */
     .reader-container { min-height: 100vh; transition: background-color 0.3s, color 0.3s; }
     .reader-container.theme-light { background: #ffffff; color: #1a1a1a; }
     .reader-container.theme-sepia { background: #f4ecd8; color: #5c4b37; }
     .reader-container.theme-dark { background: #1a1a1a; color: #e0e0e0; }
     .reader-container.theme-night { background: #0d1117; color: #c9d1d9; }
+    
+    .reader-page { max-width: 720px; margin: 0 auto; padding: 1.5rem; min-height: calc(100vh - 140px); }
+    .reader-page p { margin-bottom: 1.2em; }
+    
     .font-serif { font-family: 'Merriweather', Georgia, serif; }
     .font-sans { font-family: 'Open Sans', system-ui, sans-serif; }
-    .font-classic { font-family: 'Crimson Text', serif; }
+    .font-classic { font-family: 'Crimson Text', 'Times New Roman', serif; }
     .font-modern { font-family: 'Literata', Georgia, serif; }
-    .highlight-yellow { background: rgba(250, 204, 21, 0.4); }
-    .highlight-green { background: rgba(74, 222, 128, 0.4); }
-    .highlight-blue { background: rgba(96, 165, 250, 0.4); }
-    .highlight-pink { background: rgba(244, 114, 182, 0.4); }
+    
+    .reading-progress { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(to right, #ef4444, #f59e0b); z-index: 101; transition: width 0.1s; }
+    
+    /* Highlights */
+    .highlight-yellow { background: rgba(250, 204, 21, 0.4); border-radius: 2px; cursor: pointer; }
+    .highlight-green { background: rgba(74, 222, 128, 0.4); border-radius: 2px; cursor: pointer; }
+    .highlight-blue { background: rgba(96, 165, 250, 0.4); border-radius: 2px; cursor: pointer; }
+    .highlight-pink { background: rgba(244, 114, 182, 0.4); border-radius: 2px; cursor: pointer; }
+    
+    /* Selection popup */
     .selection-popup { position: absolute; background: white; border-radius: 8px; box-shadow: 0 4px 20px rgba(0,0,0,0.2); padding: 8px; display: none; z-index: 200; }
     .selection-popup.show { display: flex; gap: 4px; }
-    .study-section { background: #f8fafc; border-radius: 12px; padding: 16px; margin-bottom: 12px; }
-    .study-section h4 { font-weight: 600; margin-bottom: 8px; color: #1e293b; }
-    .key-term { background: #fef3c7; padding: 2px 6px; border-radius: 4px; font-weight: 500; }
-    .scripture-ref { background: #dbeafe; padding: 8px 12px; border-radius: 8px; font-style: italic; margin: 8px 0; border-left: 3px solid #3b82f6; }
-    .learning-objective { display: flex; align-items: start; gap: 8px; padding: 8px 0; border-bottom: 1px solid #e5e7eb; }
-    .learning-objective:last-child { border-bottom: none; }
-    .quiz-option { transition: all 0.2s; cursor: pointer; }
-    .quiz-option:hover { transform: translateX(4px); }
-    .quiz-option.selected { border-color: #3b82f6 !important; background: #eff6ff !important; }
-    .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
-    .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
-    .tab-bar { display: flex; background: #f1f5f9; border-radius: 12px; padding: 4px; margin-bottom: 16px; }
-    .tab-btn { flex: 1; padding: 10px; border-radius: 8px; text-align: center; font-weight: 500; color: #64748b; transition: all 0.2s; }
-    .tab-btn.active { background: white; color: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .loading-spinner { border: 3px solid #e5e7eb; border-top-color: #dc2626; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .note-card { background: white; border-radius: 12px; padding: 12px; margin-bottom: 8px; border-left: 3px solid #3b82f6; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-    .reading-content { line-height: 1.9; }
-    .reading-content h2 { font-size: 1.5rem; font-weight: 700; margin: 1.5rem 0 1rem 0; color: #1e293b; }
-    .reading-content h3 { font-size: 1.25rem; font-weight: 600; margin: 1.25rem 0 0.75rem 0; color: #334155; }
-    .reading-content p { margin-bottom: 1rem; }
-    .reading-content ul, .reading-content ol { margin: 1rem 0; padding-left: 1.5rem; }
-    .reading-content li { margin-bottom: 0.5rem; }
-    .reading-content blockquote { background: #f0f9ff; border-left: 4px solid #0ea5e9; padding: 1rem; margin: 1rem 0; border-radius: 0 8px 8px 0; font-style: italic; }
-    .reading-content .scripture { background: #fef3c7; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #f59e0b; }
-    .reading-content .key-concept { background: #f0fdf4; padding: 1rem; border-radius: 8px; margin: 1rem 0; border-left: 4px solid #22c55e; }
+    .selection-popup button { width: 32px; height: 32px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; transition: transform 0.2s; }
+    .selection-popup button:hover { transform: scale(1.1); }
+    
+    /* Notes panel */
+    .notes-panel { position: fixed; right: 0; top: 0; bottom: 0; width: 350px; background: white; box-shadow: -4px 0 20px rgba(0,0,0,0.1); transform: translateX(100%); transition: transform 0.3s; z-index: 150; }
+    .notes-panel.open { transform: translateX(0); }
+    .theme-dark .notes-panel, .theme-night .notes-panel { background: #2d2d2d; color: #e0e0e0; }
+    
+    /* Page navigation */
+    .page-nav { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(255,255,255,0.95); backdrop-blur: 10px; border-top: 1px solid #e5e7eb; padding: 12px; z-index: 100; }
+    .theme-dark .page-nav, .theme-night .page-nav { background: rgba(30,30,30,0.95); border-color: #404040; }
+    
+    /* Bookmark indicator */
+    .bookmark-ribbon { position: absolute; right: 20px; top: -5px; width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #ef4444; }
+    
+    /* Note card */
+    .note-card { background: #f8fafc; border-left: 3px solid #3b82f6; padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 12px; }
+    .theme-dark .note-card, .theme-night .note-card { background: #374151; }
+    
+    /* Settings panel */
+    .settings-drawer { position: fixed; bottom: 60px; left: 0; right: 0; background: white; border-top: 1px solid #e5e7eb; transform: translateY(100%); transition: transform 0.3s; z-index: 99; max-height: 50vh; overflow-y: auto; }
+    .settings-drawer.open { transform: translateY(0); }
+    .theme-dark .settings-drawer, .theme-night .settings-drawer { background: #1f2937; border-color: #374151; }
+    
+    /* TOC */
+    .toc-panel { position: fixed; left: 0; top: 0; bottom: 0; width: 300px; background: white; box-shadow: 4px 0 20px rgba(0,0,0,0.1); transform: translateX(-100%); transition: transform 0.3s; z-index: 150; overflow-y: auto; }
+    .toc-panel.open { transform: translateX(0); }
+    .theme-dark .toc-panel, .theme-night .toc-panel { background: #1f2937; }
   </style>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen">
+
+  <!-- LOGIN SCREEN -->
+  <div id="screen-login" class="screen active">
+    <div class="min-h-screen flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8">
+        <div class="text-center mb-8">
+          <div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing Tracker</h1>
+          <p class="text-slate-500 mt-2">Ministry Preparation & Study</p>
+        </div>
+        <div id="login-form">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" id="login-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="your@email.com">
+          </div>
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Password</label>
+            <input type="password" id="login-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="••••••••">
+          </div>
+          <button id="btn-login" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-lg font-medium hover:opacity-90">Sign In</button>
+          <p class="text-center text-sm text-slate-500 mt-4">Don't have an account? <span id="link-register" class="text-red-600 hover:underline cursor-pointer">Create one</span></p>
+        </div>
+        <div id="register-form" style="display:none;">
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label>
+            <input type="text" id="reg-name" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="John Smith">
+          </div>
+          <div class="mb-4">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Email</label>
+            <input type="email" id="reg-email" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="your@email.com">
+          </div>
+          <div class="mb-6">
+            <label class="block text-sm font-medium text-slate-700 mb-1">Password (min 6 characters)</label>
+            <input type="password" id="reg-password" class="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-red-500" placeholder="••••••••">
+          </div>
+          <button id="btn-register" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-lg font-medium hover:opacity-90">Create Account</button>
+          <p class="text-center text-sm text-slate-500 mt-4">Already have an account? <span id="link-login" class="text-red-600 hover:underline cursor-pointer">Sign in</span></p>
+        </div>
+        <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"></div>
+        <div id="login-loading" class="hidden mt-4 text-center text-slate-500">Loading...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN APP -->
+  <div id="screen-app" class="screen">
+    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold">Foursquare Licensing Tracker</h1>
+            <p class="text-red-200 text-sm" id="user-greeting">Welcome!</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-4">
+          <span id="save-status" class="text-xs text-green-300 hidden">✓ Saved</span>
+          <button id="btn-logout" class="text-red-200 hover:text-white text-sm">Sign Out</button>
+        </div>
+      </div>
+    </header>
+    
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <!-- Progress Card -->
+      <div class="bg-white rounded-xl shadow-sm border p-6 mb-6">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h2 class="text-xl font-bold text-slate-800">Licensing Progress</h2>
+            <p class="text-sm text-slate-500">Complete all categories to prepare for your interview</p>
+          </div>
+          <div class="text-right">
+            <div class="text-3xl font-bold text-red-600" id="overall-progress">0%</div>
+            <div class="text-sm text-slate-500">Complete</div>
+          </div>
+        </div>
+        <div class="w-full bg-slate-100 rounded-full h-3">
+          <div class="bg-gradient-to-r from-red-500 to-red-600 h-3 rounded-full transition-all" id="progress-bar" style="width:0%"></div>
+        </div>
+      </div>
+
+      <!-- My Notes & Highlights Card -->
+      <div id="notes-dashboard" class="bg-white rounded-xl shadow-sm border p-6 mb-6 hidden">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+            <span>📝</span> My Notes & Highlights
+          </h2>
+          <button onclick="toggleNotesDashboard()" class="text-sm text-red-600 hover:underline">View All →</button>
+        </div>
+        <div id="recent-notes" class="space-y-3"></div>
+      </div>
+
+      <!-- Categories -->
+      <div id="categories-container" class="space-y-4"></div>
+    </main>
+  </div>
+
+  <!-- NOTES DASHBOARD SCREEN -->
+  <div id="screen-notes" class="screen">
+    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <button onclick="backToApp()" class="flex items-center gap-2 text-red-200 hover:text-white">← Back</button>
+        <h1 class="font-bold">My Notes & Highlights</h1>
+        <div></div>
+      </div>
+    </header>
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <div class="flex gap-2 mb-6">
+        <button onclick="filterNotes('all')" class="filter-btn px-4 py-2 rounded-lg bg-red-600 text-white">All</button>
+        <button onclick="filterNotes('notes')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Notes</button>
+        <button onclick="filterNotes('highlights')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Highlights</button>
+        <button onclick="filterNotes('bookmarks')" class="filter-btn px-4 py-2 rounded-lg bg-slate-100 text-slate-700">Bookmarks</button>
+      </div>
+      <div id="all-notes-list" class="space-y-4"></div>
+    </main>
+  </div>
+
+  <!-- CHAPTER SCREEN -->
+  <div id="screen-chapter" class="screen">
+    <header class="bg-gradient-to-r from-red-800 to-red-900 text-white shadow-lg">
+      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
+        <button id="chapter-back" class="flex items-center gap-2 text-red-200 hover:text-white">← Back</button>
+        <div class="text-center">
+          <div class="text-sm text-red-200" id="chapter-category"></div>
+          <div class="font-bold" id="chapter-title"></div>
+        </div>
+        <div id="chapter-badge" class="text-sm text-red-200"></div>
+      </div>
+    </header>
+    <div class="bg-white border-b">
+      <div class="max-w-4xl mx-auto flex">
+        <button class="tab-btn active" data-tab="read" onclick="switchTab('read')">📖 Read</button>
+        <button class="tab-btn" data-tab="study" onclick="switchTab('study')">📝 Study Guide</button>
+        <button class="tab-btn" data-tab="quiz" onclick="switchTab('quiz')">✅ Quiz</button>
+      </div>
+    </div>
+    <main class="max-w-4xl mx-auto px-4 py-6">
+      <div id="tab-read" class="tab-content">
+        <div id="reading-loading" class="text-center py-12">
+          <div class="loading-spinner mx-auto mb-4"></div>
+          <p class="text-slate-500">Loading content...</p>
+        </div>
+        <div id="reading-preview" class="bg-white rounded-xl shadow-sm border p-6 hidden">
+          <div id="preview-text" class="prose max-w-none" style="max-height: 300px; overflow: hidden;"></div>
+          <div class="mt-6 pt-6 border-t flex flex-wrap gap-3">
+            <button onclick="openReader()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Open Reader
+            </button>
+            <button onclick="resumeReading()" id="btn-resume" class="px-6 py-3 border border-red-600 text-red-600 rounded-lg hover:bg-red-50 hidden">
+              📑 Resume (Page <span id="resume-page">1</span>)
+            </button>
+            <button onclick="markReadComplete()" class="px-6 py-3 border rounded-lg hover:bg-slate-50 flex items-center gap-2">✓ Mark as Read</button>
+          </div>
+        </div>
+      </div>
+      <div id="tab-study" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <div id="study-content" class="lesson-content"></div>
+          <div class="mt-6 pt-6 border-t flex justify-between">
+            <button id="study-prev" class="px-5 py-2 border rounded-lg text-slate-600 hover:bg-slate-50 hidden">← Prev</button>
+            <button id="study-next" class="px-5 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 ml-auto">Next →</button>
+          </div>
+        </div>
+      </div>
+      <div id="tab-quiz" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <div id="quiz-container">
+            <div class="text-sm text-slate-500 mb-2" id="quiz-counter"></div>
+            <div id="quiz-question" class="text-xl font-medium text-slate-800 mb-6"></div>
+            <div id="quiz-options" class="space-y-3"></div>
+            <div id="quiz-feedback" class="hidden mt-6 p-4 rounded-lg"></div>
+            <div class="mt-6 flex justify-end">
+              <button id="quiz-submit" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50" disabled>Check Answer</button>
+              <button id="quiz-next" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 hidden">Next →</button>
+            </div>
+          </div>
+          <div id="quiz-results" class="hidden text-center py-8">
+            <div id="results-icon" class="text-6xl mb-4"></div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2" id="results-title"></h2>
+            <p class="text-slate-600 mb-6" id="results-message"></p>
+            <div class="flex justify-center gap-4 mb-6">
+              <div class="bg-green-50 rounded-xl p-4"><div class="text-3xl font-bold text-green-600" id="results-correct">0</div><div class="text-sm">Correct</div></div>
+              <div class="bg-red-50 rounded-xl p-4"><div class="text-3xl font-bold text-red-600" id="results-incorrect">0</div><div class="text-sm">Incorrect</div></div>
+              <div class="bg-blue-50 rounded-xl p-4"><div class="text-3xl font-bold text-blue-600" id="results-percent">0%</div><div class="text-sm">Score</div></div>
+            </div>
+            <div class="flex justify-center gap-4">
+              <button onclick="retakeQuiz()" class="px-6 py-3 border rounded-lg hover:bg-slate-50">Retake</button>
+              <button onclick="backToApp()" class="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700">Done</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- FULL READER SCREEN -->
+  <div id="screen-reader" class="screen">
+    <div id="reader-container" class="reader-container theme-light font-serif">
+      <!-- Progress bar -->
+      <div class="reading-progress" id="reading-progress" style="width: 0%"></div>
+      
+      <!-- Top toolbar -->
+      <div class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur border-b z-50" id="reader-header">
+        <div class="flex items-center justify-between px-4 py-3">
+          <button onclick="closeReader()" class="p-2 hover:bg-slate-100 rounded-lg">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          </button>
+          <div class="text-center">
+            <div class="font-medium text-sm" id="reader-title"></div>
+            <div class="text-xs text-slate-500" id="reader-page-info">Page 1 of 1</div>
+          </div>
+          <div class="flex items-center gap-1">
+            <button onclick="toggleBookmark()" id="btn-bookmark" class="p-2 hover:bg-slate-100 rounded-lg" title="Bookmark">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+            </button>
+            <button onclick="toggleReaderNotes()" class="p-2 hover:bg-slate-100 rounded-lg" title="Notes">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            </button>
+            <button onclick="toggleTOC()" class="p-2 hover:bg-slate-100 rounded-lg" title="Contents">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Page content -->
+      <div class="pt-16 pb-24 px-4" id="reader-page-container">
+        <div class="reader-page" id="reader-page"></div>
+      </div>
+      
+      <!-- Selection popup for highlighting -->
+      <div class="selection-popup" id="selection-popup">
+        <button onclick="addHighlight('yellow')" class="bg-yellow-300 border-yellow-400" title="Yellow"></button>
+        <button onclick="addHighlight('green')" class="bg-green-300 border-green-400" title="Green"></button>
+        <button onclick="addHighlight('blue')" class="bg-blue-300 border-blue-400" title="Blue"></button>
+        <button onclick="addHighlight('pink')" class="bg-pink-300 border-pink-400" title="Pink"></button>
+        <button onclick="addNoteToSelection()" class="bg-white border-slate-300" title="Add Note">📝</button>
+      </div>
+      
+      <!-- Bottom navigation -->
+      <div class="page-nav" id="page-nav">
+        <div class="max-w-lg mx-auto">
+          <div class="flex items-center justify-between mb-2">
+            <button onclick="prevPage()" class="px-4 py-2 border rounded-lg hover:bg-slate-100 disabled:opacity-30" id="btn-prev-page">← Prev</button>
+            <div class="flex items-center gap-2">
+              <input type="number" id="page-input" class="w-16 text-center border rounded-lg py-2" min="1" onchange="goToPage(this.value)">
+              <span class="text-slate-500">/ <span id="total-pages">1</span></span>
+            </div>
+            <button onclick="nextPage()" class="px-4 py-2 border rounded-lg hover:bg-slate-100 disabled:opacity-30" id="btn-next-page">Next →</button>
+          </div>
+          <div class="flex justify-center gap-4">
+            <button onclick="toggleSettings()" class="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              Settings
+            </button>
+            <button onclick="addPageNote()" class="text-sm text-slate-600 hover:text-slate-900 flex items-center gap-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>
+              Add Note
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Settings drawer -->
+      <div class="settings-drawer" id="settings-drawer">
+        <div class="p-6 max-w-lg mx-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="font-bold text-lg">Reading Settings</h3>
+            <button onclick="toggleSettings()" class="text-slate-500">✕</button>
+          </div>
+          <!-- Theme -->
+          <div class="mb-6">
+            <div class="text-sm font-medium mb-3">Theme</div>
+            <div class="flex gap-3">
+              <button onclick="setTheme('light')" class="w-12 h-12 rounded-full bg-white border-2 border-slate-300" title="Light"></button>
+              <button onclick="setTheme('sepia')" class="w-12 h-12 rounded-full bg-[#f4ecd8] border-2 border-[#d4c4a8]" title="Sepia"></button>
+              <button onclick="setTheme('dark')" class="w-12 h-12 rounded-full bg-[#1a1a1a] border-2 border-[#404040]" title="Dark"></button>
+              <button onclick="setTheme('night')" class="w-12 h-12 rounded-full bg-[#0d1117] border-2 border-[#30363d]" title="Night"></button>
+            </div>
+          </div>
+          <!-- Font -->
+          <div class="mb-6">
+            <div class="text-sm font-medium mb-3">Font</div>
+            <div class="flex flex-wrap gap-2">
+              <button onclick="setFont('serif')" class="px-3 py-2 border rounded-lg font-serif">Merriweather</button>
+              <button onclick="setFont('classic')" class="px-3 py-2 border rounded-lg font-classic">Crimson</button>
+              <button onclick="setFont('modern')" class="px-3 py-2 border rounded-lg font-modern">Literata</button>
+              <button onclick="setFont('sans')" class="px-3 py-2 border rounded-lg font-sans">Open Sans</button>
+            </div>
+          </div>
+          <!-- Size -->
+          <div class="mb-6">
+            <div class="text-sm font-medium mb-3">Font Size</div>
+            <div class="flex items-center gap-4">
+              <button onclick="adjustFontSize(-2)" class="w-10 h-10 border rounded-full text-lg">A-</button>
+              <span id="font-size-display" class="text-lg font-medium w-16 text-center">18px</span>
+              <button onclick="adjustFontSize(2)" class="w-10 h-10 border rounded-full text-xl">A+</button>
+            </div>
+          </div>
+          <!-- Line Height -->
+          <div class="mb-4">
+            <div class="text-sm font-medium mb-3">Line Spacing</div>
+            <div class="flex gap-2">
+              <button onclick="setLineHeight(1.5)" class="px-4 py-2 border rounded-lg">Compact</button>
+              <button onclick="setLineHeight(1.8)" class="px-4 py-2 border rounded-lg">Normal</button>
+              <button onclick="setLineHeight(2.2)" class="px-4 py-2 border rounded-lg">Relaxed</button>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Notes panel -->
+      <div class="notes-panel" id="notes-panel">
+        <div class="p-4 border-b flex justify-between items-center">
+          <h3 class="font-bold">Notes & Highlights</h3>
+          <button onclick="toggleReaderNotes()" class="text-slate-500">✕</button>
+        </div>
+        <div class="p-4 overflow-y-auto" style="height: calc(100% - 60px);" id="chapter-notes-list"></div>
+      </div>
+      
+      <!-- TOC panel -->
+      <div class="toc-panel" id="toc-panel">
+        <div class="p-4 border-b flex justify-between items-center">
+          <h3 class="font-bold">Contents</h3>
+          <button onclick="toggleTOC()" class="text-slate-500">✕</button>
+        </div>
+        <div class="p-4" id="toc-list"></div>
+      </div>
+      
+      <!-- Overlay -->
+      <div class="fixed inset-0 bg-black/30 z-40 hidden" id="reader-overlay" onclick="closeAllPanels()"></div>
+    </div>
+  </div>
+
+  <!-- Note Modal -->
+  <div id="note-modal" class="fixed inset-0 bg-black/50 z-[200] hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl max-w-lg w-full p-6">
+      <h3 class="font-bold text-lg mb-2">Add Note</h3>
+      <div class="text-sm text-slate-500 mb-4 italic" id="note-modal-quote"></div>
+      <textarea id="note-modal-text" class="w-full border rounded-lg p-3 h-32 resize-none" placeholder="Write your note..."></textarea>
+      <div class="flex justify-end gap-3 mt-4">
+        <button onclick="closeNoteModal()" class="px-4 py-2 border rounded-lg">Cancel</button>
+        <button onclick="saveNote()" class="px-4 py-2 bg-red-600 text-white rounded-lg">Save Note</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// Toggle forms
+(function() {
+  document.getElementById('link-register').onclick = function() { document.getElementById('login-form').style.display = 'none'; document.getElementById('register-form').style.display = 'block'; };
+  document.getElementById('link-login').onclick = function() { document.getElementById('register-form').style.display = 'none'; document.getElementById('login-form').style.display = 'block'; };
+})();
+
+// Supabase
+var supabase = null;
+var SUPABASE_URL = 'https://mvuvgecqxwuqfshqbtjf.supabase.co';
+var SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXZnZWNxeHd1cWZzaHFidGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODQ4MTUsImV4cCI6MjA4MzY2MDgxNX0.6OezNuwN5Ip2a_Xw_SsuxoB80nn3WP7D5dnhAEE9A9o';
+
+function initSupabase() {
+  if (window.supabase && window.supabase.createClient) {
+    supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    checkExistingSession();
+  }
+}
+var sbScript = document.createElement('script');
+sbScript.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';
+sbScript.onload = initSupabase;
+document.head.appendChild(sbScript);
+
+// Settings
+var readerSettings = { theme: 'light', font: 'serif', fontSize: 18, lineHeight: 1.8 };
+try { var s = localStorage.getItem('readerSettings'); if (s) readerSettings = JSON.parse(s); } catch(e) {}
+function saveReaderSettings() { try { localStorage.setItem('readerSettings', JSON.stringify(readerSettings)); } catch(e) {} }
+
+// Content cache
+var loadedContent = {};
+var currentReadingContent = '';
+var contentPages = [];
+var currentPageNum = 1;
+var CHARS_PER_PAGE = 3000;
+
+// Annotations (highlights, notes, bookmarks)
+var annotations = { highlights: [], notes: [], bookmarks: [] };
+
+// STATE
+var currentUser = null;
+var userProgress = null;
+var currentCategory = null;
+var currentChapter = null;
+var studyIndex = 0;
+var quizIndex = 0;
+var selectedAnswer = null;
+var quizScore = 0;
+var expandedCategories = {};
+var pendingSelection = null;
+
+// DATA - Categories and chapters (keeping compact for space)
+var CATEGORIES = [
+  { id: 'heritage', name: 'Heritage', icon: '🏛️', color: 'from-amber-500 to-orange-600', description: 'The history and founding of the Foursquare Church', type: 'domain',
+    chapters: [
+      { id: 'heritage-1', title: 'Aimee Semple McPherson', reading: '<h2>Aimee Semple McPherson (1890-1944)</h2><p>Aimee Semple McPherson was born on October 9, 1890, near Ingersoll, Ontario, Canada. She became one of the most influential evangelists of the 20th century and founded the International Church of the Foursquare Gospel.</p><p>At age 17, Aimee attended a Pentecostal revival meeting where she heard Robert Semple preach. She was converted and later married Robert. Together they went as missionaries to China, where Robert died of malaria in 1910, leaving Aimee widowed with a newborn daughter.</p><p>After returning to America and a brief marriage to Harold McPherson, Aimee began her evangelistic ministry in earnest. She traveled across the country conducting revival meetings, becoming known for her dynamic preaching, dramatic illustrated sermons, and healing ministry.</p><p>Aimee was a pioneer in many ways. She was one of the first women to preach on the radio and the first woman to receive an FCC broadcast license.</p>', studyGuide: [{ title: 'Early Life', content: '<p>Born October 9, 1890 in Canada. Converted at 17. Married Robert Semple, went to China.</p>' }], quizzes: [{q: "When was Aimee born?", options: ["1880", "1890", "1900", "1910"], correct: 1, explanation: "1890"}] },
+      { id: 'heritage-2', title: 'Angelus Temple', reading: '<h2>Angelus Temple</h2><p>Angelus Temple was dedicated on January 1, 1923, in Echo Park, Los Angeles. This 5,300-seat auditorium became the headquarters of the Foursquare movement.</p><p>Built at a cost of $1.5 million, its distinctive dome became iconic. During the Great Depression, the commissary fed 1.5 million people.</p>', studyGuide: [{ title: 'The Building', content: '<p>Dedicated Jan 1, 1923. Seats 5,300. Cost $1.5 million.</p>' }], quizzes: [{q: "When was Angelus Temple dedicated?", options: ["1920", "1923", "1925", "1930"], correct: 1, explanation: "Jan 1, 1923"}] }
+    ]
+  },
+  { id: 'identity', name: 'Identity', icon: '✨', color: 'from-purple-500 to-violet-600', description: 'What makes Foursquare distinctive', type: 'domain',
+    chapters: [
+      { id: 'identity-1', title: 'The Foursquare Gospel', reading: '<h2>The Foursquare Gospel</h2><p>The name came to Aimee in Oakland, 1922, while preaching on Ezekiel 1. The four faces represent: Man = Savior, Lion = Baptizer, Ox = Healer, Eagle = Coming King.</p><p>Hebrews 13:8: "Jesus Christ is the same yesterday, today, and forever."</p>', studyGuide: [{ title: 'The Four Faces', content: '<p>Man=Savior, Lion=Baptizer, Ox=Healer, Eagle=King</p>' }], quizzes: [{q: "Where did Aimee receive the vision?", options: ["LA", "Oakland", "SF", "NY"], correct: 1, explanation: "Oakland, 1922"}] }
+    ]
+  },
+  { id: 'doctrine', name: 'Doctrine', icon: '📖', color: 'from-blue-500 to-indigo-600', description: 'Core Foursquare beliefs', type: 'domain',
+    chapters: [
+      { id: 'doctrine-1', title: 'Declaration of Faith', reading: '<h2>Declaration of Faith</h2><p>22 statements of core belief covering Scripture, Trinity, salvation, Holy Spirit, healing, and Second Coming.</p>', studyGuide: [{ title: 'Overview', content: '<p>22 statements based on Scripture.</p>' }], quizzes: [{q: "How many statements?", options: ["10", "22", "30", "40"], correct: 1, explanation: "22"}] }
+    ]
+  },
+  { id: 'polity', name: 'Polity', icon: '⚖️', color: 'from-emerald-500 to-teal-600', description: 'Church structure and governance', type: 'domain',
+    chapters: [
+      { id: 'polity-1', title: 'Church Government', reading: '<h2>Church Government</h2><p>Modified episcopal with congregational elements. Convention is highest body. Districts provide regional oversight.</p>', studyGuide: [{ title: 'Structure', content: '<p>Convention > Board > President > Districts > Local</p>' }], quizzes: [{q: "Highest governing body?", options: ["Board", "President", "Convention", "Local"], correct: 2, explanation: "Convention"}] }
+    ]
+  },
+  { id: 'practice', name: 'Ministry Practice', icon: '🙏', color: 'from-pink-500 to-rose-600', description: 'Practical ministry', type: 'domain',
+    chapters: [
+      { id: 'practice-1', title: 'Ordinances', reading: '<h2>Ordinances</h2><p>Two ordinances: Water Baptism by immersion and Lord\'s Supper. Both symbolic, not sacramental.</p>', studyGuide: [{ title: 'Two Ordinances', content: '<p>Baptism and Communion</p>' }], quizzes: [{q: "How many ordinances?", options: ["1", "2", "3", "7"], correct: 1, explanation: "Two"}] }
+    ]
+  },
+  { id: 'fopt', name: 'Foundations of Pentecostal Theology', icon: '📚', color: 'from-indigo-500 to-purple-600', description: 'Complete textbook (10 Chapters)', type: 'book',
+    chapters: [
+      { id: 'ch1', num: 1, title: 'The Doctrine of Scripture', hasFullText: true },
+      { id: 'ch2', num: 2, title: 'The Doctrine of God', hasFullText: true },
+      { id: 'ch3', num: 3, title: 'The Doctrine of Humankind', hasFullText: true },
+      { id: 'ch4', num: 4, title: 'The Doctrine of Sin', hasFullText: true },
+      { id: 'ch5', num: 5, title: 'The Doctrine of Salvation', hasFullText: true },
+      { id: 'ch6', num: 6, title: 'The Doctrine of the Holy Spirit', hasFullText: true },
+      { id: 'ch7', num: 7, title: 'The Doctrine of Divine Healing', hasFullText: true },
+      { id: 'ch8', num: 8, title: 'The Doctrine of the Church', hasFullText: true },
+      { id: 'ch9', num: 9, title: 'The Doctrine of Angels', hasFullText: true },
+      { id: 'ch10', num: 10, title: 'The Doctrine of Last Things', hasFullText: true }
+    ]
+  },
+  { id: 'aimee-bio', name: 'Aimee: Life Story', icon: '👩', color: 'from-rose-400 to-pink-500', description: 'Biography', type: 'book', comingSoon: true, chapters: [] },
+  { id: 'women-ministry', name: 'Women in Ministry', icon: '👩‍🏫', color: 'from-fuchsia-400 to-purple-500', description: 'Biblical position', type: 'book', comingSoon: true, chapters: [] },
+  { id: 'disciples-nations', name: 'Disciples of All Nations', icon: '🌍', color: 'from-cyan-400 to-blue-500', description: 'Missions', type: 'book', comingSoon: true, chapters: [] },
+  { id: 'identity-keystones', name: 'Foursquare Keystones', icon: '🔑', color: 'from-amber-400 to-orange-500', description: 'Five key areas', type: 'book', comingSoon: true, chapters: [] }
+];
+
+var FOPT_DATA = {
+  ch1: { studyGuide: [{ title: 'Scripture', content: '<p>God-breathed. 66 books. Verbal plenary inspiration.</p>' }], quizzes: [{q: "Books in Bible?", options: ["39","27","66","73"], correct: 2, explanation: "66"}] },
+  ch2: { studyGuide: [{ title: 'God', content: '<p>Trinity. One God, three persons.</p>' }], quizzes: [{q: "Persons in Trinity?", options: ["1","2","3","4"], correct: 2, explanation: "3"}] },
+  ch3: { studyGuide: [{ title: 'Humanity', content: '<p>Imago Dei. Body, soul, spirit.</p>' }], quizzes: [{q: "Imago Dei means?", options: ["Image of man","Image of God","Creation","Nature"], correct: 1, explanation: "Image of God"}] },
+  ch4: { studyGuide: [{ title: 'Sin', content: '<p>Hamartia = missing mark. Wages = death.</p>' }], quizzes: [{q: "Wages of sin?", options: ["Sickness","Poverty","Death","Suffering"], correct: 2, explanation: "Death"}] },
+  ch5: { studyGuide: [{ title: 'Salvation', content: '<p>By grace through faith. Not works.</p>' }], quizzes: [{q: "Salvation by?", options: ["Works","Grace","Baptism","Law"], correct: 1, explanation: "Grace through faith"}] },
+  ch6: { studyGuide: [{ title: 'Holy Spirit', content: '<p>Third person. Spirit baptism with tongues.</p>' }], quizzes: [{q: "Initial evidence?", options: ["Joy","Prophecy","Tongues","Healing"], correct: 2, explanation: "Tongues"}] },
+  ch7: { studyGuide: [{ title: 'Healing', content: '<p>In the atonement. Isaiah 53:5.</p>' }], quizzes: [{q: "Isaiah 53:5?", options: ["God is love","By stripes healed","Repent","Fear not"], correct: 1, explanation: "By His stripes"}] },
+  ch8: { studyGuide: [{ title: 'Church', content: '<p>Ekklesia = called out. Two ordinances.</p>' }], quizzes: [{q: "Ekklesia means?", options: ["Building","Called-out","Sacred","Worship"], correct: 1, explanation: "Called-out assembly"}] },
+  ch9: { studyGuide: [{ title: 'Angels', content: '<p>Created beings. Satan = fallen angel.</p>' }], quizzes: [{q: "Angels are?", options: ["Eternal","Created","Gods","Myths"], correct: 1, explanation: "Created beings"}] },
+  ch10: { studyGuide: [{ title: 'Last Things', content: '<p>Second coming. Rapture. Millennium.</p>' }], quizzes: [{q: "Millennium?", options: ["10 yrs","100 yrs","1000 yrs","Eternity"], correct: 2, explanation: "1000 years"}] }
+};
+
+// HELPERS
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s => s.classList.remove('active')); document.getElementById('screen-' + id).classList.add('active'); }
+function showError(msg) { document.getElementById('login-error').textContent = msg; document.getElementById('login-error').classList.remove('hidden'); }
+function hideError() { document.getElementById('login-error').classList.add('hidden'); }
+function showSaveStatus() { var el = document.getElementById('save-status'); el.classList.remove('hidden'); setTimeout(() => el.classList.add('hidden'), 2000); }
+
+function createDefaultProgress() {
+  var p = { annotations: { highlights: [], notes: [], bookmarks: [] } };
+  CATEGORIES.forEach(cat => {
+    p[cat.id] = {};
+    if (cat.chapters) cat.chapters.forEach(ch => { p[cat.id][ch.id] = { read: false, studied: false, quizScore: 0, lastPage: 1 }; });
+  });
+  return p;
+}
+
+// AUTH
+async function handleRegister() {
+  var name = document.getElementById('reg-name').value.trim();
+  var email = document.getElementById('reg-email').value.trim();
+  var pw = document.getElementById('reg-password').value;
+  if (!name || !email || !pw) return showError('Fill all fields');
+  if (pw.length < 6) return showError('Password min 6 chars');
+  if (!supabase) return showError('Connecting...');
+  hideError();
+  try {
+    var r = await supabase.auth.signUp({ email, password: pw, options: { data: { name } } });
+    if (r.error) throw r.error;
+    currentUser = r.data.user; userProgress = createDefaultProgress(); await saveProgress(); showApp();
+  } catch (e) { showError(e.message); }
+}
+
+async function handleLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var pw = document.getElementById('login-password').value;
+  if (!email || !pw) return showError('Fill all fields');
+  if (!supabase) return showError('Connecting...');
+  hideError();
+  try {
+    var r = await supabase.auth.signInWithPassword({ email, password: pw });
+    if (r.error) throw r.error;
+    currentUser = r.data.user; await loadProgress(); showApp();
+  } catch (e) { showError(e.message); }
+}
+
+async function handleLogout() { if (supabase) await supabase.auth.signOut(); currentUser = null; userProgress = null; showScreen('login'); }
+
+async function loadProgress() {
+  try {
+    var r = await supabase.from('progress').select('data').eq('user_id', currentUser.id).single();
+    userProgress = r.data?.data || createDefaultProgress();
+  } catch (e) { userProgress = createDefaultProgress(); }
+  if (!userProgress.annotations) userProgress.annotations = { highlights: [], notes: [], bookmarks: [] };
+  CATEGORIES.forEach(cat => {
+    if (!userProgress[cat.id]) userProgress[cat.id] = {};
+    if (cat.chapters) cat.chapters.forEach(ch => {
+      if (!userProgress[cat.id][ch.id]) userProgress[cat.id][ch.id] = { read: false, studied: false, quizScore: 0, lastPage: 1 };
+    });
+  });
+  annotations = userProgress.annotations;
+}
+
+async function saveProgress() {
+  userProgress.annotations = annotations;
+  try { await supabase.from('progress').upsert({ user_id: currentUser.id, data: userProgress, updated_at: new Date().toISOString() }, { onConflict: 'user_id' }); showSaveStatus(); }
+  catch (e) { console.error(e); }
+}
+
+function checkExistingSession() {
+  supabase?.auth.getSession().then(r => { if (r.data.session) { currentUser = r.data.session.user; loadProgress().then(showApp); } }).catch(console.error);
+}
+
+// APP
+function showApp() {
+  showScreen('app');
+  document.getElementById('user-greeting').textContent = 'Welcome, ' + (currentUser?.user_metadata?.name || currentUser?.email?.split('@')[0] || 'Student') + '!';
+  renderCategories();
+  updateOverallProgress();
+  renderNotesDashboard();
+}
+
+function backToApp() { showApp(); }
+
+function renderCategories() {
+  var html = '';
+  CATEGORIES.forEach(cat => {
+    var isExp = expandedCategories[cat.id];
+    var prog = getCategoryProgress(cat);
+    html += `<div class="bg-white rounded-xl shadow-sm border overflow-hidden">
+      <div class="category-header p-5 flex items-center justify-between" onclick="toggleCategory('${cat.id}')">
+        <div class="flex items-center gap-4">
+          <div class="w-12 h-12 rounded-xl bg-gradient-to-br ${cat.color} flex items-center justify-center text-2xl text-white shadow">${cat.icon}</div>
+          <div><h3 class="font-bold text-slate-800 text-lg">${cat.name}</h3><p class="text-sm text-slate-500">${cat.description}</p></div>
+        </div>
+        <div class="flex items-center gap-4">
+          ${cat.comingSoon ? '<span class="px-3 py-1 bg-slate-100 text-slate-500 text-sm rounded-full">Coming Soon</span>' : `<div class="text-right mr-2"><div class="text-lg font-bold text-slate-700">${prog}%</div><div class="text-xs text-slate-400">Complete</div></div>`}
+          <svg class="chevron w-5 h-5 text-slate-400 ${isExp ? 'rotated' : ''}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+        </div>
+      </div>
+      <div class="category-content ${isExp ? 'expanded' : ''}">`;
+    if (!cat.comingSoon && cat.chapters?.length) {
+      html += '<div class="border-t px-5 py-4 space-y-2">';
+      cat.chapters.forEach(ch => {
+        var p = userProgress[cat.id]?.[ch.id] || {};
+        var done = p.read && p.studied && p.quizScore >= 80;
+        var title = ch.num ? `Ch. ${ch.num}: ${ch.title}` : ch.title;
+        html += `<div class="chapter-card flex items-center justify-between p-3 bg-slate-50 rounded-lg cursor-pointer" onclick="openChapter('${cat.id}','${ch.id}')">
+          <div class="flex items-center gap-3">
+            ${done ? '<div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center text-white text-sm">✓</div>' : `<div class="w-8 h-8 bg-slate-200 rounded-full flex items-center justify-center text-slate-500 text-sm">${ch.num||'•'}</div>`}
+            <span class="font-medium text-slate-700">${title}</span>
+          </div>
+          <div class="flex items-center gap-2 text-xs">
+            <span class="${p.read ? 'text-green-600' : 'text-slate-400'}">📖</span>
+            <span class="${p.studied ? 'text-green-600' : 'text-slate-400'}">📝</span>
+            <span class="${p.quizScore >= 80 ? 'text-green-600' : 'text-slate-400'}">✅${p.quizScore > 0 ? p.quizScore+'%' : ''}</span>
+          </div>
+        </div>`;
+      });
+      html += '</div>';
+    } else if (cat.comingSoon) {
+      html += '<div class="border-t px-5 py-8 text-center text-slate-400">Coming soon!</div>';
+    }
+    html += '</div></div>';
+  });
+  document.getElementById('categories-container').innerHTML = html;
+}
+
+function toggleCategory(id) { expandedCategories[id] = !expandedCategories[id]; renderCategories(); }
+
+function getCategoryProgress(cat) {
+  if (cat.comingSoon || !cat.chapters?.length) return 0;
+  var t = cat.chapters.length * 3, d = 0;
+  cat.chapters.forEach(ch => { var p = userProgress[cat.id]?.[ch.id] || {}; if (p.read) d++; if (p.studied) d++; if (p.quizScore >= 80) d++; });
+  return Math.round((d / t) * 100);
+}
+
+function updateOverallProgress() {
+  var t = 0, d = 0;
+  CATEGORIES.forEach(cat => {
+    if (!cat.comingSoon && cat.chapters) cat.chapters.forEach(ch => { t += 3; var p = userProgress[cat.id]?.[ch.id] || {}; if (p.read) d++; if (p.studied) d++; if (p.quizScore >= 80) d++; });
+  });
+  var pct = t > 0 ? Math.round((d / t) * 100) : 0;
+  document.getElementById('overall-progress').textContent = pct + '%';
+  document.getElementById('progress-bar').style.width = pct + '%';
+}
+
+// Notes Dashboard
+function renderNotesDashboard() {
+  var all = [...annotations.notes, ...annotations.highlights, ...annotations.bookmarks].sort((a, b) => new Date(b.date) - new Date(a.date));
+  if (all.length === 0) { document.getElementById('notes-dashboard').classList.add('hidden'); return; }
+  document.getElementById('notes-dashboard').classList.remove('hidden');
+  var recent = all.slice(0, 3);
+  var html = '';
+  recent.forEach(n => {
+    var icon = n.type === 'note' ? '📝' : n.type === 'highlight' ? '🖍️' : '🔖';
+    html += `<div class="note-card"><div class="flex items-start gap-2"><span>${icon}</span><div class="flex-1"><div class="text-sm font-medium">${n.chapterTitle || 'Unknown'}</div><div class="text-xs text-slate-500">${n.text?.substring(0, 80) || 'Page ' + n.page}${n.text?.length > 80 ? '...' : ''}</div></div></div></div>`;
+  });
+  document.getElementById('recent-notes').innerHTML = html;
+}
+
+function toggleNotesDashboard() {
+  showScreen('notes');
+  filterNotes('all');
+}
+
+function filterNotes(type) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('bg-red-600', 'text-white'));
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.add('bg-slate-100', 'text-slate-700'));
+  event.target.classList.remove('bg-slate-100', 'text-slate-700');
+  event.target.classList.add('bg-red-600', 'text-white');
+  
+  var items = [];
+  if (type === 'all' || type === 'notes') items = items.concat(annotations.notes.map(n => ({...n, type: 'note'})));
+  if (type === 'all' || type === 'highlights') items = items.concat(annotations.highlights.map(h => ({...h, type: 'highlight'})));
+  if (type === 'all' || type === 'bookmarks') items = items.concat(annotations.bookmarks.map(b => ({...b, type: 'bookmark'})));
+  items.sort((a, b) => new Date(b.date) - new Date(a.date));
+  
+  var html = '';
+  if (items.length === 0) html = '<p class="text-slate-500 text-center py-8">No items yet</p>';
+  items.forEach(n => {
+    var icon = n.type === 'note' ? '📝' : n.type === 'highlight' ? '🖍️' : '🔖';
+    var color = n.color ? `highlight-${n.color}` : '';
+    html += `<div class="bg-white rounded-xl border p-4">
+      <div class="flex items-start gap-3">
+        <span class="text-xl">${icon}</span>
+        <div class="flex-1">
+          <div class="font-medium">${n.chapterTitle || 'Chapter'}</div>
+          <div class="text-sm text-slate-500 mb-2">Page ${n.page} • ${new Date(n.date).toLocaleDateString()}</div>
+          ${n.quote ? `<div class="text-sm ${color} px-2 py-1 rounded mb-2">"${n.quote}"</div>` : ''}
+          ${n.text ? `<div class="text-sm">${n.text}</div>` : ''}
+        </div>
+        <button onclick="deleteAnnotation('${n.type}', '${n.id}')" class="text-slate-400 hover:text-red-500">✕</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('all-notes-list').innerHTML = html;
+}
+
+function deleteAnnotation(type, id) {
+  if (type === 'note') annotations.notes = annotations.notes.filter(n => n.id !== id);
+  if (type === 'highlight') annotations.highlights = annotations.highlights.filter(h => h.id !== id);
+  if (type === 'bookmark') annotations.bookmarks = annotations.bookmarks.filter(b => b.id !== id);
+  saveProgress();
+  filterNotes('all');
+}
+
+// CHAPTER VIEW
+function openChapter(catId, chId) {
+  currentCategory = CATEGORIES.find(c => c.id === catId);
+  currentChapter = currentCategory.chapters.find(c => c.id === chId);
+  studyIndex = 0; quizIndex = 0; quizScore = 0;
+  showScreen('chapter');
+  document.getElementById('chapter-category').textContent = currentCategory.name;
+  document.getElementById('chapter-title').textContent = currentChapter.num ? `Chapter ${currentChapter.num}: ${currentChapter.title}` : currentChapter.title;
+  updateChapterBadge();
+  switchTab('read');
+}
+
+function updateChapterBadge() {
+  var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
+  document.getElementById('chapter-badge').textContent = p.quizScore > 0 ? `Quiz: ${p.quizScore}%` : '';
+}
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  if (tab === 'read') loadReadContent();
+  else if (tab === 'study') loadStudyContent();
+  else if (tab === 'quiz') startQuiz();
+}
+
+// READ
+function loadReadContent() {
+  document.getElementById('reading-loading').classList.remove('hidden');
+  document.getElementById('reading-preview').classList.add('hidden');
+  
+  if (currentCategory.id === 'fopt' && currentChapter.hasFullText) {
+    var chId = currentChapter.id;
+    if (loadedContent[chId]) return displayReadPreview(loadedContent[chId]);
+    var s = document.createElement('script');
+    s.src = 'chapters/' + chId + '.js';
+    s.onload = () => { var v = 'FOPT_' + chId.toUpperCase(); if (window[v]) { loadedContent[chId] = window[v].content; displayReadPreview(loadedContent[chId]); } };
+    s.onerror = () => { document.getElementById('reading-loading').innerHTML = '<p class="text-red-500">Failed to load chapter file.</p>'; };
+    document.head.appendChild(s);
+  } else if (currentChapter.reading) {
+    displayReadPreview(currentChapter.reading);
+  } else {
+    document.getElementById('reading-loading').innerHTML = '<p class="text-slate-500">No content available.</p>';
+  }
+}
+
+function displayReadPreview(content) {
+  currentReadingContent = content;
+  document.getElementById('reading-loading').classList.add('hidden');
+  document.getElementById('reading-preview').classList.remove('hidden');
+  var preview = content.substring(0, 800).replace(/\n\n/g, '</p><p>');
+  document.getElementById('preview-text').innerHTML = '<p>' + preview + '...</p>';
+  
+  var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
+  if (p.lastPage > 1) {
+    document.getElementById('btn-resume').classList.remove('hidden');
+    document.getElementById('resume-page').textContent = p.lastPage;
+  } else {
+    document.getElementById('btn-resume').classList.add('hidden');
+  }
+}
+
+function markReadComplete() {
+  userProgress[currentCategory.id][currentChapter.id].read = true;
+  saveProgress();
+  alert('Marked as read! ✓');
+}
+
+// READER
+function openReader() {
+  showScreen('reader');
+  paginateContent();
+  currentPageNum = 1;
+  applyReaderSettings();
+  document.getElementById('reader-title').textContent = currentChapter.num ? `Chapter ${currentChapter.num}` : currentChapter.title;
+  renderPage();
+  setupTextSelection();
+}
+
+function resumeReading() {
+  var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
+  openReader();
+  currentPageNum = p.lastPage || 1;
+  renderPage();
+}
+
+function closeReader() {
+  userProgress[currentCategory.id][currentChapter.id].lastPage = currentPageNum;
+  saveProgress();
+  showScreen('chapter');
+}
+
+function paginateContent() {
+  var text = currentReadingContent;
+  // Split into paragraphs
+  var paras = text.split(/\n\n+/);
+  contentPages = [];
+  var currentPage = '';
+  var charCount = 0;
+  
+  paras.forEach(p => {
+    if (charCount + p.length > CHARS_PER_PAGE && currentPage) {
+      contentPages.push(currentPage);
+      currentPage = '';
+      charCount = 0;
+    }
+    currentPage += '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+    charCount += p.length;
+  });
+  if (currentPage) contentPages.push(currentPage);
+  if (contentPages.length === 0) contentPages = ['<p>No content</p>'];
+  
+  document.getElementById('total-pages').textContent = contentPages.length;
+}
+
+function renderPage() {
+  var page = contentPages[currentPageNum - 1] || '';
+  // Apply highlights
+  var chapterHighlights = annotations.highlights.filter(h => h.chapterId === currentChapter.id && h.page === currentPageNum);
+  chapterHighlights.forEach(h => {
+    if (h.quote) {
+      var regex = new RegExp(escapeRegex(h.quote), 'gi');
+      page = page.replace(regex, `<span class="highlight-${h.color}" data-highlight-id="${h.id}">${h.quote}</span>`);
+    }
+  });
+  
+  document.getElementById('reader-page').innerHTML = page;
+  document.getElementById('page-input').value = currentPageNum;
+  document.getElementById('reader-page-info').textContent = `Page ${currentPageNum} of ${contentPages.length}`;
+  document.getElementById('btn-prev-page').disabled = currentPageNum <= 1;
+  document.getElementById('btn-next-page').disabled = currentPageNum >= contentPages.length;
+  document.getElementById('reading-progress').style.width = ((currentPageNum / contentPages.length) * 100) + '%';
+  
+  // Check bookmark
+  var hasBookmark = annotations.bookmarks.some(b => b.chapterId === currentChapter.id && b.page === currentPageNum);
+  document.getElementById('btn-bookmark').innerHTML = hasBookmark ? '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="#ef4444" stroke="#ef4444" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>' : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>';
+  
+  renderChapterNotes();
+}
+
+function escapeRegex(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+
+function prevPage() { if (currentPageNum > 1) { currentPageNum--; renderPage(); } }
+function nextPage() { if (currentPageNum < contentPages.length) { currentPageNum++; renderPage(); } }
+function goToPage(n) { n = parseInt(n); if (n >= 1 && n <= contentPages.length) { currentPageNum = n; renderPage(); } }
+
+// Text Selection for Highlighting
+function setupTextSelection() {
+  document.getElementById('reader-page').addEventListener('mouseup', handleSelection);
+  document.getElementById('reader-page').addEventListener('touchend', handleSelection);
+}
+
+function handleSelection(e) {
+  var sel = window.getSelection();
+  var text = sel.toString().trim();
+  if (text.length > 0) {
+    pendingSelection = text;
+    var range = sel.getRangeAt(0);
+    var rect = range.getBoundingClientRect();
+    var popup = document.getElementById('selection-popup');
+    popup.style.top = (rect.top + window.scrollY - 50) + 'px';
+    popup.style.left = (rect.left + rect.width/2 - 80) + 'px';
+    popup.classList.add('show');
+  } else {
+    document.getElementById('selection-popup').classList.remove('show');
+  }
+}
+
+function addHighlight(color) {
+  if (!pendingSelection) return;
+  annotations.highlights.push({
+    id: Date.now().toString(),
+    chapterId: currentChapter.id,
+    chapterTitle: currentChapter.title,
+    page: currentPageNum,
+    quote: pendingSelection,
+    color: color,
+    date: new Date().toISOString()
+  });
+  saveProgress();
+  document.getElementById('selection-popup').classList.remove('show');
+  window.getSelection().removeAllRanges();
+  renderPage();
+}
+
+function addNoteToSelection() {
+  if (!pendingSelection) return;
+  document.getElementById('note-modal-quote').textContent = '"' + pendingSelection.substring(0, 100) + (pendingSelection.length > 100 ? '...' : '') + '"';
+  document.getElementById('note-modal-text').value = '';
+  document.getElementById('note-modal').classList.remove('hidden');
+  document.getElementById('selection-popup').classList.remove('show');
+}
+
+function addPageNote() {
+  pendingSelection = '';
+  document.getElementById('note-modal-quote').textContent = 'Note for Page ' + currentPageNum;
+  document.getElementById('note-modal-text').value = '';
+  document.getElementById('note-modal').classList.remove('hidden');
+}
+
+function closeNoteModal() {
+  document.getElementById('note-modal').classList.add('hidden');
+  pendingSelection = null;
+}
+
+function saveNote() {
+  var text = document.getElementById('note-modal-text').value.trim();
+  if (!text) return;
+  annotations.notes.push({
+    id: Date.now().toString(),
+    chapterId: currentChapter.id,
+    chapterTitle: currentChapter.title,
+    page: currentPageNum,
+    quote: pendingSelection || null,
+    text: text,
+    date: new Date().toISOString()
+  });
+  saveProgress();
+  closeNoteModal();
+  renderPage();
+}
+
+// Bookmarks
+function toggleBookmark() {
+  var existing = annotations.bookmarks.findIndex(b => b.chapterId === currentChapter.id && b.page === currentPageNum);
+  if (existing >= 0) {
+    annotations.bookmarks.splice(existing, 1);
+  } else {
+    annotations.bookmarks.push({
+      id: Date.now().toString(),
+      chapterId: currentChapter.id,
+      chapterTitle: currentChapter.title,
+      page: currentPageNum,
+      date: new Date().toISOString()
+    });
+  }
+  saveProgress();
+  renderPage();
+}
+
+// Reader panels
+function toggleReaderNotes() {
+  document.getElementById('notes-panel').classList.toggle('open');
+  document.getElementById('reader-overlay').classList.toggle('hidden', !document.getElementById('notes-panel').classList.contains('open'));
+}
+
+function toggleTOC() {
+  document.getElementById('toc-panel').classList.toggle('open');
+  document.getElementById('reader-overlay').classList.toggle('hidden', !document.getElementById('toc-panel').classList.contains('open'));
+  renderTOC();
+}
+
+function toggleSettings() {
+  document.getElementById('settings-drawer').classList.toggle('open');
+}
+
+function closeAllPanels() {
+  document.getElementById('notes-panel').classList.remove('open');
+  document.getElementById('toc-panel').classList.remove('open');
+  document.getElementById('reader-overlay').classList.add('hidden');
+}
+
+function renderChapterNotes() {
+  var notes = annotations.notes.filter(n => n.chapterId === currentChapter.id);
+  var highlights = annotations.highlights.filter(h => h.chapterId === currentChapter.id);
+  var all = [...notes.map(n => ({...n, type: 'note'})), ...highlights.map(h => ({...h, type: 'highlight'}))].sort((a, b) => a.page - b.page);
+  
+  if (all.length === 0) {
+    document.getElementById('chapter-notes-list').innerHTML = '<p class="text-slate-500 text-center">No notes yet. Select text to highlight or add notes.</p>';
+    return;
+  }
+  
+  var html = '';
+  all.forEach(n => {
+    html += `<div class="note-card cursor-pointer" onclick="goToPage(${n.page})">
+      <div class="text-xs text-slate-500 mb-1">Page ${n.page}</div>
+      ${n.quote ? `<div class="text-sm highlight-${n.color || 'yellow'} px-1 rounded">"${n.quote.substring(0, 60)}..."</div>` : ''}
+      ${n.text ? `<div class="text-sm mt-1">${n.text}</div>` : ''}
+    </div>`;
+  });
+  document.getElementById('chapter-notes-list').innerHTML = html;
+}
+
+function renderTOC() {
+  var bookmarks = annotations.bookmarks.filter(b => b.chapterId === currentChapter.id);
+  var html = '<div class="mb-4"><div class="font-medium text-sm text-slate-500 mb-2">Pages</div>';
+  for (var i = 1; i <= contentPages.length; i++) {
+    var hasBookmark = bookmarks.some(b => b.page === i);
+    html += `<div class="flex items-center justify-between py-2 px-3 rounded hover:bg-slate-100 cursor-pointer ${i === currentPageNum ? 'bg-slate-100' : ''}" onclick="goToPage(${i}); toggleTOC();">
+      <span>Page ${i}</span>
+      ${hasBookmark ? '<span class="text-red-500">🔖</span>' : ''}
+    </div>`;
+  }
+  html += '</div>';
+  document.getElementById('toc-list').innerHTML = html;
+}
+
+// Reader Settings
+function setTheme(t) { readerSettings.theme = t; saveReaderSettings(); applyReaderSettings(); }
+function setFont(f) { readerSettings.font = f; saveReaderSettings(); applyReaderSettings(); }
+function adjustFontSize(d) { readerSettings.fontSize = Math.max(14, Math.min(28, readerSettings.fontSize + d)); saveReaderSettings(); applyReaderSettings(); }
+function setLineHeight(h) { readerSettings.lineHeight = h; saveReaderSettings(); applyReaderSettings(); }
+
+function applyReaderSettings() {
+  var c = document.getElementById('reader-container');
+  c.className = `reader-container theme-${readerSettings.theme} font-${readerSettings.font}`;
+  var p = document.getElementById('reader-page');
+  p.style.fontSize = readerSettings.fontSize + 'px';
+  p.style.lineHeight = readerSettings.lineHeight;
+  document.getElementById('font-size-display').textContent = readerSettings.fontSize + 'px';
+  
+  // Update header/nav colors for dark themes
+  var header = document.getElementById('reader-header');
+  var nav = document.getElementById('page-nav');
+  if (readerSettings.theme === 'dark' || readerSettings.theme === 'night') {
+    header.style.background = 'rgba(30,30,30,0.95)';
+    header.style.borderColor = '#404040';
+    nav.style.background = 'rgba(30,30,30,0.95)';
+  } else {
+    header.style.background = 'rgba(255,255,255,0.95)';
+    header.style.borderColor = '#e5e7eb';
+    nav.style.background = 'rgba(255,255,255,0.95)';
+  }
+}
+
+// STUDY
+function loadStudyContent() {
+  var sg = currentCategory.id === 'fopt' ? FOPT_DATA[currentChapter.id]?.studyGuide : currentChapter.studyGuide;
+  if (!sg?.length) { document.getElementById('study-content').innerHTML = '<p class="text-slate-500">No study guide.</p>'; return; }
+  studyIndex = 0;
+  window._sg = sg;
+  renderStudyLesson();
+}
+
+function renderStudyLesson() {
+  var sg = window._sg;
+  var l = sg[studyIndex];
+  document.getElementById('study-content').innerHTML = `<div class="text-sm text-slate-500 mb-2">Part ${studyIndex+1} of ${sg.length}</div><h2 class="text-xl font-bold mb-4">${l.title}</h2><div class="lesson-content">${l.content}</div>`;
+  document.getElementById('study-prev').classList.toggle('hidden', studyIndex === 0);
+  document.getElementById('study-next').textContent = studyIndex === sg.length - 1 ? 'Complete ✓' : 'Next →';
+}
+
+document.getElementById('study-prev').onclick = () => { if (studyIndex > 0) { studyIndex--; renderStudyLesson(); } };
+document.getElementById('study-next').onclick = () => {
+  var sg = window._sg;
+  if (studyIndex < sg.length - 1) { studyIndex++; renderStudyLesson(); }
+  else { userProgress[currentCategory.id][currentChapter.id].studied = true; saveProgress(); switchTab('quiz'); }
+};
+
+// QUIZ
+function startQuiz() {
+  var q = currentCategory.id === 'fopt' ? FOPT_DATA[currentChapter.id]?.quizzes : currentChapter.quizzes;
+  if (!q?.length) { document.getElementById('quiz-container').innerHTML = '<p class="text-slate-500">No quiz.</p>'; return; }
+  window._q = q;
+  quizIndex = 0; quizScore = 0;
+  document.getElementById('quiz-container').classList.remove('hidden');
+  document.getElementById('quiz-results').classList.add('hidden');
+  renderQuizQuestion();
+}
+
+function renderQuizQuestion() {
+  var q = window._q[quizIndex];
+  document.getElementById('quiz-counter').textContent = `Question ${quizIndex+1} of ${window._q.length}`;
+  document.getElementById('quiz-question').textContent = q.q;
+  var html = '';
+  ['A','B','C','D'].forEach((l, i) => {
+    if (q.options[i]) html += `<button class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" onclick="selectAnswer(${i})" data-index="${i}"><span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">${l}</span><span>${q.options[i]}</span></button>`;
+  });
+  document.getElementById('quiz-options').innerHTML = html;
+  document.getElementById('quiz-feedback').classList.add('hidden');
+  document.getElementById('quiz-submit').classList.remove('hidden');
+  document.getElementById('quiz-submit').disabled = true;
+  document.getElementById('quiz-next').classList.add('hidden');
+  selectedAnswer = null;
+}
+
+function selectAnswer(i) {
+  selectedAnswer = i;
+  document.querySelectorAll('.quiz-option').forEach((b, idx) => b.classList.toggle('selected', idx === i));
+  document.getElementById('quiz-submit').disabled = false;
+}
+
+document.getElementById('quiz-submit').onclick = () => {
+  var q = window._q[quizIndex];
+  var correct = selectedAnswer === q.correct;
+  if (correct) quizScore++;
+  document.querySelectorAll('.quiz-option').forEach(b => {
+    var idx = parseInt(b.dataset.index);
+    b.onclick = null;
+    if (idx === q.correct) b.classList.add('correct');
+    else if (idx === selectedAnswer && !correct) b.classList.add('incorrect');
+  });
+  var fb = document.getElementById('quiz-feedback');
+  fb.classList.remove('hidden');
+  fb.className = 'mt-6 p-4 rounded-lg ' + (correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200');
+  fb.innerHTML = `<div class="font-medium ${correct ? 'text-green-800">✓ Correct!' : 'text-red-800">✗ Incorrect'}</div><div class="text-sm mt-1">${q.explanation}</div>`;
+  document.getElementById('quiz-submit').classList.add('hidden');
+  document.getElementById('quiz-next').classList.remove('hidden');
+  document.getElementById('quiz-next').textContent = quizIndex === window._q.length - 1 ? 'See Results' : 'Next →';
+};
+
+document.getElementById('quiz-next').onclick = () => {
+  if (quizIndex < window._q.length - 1) { quizIndex++; renderQuizQuestion(); }
+  else { showQuizResults(); }
+};
+
+async function showQuizResults() {
+  var pct = Math.round((quizScore / window._q.length) * 100);
+  var best = userProgress[currentCategory.id][currentChapter.id].quizScore || 0;
+  if (pct > best) userProgress[currentCategory.id][currentChapter.id].quizScore = pct;
+  await saveProgress();
+  document.getElementById('quiz-container').classList.add('hidden');
+  document.getElementById('quiz-results').classList.remove('hidden');
+  document.getElementById('results-icon').textContent = pct >= 80 ? '🎉' : '📚';
+  document.getElementById('results-title').textContent = pct >= 80 ? 'Great Job!' : 'Keep Studying';
+  document.getElementById('results-message').textContent = pct >= 80 ? `You passed with ${pct}%!` : `Need 80%. You got ${pct}%.`;
+  document.getElementById('results-correct').textContent = quizScore;
+  document.getElementById('results-incorrect').textContent = window._q.length - quizScore;
+  document.getElementById('results-percent').textContent = pct + '%';
+}
+
+function retakeQuiz() { startQuiz(); }
+
+// Events
+document.getElementById('btn-login').onclick = handleLogin;
+document.getElementById('btn-register').onclick = handleRegister;
+document.getElementById('btn-logout').onclick = handleLogout;
+document.getElementById('chapter-back').onclick = backToApp;
+</script>
+</body>
+</html>
