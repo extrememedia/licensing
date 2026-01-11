@@ -3,15 +3,16 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Foursquare Licensing Tracker</title>
+  <title>Foursquare Licensing Tracker - FOPT</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     * { box-sizing: border-box; }
     body { margin: 0; font-family: system-ui, -apple-system, sans-serif; }
     .screen { display: none; }
     .screen.active { display: block; }
+    .reading-content { line-height: 2; font-size: 1.1rem; white-space: pre-wrap; }
+    .reading-content p { margin-bottom: 1.5rem; text-indent: 2rem; }
     .lesson-content { line-height: 1.8; }
-    .lesson-content p { margin-bottom: 1rem; }
     .lesson-content ul { margin: 1rem 0; padding-left: 1.5rem; }
     .lesson-content li { margin-bottom: 0.5rem; }
     .key-point { background: #fef3c7; padding: 1rem; border-left: 4px solid #f59e0b; margin: 1rem 0; border-radius: 0 0.5rem 0.5rem 0; }
@@ -21,8 +22,10 @@
     .quiz-option.selected { border-color: #3b82f6 !important; background: #eff6ff !important; }
     .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
     .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
-    .tab-btn { padding: 0.5rem 1rem; border-radius: 0.5rem; cursor: pointer; }
-    .tab-btn.active { background: #3b82f6; color: white; }
+    .tab-btn { padding: 0.75rem 1.5rem; cursor: pointer; border-bottom: 3px solid transparent; }
+    .tab-btn.active { border-bottom-color: #3b82f6; color: #3b82f6; font-weight: 600; }
+    .loading-spinner { border: 3px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body class="bg-slate-50 min-h-screen">
@@ -35,7 +38,7 @@
           <div class="w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mx-auto mb-4">
             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
           </div>
-          <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing Tracker</h1>
+          <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing</h1>
           <p class="text-slate-500 mt-2">Foundations of Pentecostal Theology</p>
         </div>
 
@@ -102,7 +105,7 @@
         <div class="flex items-center justify-between mb-4">
           <div>
             <h2 class="text-xl font-bold text-slate-800">Foundations of Pentecostal Theology</h2>
-            <p class="text-sm text-slate-500">By Duffield & Van Cleave • 10 Doctrine Chapters • 100 Quiz Questions</p>
+            <p class="text-sm text-slate-500">By Duffield & Van Cleave • Complete Book + 100 Quiz Questions</p>
           </div>
           <div class="text-right">
             <div class="text-2xl font-bold text-blue-600" id="overall-progress">0%</div>
@@ -112,78 +115,77 @@
         <div class="w-full bg-slate-100 rounded-full h-3 mb-4">
           <div class="bg-gradient-to-r from-blue-500 to-indigo-600 h-3 rounded-full transition-all" id="progress-bar" style="width:0%"></div>
         </div>
-        <p class="text-slate-600 text-sm">Study each chapter, then pass the quiz (80%+) to advance.</p>
       </div>
       <div class="grid md:grid-cols-2 gap-4" id="domain-cards"></div>
     </main>
   </div>
 
-  <!-- LESSON SCREEN -->
-  <div id="screen-lesson" class="screen">
+  <!-- CHAPTER SCREEN (Tabs: Read Full / Study Guide / Quiz) -->
+  <div id="screen-chapter" class="screen">
     <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
-      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <button id="lesson-back" class="flex items-center gap-2 text-blue-200 hover:text-white">← Back</button>
+      <div class="max-w-5xl mx-auto px-4 py-4 flex items-center justify-between">
+        <button id="chapter-back" class="flex items-center gap-2 text-blue-200 hover:text-white">← Back</button>
         <div class="text-center">
-          <div class="text-sm text-blue-200" id="lesson-domain-label"></div>
-          <div class="font-bold" id="lesson-title"></div>
+          <div class="font-bold" id="chapter-title"></div>
         </div>
-        <div class="text-sm text-blue-200" id="lesson-progress"></div>
+        <div id="chapter-progress-badge" class="text-sm text-blue-200"></div>
       </div>
     </header>
-    <main class="max-w-4xl mx-auto px-4 py-6">
-      <div class="bg-white rounded-xl shadow-sm border p-6 md:p-8">
-        <div id="lesson-content" class="lesson-content text-slate-700"></div>
-        <div class="mt-8 pt-6 border-t flex justify-between">
-          <button id="btn-prev" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50 hidden">← Previous</button>
-          <button id="btn-next" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ml-auto">Continue →</button>
+    <div class="bg-white border-b">
+      <div class="max-w-5xl mx-auto flex">
+        <button class="tab-btn active" data-tab="read" onclick="switchTab('read')">📖 Read Full Chapter</button>
+        <button class="tab-btn" data-tab="study" onclick="switchTab('study')">📝 Study Guide</button>
+        <button class="tab-btn" data-tab="quiz" onclick="switchTab('quiz')">✅ Take Quiz</button>
+      </div>
+    </div>
+    <main class="max-w-5xl mx-auto px-4 py-6">
+      <!-- READ TAB -->
+      <div id="tab-read" class="tab-content">
+        <div id="reading-loading" class="text-center py-12">
+          <div class="loading-spinner mx-auto mb-4"></div>
+          <p class="text-slate-500">Loading full chapter...</p>
+        </div>
+        <div id="reading-content" class="bg-white rounded-xl shadow-sm border p-8 hidden">
+          <div id="full-chapter-text" class="reading-content text-slate-700"></div>
         </div>
       </div>
-    </main>
-  </div>
-
-  <!-- QUIZ SCREEN -->
-  <div id="screen-quiz" class="screen">
-    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
-      <div class="max-w-4xl mx-auto px-4 py-4 flex items-center justify-between">
-        <button id="quiz-back" class="flex items-center gap-2 text-blue-200 hover:text-white">← Exit</button>
-        <div class="text-center">
-          <div class="text-sm text-blue-200" id="quiz-domain-label"></div>
-          <div class="font-bold">Knowledge Check</div>
-        </div>
-        <div class="text-sm text-blue-200" id="quiz-progress"></div>
-      </div>
-    </header>
-    <main class="max-w-4xl mx-auto px-4 py-6">
-      <div class="bg-white rounded-xl shadow-sm border p-6 md:p-8">
-        <div id="quiz-question" class="text-xl font-medium text-slate-800 mb-6"></div>
-        <div id="quiz-options" class="space-y-3"></div>
-        <div id="quiz-feedback" class="hidden mt-6 p-4 rounded-lg"></div>
-        <div class="mt-8 pt-6 border-t flex justify-end">
-          <button id="btn-submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" disabled>Check Answer</button>
-          <button id="btn-next-q" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 hidden">Next →</button>
+      <!-- STUDY TAB -->
+      <div id="tab-study" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <div id="study-lessons"></div>
+          <div class="mt-6 pt-6 border-t flex justify-between">
+            <button id="study-prev" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50 hidden">← Previous</button>
+            <button id="study-next" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ml-auto">Next →</button>
+          </div>
         </div>
       </div>
-    </main>
-  </div>
-
-  <!-- RESULTS SCREEN -->
-  <div id="screen-results" class="screen">
-    <header class="bg-gradient-to-r from-blue-900 to-indigo-900 text-white shadow-lg">
-      <div class="max-w-4xl mx-auto px-4 py-4 text-center"><h1 class="text-xl font-bold">Quiz Complete!</h1></div>
-    </header>
-    <main class="max-w-4xl mx-auto px-4 py-6">
-      <div class="bg-white rounded-xl shadow-sm border p-8 text-center">
-        <div id="results-icon" class="text-6xl mb-4">🎉</div>
-        <h2 class="text-2xl font-bold text-slate-800 mb-2" id="results-title">Great Job!</h2>
-        <p class="text-slate-600 mb-6" id="results-message"></p>
-        <div class="flex justify-center gap-4 mb-8">
-          <div class="bg-green-50 rounded-xl p-4"><div class="text-3xl font-bold text-green-600" id="results-correct">0</div><div class="text-sm text-green-700">Correct</div></div>
-          <div class="bg-red-50 rounded-xl p-4"><div class="text-3xl font-bold text-red-600" id="results-incorrect">0</div><div class="text-sm text-red-700">Incorrect</div></div>
-          <div class="bg-blue-50 rounded-xl p-4"><div class="text-3xl font-bold text-blue-600" id="results-percent">0%</div><div class="text-sm text-blue-700">Score</div></div>
-        </div>
-        <div class="flex justify-center gap-4">
-          <button id="btn-retake" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50">Retake Quiz</button>
-          <button id="btn-continue" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Continue</button>
+      <!-- QUIZ TAB -->
+      <div id="tab-quiz" class="tab-content hidden">
+        <div class="bg-white rounded-xl shadow-sm border p-6">
+          <div id="quiz-container">
+            <div class="text-sm text-slate-500 mb-2" id="quiz-counter"></div>
+            <div id="quiz-question" class="text-xl font-medium text-slate-800 mb-6"></div>
+            <div id="quiz-options" class="space-y-3"></div>
+            <div id="quiz-feedback" class="hidden mt-6 p-4 rounded-lg"></div>
+            <div class="mt-6 flex justify-end">
+              <button id="quiz-submit" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50" disabled>Check Answer</button>
+              <button id="quiz-next" class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 hidden">Next →</button>
+            </div>
+          </div>
+          <div id="quiz-results" class="hidden text-center py-8">
+            <div id="results-icon" class="text-6xl mb-4">🎉</div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-2" id="results-title"></h2>
+            <p class="text-slate-600 mb-6" id="results-message"></p>
+            <div class="flex justify-center gap-4 mb-6">
+              <div class="bg-green-50 rounded-xl p-4"><div class="text-3xl font-bold text-green-600" id="results-correct">0</div><div class="text-sm text-green-700">Correct</div></div>
+              <div class="bg-red-50 rounded-xl p-4"><div class="text-3xl font-bold text-red-600" id="results-incorrect">0</div><div class="text-sm text-red-700">Incorrect</div></div>
+              <div class="bg-blue-50 rounded-xl p-4"><div class="text-3xl font-bold text-blue-600" id="results-percent">0%</div><div class="text-sm text-blue-700">Score</div></div>
+            </div>
+            <div class="flex justify-center gap-4">
+              <button onclick="retakeQuiz()" class="px-6 py-3 border rounded-lg text-slate-600 hover:bg-slate-50">Retake Quiz</button>
+              <button onclick="backToApp()" class="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Back to Chapters</button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
@@ -216,233 +218,237 @@ script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd
 script.onload = initSupabase;
 document.head.appendChild(script);
 
-// FOPT CHAPTERS DATA
-var DOMAINS = [
+// Loaded chapter content cache
+var loadedChapters = {};
+
+// CHAPTER DATA
+var CHAPTERS = [
   {
-    id: 'ch1', name: 'Scripture', fullName: 'The Doctrine of Scripture', icon: '📖', color: 'from-amber-500 to-orange-600',
-    description: 'Bibliology: The Bible\'s origin, inspiration, and authority.',
-    lessons: [
-      { title: 'Introduction to Scripture', content: '<h3 class="text-xl font-bold mb-4">God Reveals Himself</h3><p>God does not remain silent. The Lord takes pleasure in making Himself known to His children. The God of the Bible is a God who speaks.</p><div class="scripture">"By the word of the Lord the heavens were made; and all the host of them by the breath of His mouth." — Psalm 33:6</div><p>God\'s greatest revelation is Jesus Christ: "In the beginning was the Word, and the Word was with God, and the Word was God... And the Word became flesh" (John 1:1, 14).</p>' },
-      { title: 'Names of the Bible', content: '<h3 class="text-xl font-bold mb-4">Names for God\'s Word</h3><ul><li><strong>Bible</strong> — From Greek "biblos" meaning "book"</li><li><strong>Scripture/Scriptures</strong> — Holy writings</li><li><strong>The Holy Scriptures</strong> — Romans 1:2</li><li><strong>The Oracles of God</strong> — Romans 3:2</li><li><strong>The Word of God</strong> — Mark 7:13, Hebrews 4:12</li></ul>' },
-      { title: 'Divisions of Scripture', content: '<h3 class="text-xl font-bold mb-4">The Structure of the Bible</h3><p><strong>Old Testament (39 books):</strong></p><ul><li>The Law (Torah): Genesis through Deuteronomy</li><li>The Prophets (Nebhiim): Former and Latter Prophets</li><li>The Writings (Kethbhim): Psalms, Proverbs, etc.</li></ul><p><strong>New Testament (27 books):</strong></p><ul><li>Gospels: Matthew, Mark, Luke, John</li><li>History: Acts</li><li>Epistles: Romans through Jude</li><li>Prophecy: Revelation</li></ul><div class="key-point"><strong>Key Fact:</strong> 66 total books written by 40+ authors over 1,500 years with remarkable unity.</div>' },
-      { title: 'Inspiration of Scripture', content: '<h3 class="text-xl font-bold mb-4">God-Breathed</h3><div class="scripture">"All Scripture is given by inspiration of God, and is profitable for doctrine, for reproof, for correction, for instruction in righteousness." — 2 Timothy 3:16</div><p><strong>"Theopneustos"</strong> = God-breathed. Scripture is not merely human writing about God, but God\'s own breath through human authors.</p><p><strong>Verbal Plenary Inspiration:</strong></p><ul><li><strong>Verbal</strong> — Every word (not just ideas) is inspired</li><li><strong>Plenary</strong> — All parts are equally inspired</li></ul><div class="key-point">The Bible is without error in its original manuscripts (inerrancy).</div>' },
-      { title: 'The Canon of Scripture', content: '<h3 class="text-xl font-bold mb-4">The Authoritative Collection</h3><p><strong>"Canon"</strong> comes from Greek meaning "rule" or "standard." It refers to the authoritative collection of inspired books.</p><p><strong>Tests for Canonicity:</strong></p><ul><li>Apostolic authority — Written by apostles or their close associates</li><li>Doctrinal consistency — Agrees with established truth</li><li>Universal acceptance — Recognized by the church</li><li>Spiritual power — Transforms lives</li></ul><div class="key-point">The canon was recognized, not created, by the church. God inspired the books; the church identified them.</div>' }
+    id: 'ch1', number: 1, name: 'Scripture', fullName: 'The Doctrine of Scripture (Bibliology)', icon: '📖', color: 'from-amber-500 to-orange-600',
+    description: 'The Bible\'s origin, inspiration, inerrancy, and authority.',
+    studyGuide: [
+      { title: 'Introduction', content: '<h3 class="text-xl font-bold mb-4">God Reveals Himself</h3><p>God does not remain silent. He takes pleasure in making Himself known. The greatest revelation is Jesus Christ, the Word Incarnate (John 1:1-14).</p><div class="scripture">"God, who at various times and in various ways spoke in time past to the fathers by the prophets, has in these last days spoken to us by His Son." — Hebrews 1:1-2</div>' },
+      { title: 'Names of the Bible', content: '<h3 class="text-xl font-bold mb-4">Names for God\'s Word</h3><ul><li><strong>Bible</strong> — Greek "biblos" = book</li><li><strong>Scripture/Scriptures</strong> — Holy writings</li><li><strong>The Word of God</strong> — Mark 7:13, Hebrews 4:12</li><li><strong>The Oracles of God</strong> — Romans 3:2</li></ul>' },
+      { title: 'Divisions of Scripture', content: '<h3 class="text-xl font-bold mb-4">Structure of the Bible</h3><p><strong>Old Testament (39 books):</strong> Law (Torah), Prophets (Nebhiim), Writings (Kethbhim)</p><p><strong>New Testament (27 books):</strong> Gospels, Acts, Epistles, Revelation</p><div class="key-point">66 books, 40+ authors, 1,500+ years — one unified message!</div>' },
+      { title: 'Inspiration', content: '<h3 class="text-xl font-bold mb-4">God-Breathed</h3><div class="scripture">"All Scripture is given by inspiration of God (theopneustos)." — 2 Timothy 3:16</div><p><strong>Verbal Plenary Inspiration:</strong> Every word (verbal) and all parts (plenary) are inspired by God.</p>' },
+      { title: 'The Canon', content: '<h3 class="text-xl font-bold mb-4">The Authoritative Collection</h3><p>"Canon" = rule or standard. The church recognized (not created) which books God inspired.</p>' }
     ],
     quizzes: [
-      {q: "What Greek word does 'Bible' come from?", options: ["Logos", "Biblos", "Theos", "Graphe"], correct: 1, explanation: "Bible comes from the Greek 'biblos' meaning 'book.'"},
+      {q: "What Greek word does 'Bible' come from?", options: ["Logos", "Biblos", "Theos", "Graphe"], correct: 1, explanation: "Bible comes from Greek 'biblos' meaning 'book.'"},
       {q: "How many books are in the Old Testament?", options: ["27", "39", "46", "66"], correct: 1, explanation: "The Old Testament contains 39 books."},
       {q: "How many books are in the New Testament?", options: ["21", "24", "27", "30"], correct: 2, explanation: "The New Testament contains 27 books."},
-      {q: "What are the three divisions of the Hebrew Old Testament?", options: ["History, Poetry, Prophecy", "Law, Prophets, Writings", "Genesis, Psalms, Isaiah", "Torah, Gospels, Epistles"], correct: 1, explanation: "The Hebrew Bible divides into Torah (Law), Nebhiim (Prophets), and Kethbhim (Writings)."},
-      {q: "What does 'theopneustos' mean?", options: ["Holy book", "God-breathed", "Divine word", "Sacred text"], correct: 1, explanation: "'Theopneustos' in 2 Timothy 3:16 means 'God-breathed' or inspired by God."},
-      {q: "What is 'verbal plenary inspiration'?", options: ["Only major ideas are inspired", "Only New Testament is inspired", "Every word of Scripture is inspired", "Inspiration applies only to doctrine"], correct: 2, explanation: "Verbal plenary inspiration means every word (verbal) and all parts (plenary) are inspired."},
-      {q: "What does 'canon' mean?", options: ["A large weapon", "Rule or standard", "Ancient scroll", "Holy temple"], correct: 1, explanation: "'Canon' comes from Greek meaning 'rule' or 'standard' - the authoritative collection of books."},
-      {q: "Approximately how many authors wrote the Bible?", options: ["12", "27", "40+", "66"], correct: 2, explanation: "The Bible was written by at least 40 different authors."},
-      {q: "Over what time period was the Bible written?", options: ["100 years", "500 years", "1,000 years", "1,500+ years"], correct: 3, explanation: "The Bible was written over a period of at least 1,500 years."},
-      {q: "What verse says 'All Scripture is given by inspiration of God'?", options: ["John 3:16", "Romans 8:28", "2 Timothy 3:16", "Hebrews 4:12"], correct: 2, explanation: "2 Timothy 3:16 states 'All Scripture is given by inspiration of God.'"}
+      {q: "What are the three divisions of the Hebrew Old Testament?", options: ["History, Poetry, Prophecy", "Law, Prophets, Writings", "Genesis, Psalms, Isaiah", "Torah, Gospels, Epistles"], correct: 1, explanation: "Torah (Law), Nebhiim (Prophets), Kethbhim (Writings)."},
+      {q: "What does 'theopneustos' mean?", options: ["Holy book", "God-breathed", "Divine word", "Sacred text"], correct: 1, explanation: "'Theopneustos' means 'God-breathed' — Scripture is inspired by God."},
+      {q: "What is 'verbal plenary inspiration'?", options: ["Only ideas inspired", "Only NT inspired", "Every word inspired", "Only doctrine inspired"], correct: 2, explanation: "Every word (verbal) and all parts (plenary) are inspired."},
+      {q: "What does 'canon' mean?", options: ["Weapon", "Rule or standard", "Scroll", "Temple"], correct: 1, explanation: "'Canon' means rule or standard — the authoritative books."},
+      {q: "How many authors wrote the Bible?", options: ["12", "27", "40+", "66"], correct: 2, explanation: "At least 40 different authors wrote the Bible."},
+      {q: "Over what period was the Bible written?", options: ["100 years", "500 years", "1,000 years", "1,500+ years"], correct: 3, explanation: "The Bible was written over 1,500+ years."},
+      {q: "2 Timothy 3:16 says:", options: ["God is love", "All Scripture is inspired", "Jesus saves", "Believe and be saved"], correct: 1, explanation: "'All Scripture is given by inspiration of God.'"}
     ]
   },
   {
-    id: 'ch2', name: 'God', fullName: 'The Doctrine of God', icon: '👑', color: 'from-purple-500 to-violet-600',
-    description: 'Theology: The nature, attributes, and Trinity of God.',
-    lessons: [
-      { title: 'The Knowability of God', content: '<h3 class="text-xl font-bold mb-4">Knowing the Unknowable</h3><p>God is beyond full human comprehension, yet He makes Himself knowable. The finite cannot fully grasp the infinite, but God reveals what we need to know.</p><div class="scripture">"Can you search out the deep things of God? Can you find out the limits of the Almighty?" — Job 11:7</div><p>Yet God invites us to know Him: "Let him who glories glory in this, that he understands and knows Me" (Jeremiah 9:24).</p>' },
-      { title: 'Arguments for God\'s Existence', content: '<h3 class="text-xl font-bold mb-4">Evidence for God</h3><ul><li><strong>Cosmological</strong> — Every effect needs a cause; the universe needs a First Cause</li><li><strong>Teleological</strong> — Design in creation requires an intelligent Designer</li><li><strong>Ontological</strong> — The idea of a perfect Being requires His existence</li><li><strong>Moral</strong> — Universal moral law requires a Moral Lawgiver</li><li><strong>Anthropological</strong> — Human personality requires a Personal Creator</li></ul><div class="key-point">These arguments don\'t prove God, but they point toward Him and show faith is reasonable.</div>' },
-      { title: 'The Nature of God', content: '<h3 class="text-xl font-bold mb-4">Who God Is</h3><div class="scripture">"God is Spirit, and those who worship Him must worship in spirit and truth." — John 4:24</div><p><strong>God is:</strong></p><ul><li><strong>Spirit</strong> — Not physical, invisible, without material form</li><li><strong>Perfect</strong> — Complete, lacking nothing</li><li><strong>Personal</strong> — Has intellect, emotion, and will</li><li><strong>One</strong> — There is only one true God</li></ul>' },
-      { title: 'The Names of God', content: '<h3 class="text-xl font-bold mb-4">God\'s Names Reveal His Character</h3><p><strong>Old Testament Names:</strong></p><ul><li><strong>YHWH (Yahweh/Jehovah)</strong> — "I AM," the covenant name</li><li><strong>Elohim</strong> — God as powerful Creator</li><li><strong>El Shaddai</strong> — God Almighty</li><li><strong>Adonai</strong> — Lord, Master</li></ul><p><strong>New Testament:</strong></p><ul><li><strong>Theos</strong> — God</li><li><strong>Kurios</strong> — Lord</li><li><strong>Pater</strong> — Father</li></ul>' },
-      { title: 'The Attributes of God', content: '<h3 class="text-xl font-bold mb-4">God\'s Characteristics</h3><p><strong>Absolute Attributes:</strong></p><ul><li><strong>Self-existence</strong> — God depends on nothing</li><li><strong>Immutability</strong> — God never changes</li><li><strong>Omnipresence</strong> — God is everywhere</li><li><strong>Omniscience</strong> — God knows everything</li><li><strong>Omnipotence</strong> — God is all-powerful</li></ul><p><strong>Moral Attributes:</strong></p><ul><li><strong>Holiness</strong> — God is set apart, pure</li><li><strong>Love</strong> — God\'s nature is love (1 John 4:8)</li><li><strong>Righteousness & Justice</strong></li><li><strong>Truth, Mercy, Grace</strong></li></ul>' },
-      { title: 'The Trinity', content: '<h3 class="text-xl font-bold mb-4">One God, Three Persons</h3><div class="key-point"><strong>The Trinity:</strong> One God eternally existing in three persons — Father, Son, and Holy Spirit — equal in essence, distinct in role.</div><p><strong>Evidence:</strong></p><ul><li>Baptism of Jesus — All three present (Matthew 3:16-17)</li><li>Great Commission — "In the name of the Father, Son, and Holy Spirit" (Matthew 28:19)</li><li>Benediction — "Grace of Lord Jesus, love of God, fellowship of Holy Spirit" (2 Corinthians 13:14)</li></ul><p>Each person is fully God, co-equal and co-eternal. This is not three gods (tritheism) or one God in three modes (modalism).</p>' }
+    id: 'ch2', number: 2, name: 'God', fullName: 'The Doctrine of God (Theology)', icon: '👑', color: 'from-purple-500 to-violet-600',
+    description: 'The nature, attributes, names, and Trinity of God.',
+    studyGuide: [
+      { title: 'Knowing God', content: '<h3 class="text-xl font-bold mb-4">The Knowable Unknown</h3><p>God is beyond full comprehension yet makes Himself knowable. "Let him who glories glory in this, that he understands and knows Me" (Jeremiah 9:24).</p>' },
+      { title: 'Arguments for God', content: '<h3 class="text-xl font-bold mb-4">Evidence for God\'s Existence</h3><ul><li><strong>Cosmological</strong> — Every effect needs a cause</li><li><strong>Teleological</strong> — Design requires a Designer</li><li><strong>Moral</strong> — Universal morality requires a Lawgiver</li><li><strong>Ontological</strong> — The idea of perfection requires existence</li></ul>' },
+      { title: 'Nature of God', content: '<h3 class="text-xl font-bold mb-4">Who God Is</h3><div class="scripture">"God is Spirit, and those who worship Him must worship in spirit and truth." — John 4:24</div><p>God is Spirit, perfect, personal, and One.</p>' },
+      { title: 'Names of God', content: '<h3 class="text-xl font-bold mb-4">God\'s Names Reveal His Character</h3><ul><li><strong>YHWH</strong> — I AM, the covenant name</li><li><strong>Elohim</strong> — Powerful Creator</li><li><strong>El Shaddai</strong> — God Almighty</li><li><strong>Adonai</strong> — Lord, Master</li></ul>' },
+      { title: 'Attributes of God', content: '<h3 class="text-xl font-bold mb-4">God\'s Characteristics</h3><p><strong>Absolute:</strong> Self-existence, immutability, omnipresence, omniscience, omnipotence</p><p><strong>Moral:</strong> Holiness, love, righteousness, justice, truth, mercy, grace</p>' },
+      { title: 'The Trinity', content: '<h3 class="text-xl font-bold mb-4">One God, Three Persons</h3><div class="key-point">Father, Son, and Holy Spirit — three persons, one God, co-equal and co-eternal.</div><p>Evidence: Jesus\' baptism (Matt 3:16-17), Great Commission (Matt 28:19), Benediction (2 Cor 13:14).</p>' }
     ],
     quizzes: [
-      {q: "What does John 4:24 say about God's nature?", options: ["God is love", "God is Spirit", "God is light", "God is holy"], correct: 1, explanation: "John 4:24 states 'God is Spirit, and those who worship Him must worship in spirit and truth.'"},
-      {q: "What is the cosmological argument for God?", options: ["Design requires a designer", "Every effect needs a cause", "Morality requires a lawgiver", "Humans need God"], correct: 1, explanation: "The cosmological argument says every effect needs a cause; the universe needs a First Cause (God)."},
-      {q: "What does 'omniscient' mean?", options: ["All-powerful", "All-present", "All-knowing", "All-loving"], correct: 2, explanation: "Omniscient means 'all-knowing' - God knows everything."},
-      {q: "What does 'omnipresent' mean?", options: ["All-powerful", "Present everywhere", "All-knowing", "Eternal"], correct: 1, explanation: "Omnipresent means God is present everywhere at the same time."},
-      {q: "What does 'immutability' mean about God?", options: ["God is invisible", "God never changes", "God is infinite", "God is eternal"], correct: 1, explanation: "Immutability means God's nature and character never change."},
-      {q: "How many persons are in the Godhead (Trinity)?", options: ["One", "Two", "Three", "Four"], correct: 2, explanation: "The Trinity consists of three persons: Father, Son, and Holy Spirit."},
-      {q: "Which is NOT a name for God in the Old Testament?", options: ["Elohim", "YHWH", "El Shaddai", "Christos"], correct: 3, explanation: "Christos (Christ) is a Greek New Testament term; the others are Hebrew Old Testament names."},
-      {q: "What is the teleological argument?", options: ["Every effect needs a cause", "Design requires a Designer", "Morality requires a lawgiver", "Being requires existence"], correct: 1, explanation: "The teleological argument says design in creation requires an intelligent Designer."},
-      {q: "Is the Holy Spirit a person or an impersonal force?", options: ["Just a force or power", "A person of the Trinity", "An angel", "A symbol"], correct: 1, explanation: "The Holy Spirit is the third Person of the Trinity, not an impersonal force."},
-      {q: "Jesus Christ is:", options: ["Only human", "Only divine", "Fully God and fully man", "Half God, half man"], correct: 2, explanation: "Jesus is fully God and fully man - the hypostatic union."}
+      {q: "John 4:24 says God is:", options: ["Love", "Spirit", "Light", "Holy"], correct: 1, explanation: "'God is Spirit, and those who worship Him must worship in spirit and truth.'"},
+      {q: "The cosmological argument says:", options: ["Design needs designer", "Effect needs cause", "Morality needs lawgiver", "Being needs existence"], correct: 1, explanation: "Every effect needs a cause; the universe needs a First Cause."},
+      {q: "'Omniscient' means:", options: ["All-powerful", "All-present", "All-knowing", "All-loving"], correct: 2, explanation: "Omniscient = all-knowing."},
+      {q: "'Omnipresent' means:", options: ["All-powerful", "Present everywhere", "All-knowing", "Eternal"], correct: 1, explanation: "Omnipresent = present everywhere."},
+      {q: "'Immutability' means God:", options: ["Is invisible", "Never changes", "Is infinite", "Is eternal"], correct: 1, explanation: "Immutability = God never changes."},
+      {q: "How many persons in the Trinity?", options: ["One", "Two", "Three", "Four"], correct: 2, explanation: "Three: Father, Son, Holy Spirit."},
+      {q: "Which is NOT an OT name for God?", options: ["Elohim", "YHWH", "El Shaddai", "Christos"], correct: 3, explanation: "Christos (Christ) is Greek NT; others are Hebrew OT."},
+      {q: "The teleological argument is:", options: ["Cause and effect", "Design needs Designer", "Moral law", "Perfect being"], correct: 1, explanation: "Design in creation requires an intelligent Designer."},
+      {q: "The Holy Spirit is:", options: ["A force", "A Person of the Trinity", "An angel", "A symbol"], correct: 1, explanation: "The Holy Spirit is the third Person of the Trinity."},
+      {q: "Jesus Christ is:", options: ["Only human", "Only divine", "Fully God and man", "Half and half"], correct: 2, explanation: "Jesus is fully God and fully man."}
     ]
   },
   {
-    id: 'ch3', name: 'Humanity', fullName: 'The Doctrine of Humankind', icon: '👤', color: 'from-green-500 to-emerald-600',
-    description: 'Anthropology: Human origin, nature, and purpose.',
-    lessons: [
-      { title: 'Created by God', content: '<h3 class="text-xl font-bold mb-4">Special Creation</h3><div class="scripture">"So God created man in His own image; in the image of God He created him; male and female He created them." — Genesis 1:27</div><p>Humans did not evolve from lower life forms. We exist by special creation of God. This gives human life unique dignity and purpose.</p><div class="key-point">Human dignity comes from being created in God\'s image (Imago Dei).</div>' },
-      { title: 'Created in God\'s Image', content: '<h3 class="text-xl font-bold mb-4">Imago Dei</h3><p>The "image of God" is not physical (God is Spirit). It refers to:</p><ul><li><strong>Personal Image</strong> — Intellect, emotion, will</li><li><strong>Moral Image</strong> — Conscience, ability to know right from wrong</li><li><strong>Spiritual Capacity</strong> — Ability to relate to God</li><li><strong>Creative Ability</strong> — Like our Creator, we create</li></ul><p>Sin has marred but not destroyed this image. In Christ, it is being restored.</p>' },
-      { title: 'The Constitution of Humans', content: '<h3 class="text-xl font-bold mb-4">Body, Soul, and Spirit</h3><div class="scripture">"May your whole spirit, soul, and body be preserved blameless at the coming of our Lord Jesus Christ." — 1 Thessalonians 5:23</div><p><strong>Trichotomous view:</strong> Body, soul, and spirit are distinct.</p><p><strong>Dichotomous view:</strong> Material (body) and immaterial (soul/spirit).</p><p>Either way, humans are complex beings with physical and spiritual dimensions.</p>' },
-      { title: 'Human Purpose and Destiny', content: '<h3 class="text-xl font-bold mb-4">Why We Exist</h3><p><strong>God\'s purposes for humanity:</strong></p><ul><li>To glorify God and enjoy Him forever</li><li>To have dominion over creation as stewards</li><li>To be in relationship with God and others</li><li>To reflect God\'s image to the world</li></ul><div class="key-point">The soul is immortal — continues after physical death. Our choices now determine our eternal destiny.</div>' }
+    id: 'ch3', number: 3, name: 'Humanity', fullName: 'The Doctrine of Humankind (Anthropology)', icon: '👤', color: 'from-green-500 to-emerald-600',
+    description: 'Human origin, nature, image of God, and purpose.',
+    studyGuide: [
+      { title: 'Created by God', content: '<h3 class="text-xl font-bold mb-4">Special Creation</h3><div class="scripture">"So God created man in His own image; in the image of God He created him; male and female He created them." — Genesis 1:27</div><p>Humans exist by special creation, not evolution from lower forms.</p>' },
+      { title: 'Image of God', content: '<h3 class="text-xl font-bold mb-4">Imago Dei</h3><p>Not physical (God is Spirit). The image includes:</p><ul><li><strong>Personal</strong> — Intellect, emotion, will</li><li><strong>Moral</strong> — Conscience, right and wrong</li><li><strong>Spiritual</strong> — Capacity for God</li></ul>' },
+      { title: 'Constitution of Humans', content: '<h3 class="text-xl font-bold mb-4">Body, Soul, Spirit</h3><div class="scripture">"May your whole spirit, soul, and body be preserved blameless." — 1 Thessalonians 5:23</div><p>Trichotomous: body, soul, spirit. Or Dichotomous: material and immaterial.</p>' },
+      { title: 'Human Purpose', content: '<h3 class="text-xl font-bold mb-4">Why We Exist</h3><ul><li>Glorify God</li><li>Dominion over creation</li><li>Relationship with God and others</li><li>Reflect God\'s image</li></ul><div class="key-point">The soul is immortal — our choices now affect our eternal destiny.</div>' }
     ],
     quizzes: [
-      {q: "What does 'Imago Dei' mean?", options: ["Image of man", "Image of God", "Creation of God", "Child of God"], correct: 1, explanation: "'Imago Dei' is Latin for 'Image of God' - humans are created in God's image."},
-      {q: "According to 1 Thessalonians 5:23, humans consist of:", options: ["Body and soul", "Body, soul, and spirit", "Mind and body", "Heart and soul"], correct: 1, explanation: "1 Thessalonians 5:23 mentions 'spirit, soul, and body' - the trichotomous view."},
-      {q: "Is God's image in humans primarily physical?", options: ["Yes, we look like God", "No, it's personal and moral", "Only in our minds", "Only in our hearts"], correct: 1, explanation: "God is Spirit; His image in us is personal (intellect, will, emotion) and moral (conscience)."},
-      {q: "What does 'trichotomous' view of humans mean?", options: ["Two parts: body and soul", "Three parts: body, soul, spirit", "One unified being", "Four parts"], correct: 1, explanation: "Trichotomous means humans have three parts: body, soul, and spirit."},
-      {q: "Why did God give humans free will?", options: ["To test them", "For genuine relationship", "To make them sin", "God had no choice"], correct: 1, explanation: "Free will allows genuine love and relationship with God, not forced obedience."},
-      {q: "Human dignity comes from:", options: ["Our accomplishments", "Being created in God's image", "Our intelligence", "Our wealth"], correct: 1, explanation: "Human dignity is rooted in being created in God's image (Imago Dei)."},
-      {q: "The soul after death:", options: ["Ceases to exist", "Sleeps unconsciously", "Continues consciously", "Becomes an angel"], correct: 2, explanation: "The soul is immortal and continues to exist consciously after physical death."},
-      {q: "Humans were given what role in creation?", options: ["Servants of nature", "Dominion over creation", "Equal to animals", "No special role"], correct: 1, explanation: "God gave humans dominion (stewardship) over creation (Genesis 1:28)."},
-      {q: "Which is NOT an aspect of human personality?", options: ["Intellect", "Emotion", "Will", "Divinity"], correct: 3, explanation: "Human personality includes intellect, emotion, and will; but humans are not divine."},
-      {q: "According to FOPT, did humans evolve from lower life forms?", options: ["Yes", "No", "Partially", "Only the body"], correct: 1, explanation: "FOPT teaches humans were created by God, not evolved from lower life forms."}
+      {q: "'Imago Dei' means:", options: ["Image of man", "Image of God", "Creation of God", "Child of God"], correct: 1, explanation: "Latin for 'Image of God.'"},
+      {q: "1 Thessalonians 5:23 mentions:", options: ["Body and soul", "Body, soul, spirit", "Mind and body", "Heart and soul"], correct: 1, explanation: "'Spirit, soul, and body' — trichotomous view."},
+      {q: "Is God's image physical?", options: ["Yes", "No, personal/moral", "Only mind", "Only heart"], correct: 1, explanation: "God is Spirit; the image is personal and moral."},
+      {q: "'Trichotomous' means:", options: ["Two parts", "Three parts", "One unified", "Four parts"], correct: 1, explanation: "Three parts: body, soul, spirit."},
+      {q: "Why did God give free will?", options: ["To test", "For real relationship", "To cause sin", "No choice"], correct: 1, explanation: "Free will allows genuine love and relationship."},
+      {q: "Human dignity comes from:", options: ["Accomplishments", "Image of God", "Intelligence", "Wealth"], correct: 1, explanation: "Being created in God's image."},
+      {q: "The soul after death:", options: ["Ceases", "Sleeps", "Continues consciously", "Becomes angel"], correct: 2, explanation: "The soul continues consciously after death."},
+      {q: "Humans were given:", options: ["Servant role", "Dominion over creation", "Equal to animals", "No role"], correct: 1, explanation: "Dominion (stewardship) over creation."},
+      {q: "Which is NOT human personality?", options: ["Intellect", "Emotion", "Will", "Divinity"], correct: 3, explanation: "Humans have intellect, emotion, will — not divinity."},
+      {q: "Did humans evolve from lower forms?", options: ["Yes", "No", "Partially", "Only body"], correct: 1, explanation: "FOPT teaches special creation by God."}
     ]
   },
   {
-    id: 'ch4', name: 'Sin', fullName: 'The Doctrine of Sin', icon: '⚠️', color: 'from-red-500 to-rose-600',
-    description: 'Hamartiology: The origin, nature, and effects of sin.',
-    lessons: [
-      { title: 'The Origin of Sin', content: '<h3 class="text-xl font-bold mb-4">Where Sin Began</h3><p>Sin did not originate with humanity. It began with Satan\'s rebellion in heaven.</p><div class="scripture">"How you are fallen from heaven, O Lucifer, son of the morning!... For you have said in your heart: \'I will ascend into heaven, I will exalt my throne above the stars of God.\'" — Isaiah 14:12-13</div><p>Sin entered humanity through Adam\'s disobedience in the Garden of Eden (Genesis 3). The serpent tempted Eve through:</p><ul><li>Lust of the flesh</li><li>Lust of the eyes</li><li>Pride of life (1 John 2:16)</li></ul>' },
-      { title: 'The Nature of Sin', content: '<h3 class="text-xl font-bold mb-4">What Sin Is</h3><p><strong>Biblical terms for sin:</strong></p><ul><li><strong>Hamartia</strong> — Missing the mark</li><li><strong>Parabasis</strong> — Transgression, stepping over the line</li><li><strong>Anomia</strong> — Lawlessness</li><li><strong>Adikia</strong> — Unrighteousness</li></ul><div class="key-point">Sin is not just bad actions — it\'s rebellion against God, falling short of His glory (Romans 3:23).</div>' },
-      { title: 'The Universality of Sin', content: '<h3 class="text-xl font-bold mb-4">All Have Sinned</h3><div class="scripture">"For all have sinned and fall short of the glory of God." — Romans 3:23</div><p><strong>Original Sin:</strong> The sinful nature inherited from Adam. We are not sinners because we sin; we sin because we are sinners.</p><p><strong>Total Depravity:</strong> Sin affects every part of human nature — mind, will, emotions, body. This doesn\'t mean we\'re as bad as possible, but that no part is untouched by sin.</p>' },
-      { title: 'The Penalty of Sin', content: '<h3 class="text-xl font-bold mb-4">The Wages of Sin</h3><div class="scripture">"For the wages of sin is death, but the gift of God is eternal life in Christ Jesus our Lord." — Romans 6:23</div><p><strong>Three types of death from sin:</strong></p><ul><li><strong>Spiritual Death</strong> — Separation from God</li><li><strong>Physical Death</strong> — Body returns to dust</li><li><strong>Eternal Death</strong> — Permanent separation from God</li></ul><div class="key-point">The good news: Jesus paid sin\'s penalty so we don\'t have to!</div>' }
+    id: 'ch4', number: 4, name: 'Sin', fullName: 'The Doctrine of Sin (Hamartiology)', icon: '⚠️', color: 'from-red-500 to-rose-600',
+    description: 'The origin, nature, universality, and penalty of sin.',
+    studyGuide: [
+      { title: 'Origin of Sin', content: '<h3 class="text-xl font-bold mb-4">Where Sin Began</h3><p>Sin originated with Satan\'s rebellion, then entered humanity through Adam (Genesis 3).</p><div class="scripture">"How you are fallen from heaven, O Lucifer!" — Isaiah 14:12</div>' },
+      { title: 'Nature of Sin', content: '<h3 class="text-xl font-bold mb-4">What Sin Is</h3><ul><li><strong>Hamartia</strong> — Missing the mark</li><li><strong>Parabasis</strong> — Transgression</li><li><strong>Anomia</strong> — Lawlessness</li></ul><p>Sin is rebellion against God, falling short of His glory.</p>' },
+      { title: 'Universality of Sin', content: '<h3 class="text-xl font-bold mb-4">All Have Sinned</h3><div class="scripture">"For all have sinned and fall short of the glory of God." — Romans 3:23</div><p><strong>Original Sin:</strong> Inherited sinful nature from Adam.</p><p><strong>Total Depravity:</strong> Sin affects every part of human nature.</p>' },
+      { title: 'Penalty of Sin', content: '<h3 class="text-xl font-bold mb-4">Death</h3><div class="scripture">"The wages of sin is death." — Romans 6:23</div><ul><li><strong>Spiritual Death</strong> — Separation from God</li><li><strong>Physical Death</strong> — Body dies</li><li><strong>Eternal Death</strong> — Permanent separation</li></ul>' }
     ],
     quizzes: [
-      {q: "Where did sin first originate in the universe?", options: ["Adam and Eve", "Satan's rebellion", "Cain killing Abel", "The flood"], correct: 1, explanation: "Sin originated with Satan's rebellion against God before humanity existed."},
-      {q: "What three temptations did Eve face (1 John 2:16)?", options: ["Money, power, fame", "Lust of flesh, lust of eyes, pride of life", "Fear, doubt, unbelief", "Anger, jealousy, hate"], correct: 1, explanation: "1 John 2:16 identifies: lust of the flesh, lust of the eyes, pride of life."},
-      {q: "What does 'hamartia' (sin) literally mean?", options: ["Rebellion", "Missing the mark", "Evil deed", "Lawbreaking"], correct: 1, explanation: "The Greek 'hamartia' literally means 'missing the mark' or target."},
-      {q: "Romans 3:23 says:", options: ["Some have sinned", "Only Adam sinned", "All have sinned", "Sin is not real"], correct: 2, explanation: "Romans 3:23: 'For all have sinned and fall short of the glory of God.'"},
-      {q: "What is 'original sin'?", options: ["Adam's first sin only", "The inherited sinful nature from Adam", "The worst sin", "Satan's sin"], correct: 1, explanation: "Original sin refers to the sinful nature inherited from Adam by all humans."},
-      {q: "What does 'total depravity' mean?", options: ["Humans are as bad as possible", "Sin affects every part of human nature", "Only some humans sin", "Sin is total destruction"], correct: 1, explanation: "Total depravity means sin affects every aspect of human nature, not that we're as bad as possible."},
-      {q: "What is the penalty for sin according to Romans 6:23?", options: ["Sickness", "Poverty", "Death", "Loneliness"], correct: 2, explanation: "Romans 6:23: 'The wages of sin is death.'"},
-      {q: "Sin is primarily against:", options: ["Other people", "Ourselves", "God", "Nature"], correct: 2, explanation: "Though sin affects others, it is primarily an offense against God (Psalm 51:4)."},
-      {q: "Who is exempt from sin?", options: ["Good people", "Religious leaders", "Only Jesus Christ", "Babies"], correct: 2, explanation: "Jesus Christ alone was without sin (Hebrews 4:15)."},
-      {q: "What three types of death result from sin?", options: ["Quick, slow, peaceful", "Spiritual, physical, eternal", "Young, old, sick", "Accidental, natural, violent"], correct: 1, explanation: "Sin brings spiritual death (separation from God), physical death, and eternal death."}
+      {q: "Sin first originated with:", options: ["Adam/Eve", "Satan's rebellion", "Cain", "The flood"], correct: 1, explanation: "Sin began with Satan's rebellion before humanity."},
+      {q: "Eve faced (1 John 2:16):", options: ["Money, power, fame", "Lust flesh, eyes, pride", "Fear, doubt, unbelief", "Anger, jealousy"], correct: 1, explanation: "Lust of flesh, lust of eyes, pride of life."},
+      {q: "'Hamartia' means:", options: ["Rebellion", "Missing the mark", "Evil deed", "Lawbreaking"], correct: 1, explanation: "Greek for 'missing the mark.'"},
+      {q: "Romans 3:23:", options: ["Some sinned", "Only Adam", "All have sinned", "No sin"], correct: 2, explanation: "'All have sinned and fall short.'"},
+      {q: "'Original sin' is:", options: ["Adam's sin only", "Inherited nature", "Worst sin", "Satan's sin"], correct: 1, explanation: "The inherited sinful nature from Adam."},
+      {q: "'Total depravity' means:", options: ["As bad as possible", "Sin affects all parts", "Only some sin", "Total destruction"], correct: 1, explanation: "Sin affects every aspect of human nature."},
+      {q: "Penalty for sin (Rom 6:23):", options: ["Sickness", "Poverty", "Death", "Loneliness"], correct: 2, explanation: "'The wages of sin is death.'"},
+      {q: "Sin is primarily against:", options: ["Others", "Ourselves", "God", "Nature"], correct: 2, explanation: "Sin is primarily against God (Psalm 51:4)."},
+      {q: "Who is exempt from sin?", options: ["Good people", "Leaders", "Only Jesus", "Babies"], correct: 2, explanation: "Jesus alone was sinless (Hebrews 4:15)."},
+      {q: "Three types of death from sin:", options: ["Quick, slow, peaceful", "Spiritual, physical, eternal", "Young, old, sick", "Accident, natural, violent"], correct: 1, explanation: "Spiritual, physical, and eternal death."}
     ]
   },
   {
-    id: 'ch5', name: 'Salvation', fullName: 'The Doctrine of Salvation', icon: '✝️', color: 'from-blue-500 to-indigo-600',
-    description: 'Soteriology: How God saves through Jesus Christ.',
-    lessons: [
-      { title: 'The Death of Christ', content: '<h3 class="text-xl font-bold mb-4">The Cross</h3><div class="scripture">"But God demonstrates His own love toward us, in that while we were still sinners, Christ died for us." — Romans 5:8</div><p><strong>Key terms:</strong></p><ul><li><strong>Atonement</strong> — Christ paid sin\'s penalty</li><li><strong>Substitution</strong> — He died in our place</li><li><strong>Propitiation</strong> — He satisfied God\'s wrath</li><li><strong>Redemption</strong> — He purchased us from slavery</li><li><strong>Reconciliation</strong> — He restored our relationship with God</li></ul>' },
-      { title: 'The Resurrection', content: '<h3 class="text-xl font-bold mb-4">He Is Risen!</h3><div class="scripture">"And if Christ is not risen, your faith is futile; you are still in your sins!" — 1 Corinthians 15:17</div><p>The resurrection proves:</p><ul><li>Jesus is who He claimed to be</li><li>His sacrifice was accepted by the Father</li><li>Death is defeated</li><li>We too will be raised</li></ul><div class="key-point">The resurrection is the foundation of Christianity. Without it, we have no hope.</div>' },
-      { title: 'Grace and Faith', content: '<h3 class="text-xl font-bold mb-4">How We Are Saved</h3><div class="scripture">"For by grace you have been saved through faith, and that not of yourselves; it is the gift of God, not of works, lest anyone should boast." — Ephesians 2:8-9</div><p><strong>Grace</strong> — God\'s unmerited favor. We don\'t earn it.</p><p><strong>Faith</strong> — Trusting in Christ alone, not our works.</p><p><strong>Repentance</strong> — Turning from sin to God. A complete change of mind and direction.</p>' },
-      { title: 'Justification & Regeneration', content: '<h3 class="text-xl font-bold mb-4">Made Right, Made New</h3><p><strong>Justification:</strong> God\'s legal declaration that we are righteous. Not just pardoned, but declared "not guilty" through Christ\'s righteousness credited to us.</p><p><strong>Regeneration:</strong> The new birth. "You must be born again" (John 3:7). A new nature, new heart, new life.</p><div class="scripture">"Therefore, if anyone is in Christ, he is a new creation; old things have passed away; behold, all things have become new." — 2 Corinthians 5:17</div>' },
-      { title: 'Sanctification & Glorification', content: '<h3 class="text-xl font-bold mb-4">The Ongoing Work</h3><p><strong>Sanctification:</strong> Being set apart, growing in holiness. This is progressive — we become more like Christ over time.</p><p><strong>Glorification:</strong> The future completion of salvation when we receive resurrection bodies and are fully conformed to Christ\'s image.</p><div class="key-point">Salvation: Past (justified), Present (being sanctified), Future (will be glorified).</div>' }
+    id: 'ch5', number: 5, name: 'Salvation', fullName: 'The Doctrine of Salvation (Soteriology)', icon: '✝️', color: 'from-blue-500 to-indigo-600',
+    description: 'How God saves through Jesus Christ\'s death and resurrection.',
+    studyGuide: [
+      { title: 'Christ\'s Death', content: '<h3 class="text-xl font-bold mb-4">The Cross</h3><div class="scripture">"While we were still sinners, Christ died for us." — Romans 5:8</div><ul><li><strong>Atonement</strong> — Paid sin\'s penalty</li><li><strong>Substitution</strong> — Died in our place</li><li><strong>Propitiation</strong> — Satisfied God\'s wrath</li><li><strong>Redemption</strong> — Purchased us</li><li><strong>Reconciliation</strong> — Restored relationship</li></ul>' },
+      { title: 'Resurrection', content: '<h3 class="text-xl font-bold mb-4">He Is Risen!</h3><div class="scripture">"If Christ is not risen, your faith is futile." — 1 Corinthians 15:17</div><p>The resurrection proves Jesus is who He claimed, His sacrifice was accepted, and death is defeated.</p>' },
+      { title: 'Grace and Faith', content: '<h3 class="text-xl font-bold mb-4">How We Are Saved</h3><div class="scripture">"By grace you have been saved through faith... not of works." — Ephesians 2:8-9</div><p><strong>Grace</strong> = unmerited favor. <strong>Faith</strong> = trusting Christ alone. <strong>Repentance</strong> = turning from sin.</p>' },
+      { title: 'Justification', content: '<h3 class="text-xl font-bold mb-4">Declared Righteous</h3><p>Justification: God\'s legal declaration that we are righteous through Christ.</p>' },
+      { title: 'Regeneration', content: '<h3 class="text-xl font-bold mb-4">Born Again</h3><div class="scripture">"If anyone is in Christ, he is a new creation." — 2 Corinthians 5:17</div>' },
+      { title: 'Sanctification & Glorification', content: '<h3 class="text-xl font-bold mb-4">Past, Present, Future</h3><p><strong>Sanctification:</strong> Being set apart, growing in holiness (present).</p><p><strong>Glorification:</strong> Future completion with resurrection bodies.</p>' }
     ],
     quizzes: [
-      {q: "According to Ephesians 2:8-9, salvation is by:", options: ["Works alone", "Grace through faith", "Baptism", "Church membership"], correct: 1, explanation: "Ephesians 2:8-9: 'By grace you have been saved through faith... not of works.'"},
-      {q: "What does 'substitutionary atonement' mean?", options: ["Christ died as an example", "Christ died in our place", "We must die for our sins", "Atonement is not needed"], correct: 1, explanation: "Substitutionary atonement means Christ died as our substitute, taking our punishment."},
-      {q: "What is 'propitiation'?", options: ["Making God angry", "Satisfying God's wrath", "Ignoring sin", "Punishing sinners"], correct: 1, explanation: "Propitiation means Christ's sacrifice satisfied God's righteous anger against sin."},
-      {q: "What is 'justification'?", options: ["Being made sinless", "Being declared righteous", "Becoming God", "Joining a church"], correct: 1, explanation: "Justification is God's legal declaration that we are righteous through faith in Christ."},
-      {q: "What is 'regeneration'?", options: ["Physical healing", "New birth/new nature", "Church membership", "Baptism"], correct: 1, explanation: "Regeneration is the new birth - receiving a new spiritual nature (John 3:3)."},
-      {q: "What is 'sanctification'?", options: ["Initial salvation", "Being set apart, growing in holiness", "Final judgment", "Church ritual"], correct: 1, explanation: "Sanctification is the ongoing process of being set apart and growing in Christlikeness."},
-      {q: "What proves Christ's victory over sin and death?", options: ["His teachings", "His miracles", "His resurrection", "His popularity"], correct: 2, explanation: "Christ's bodily resurrection is the proof of His victory over sin and death."},
-      {q: "What is 'redemption'?", options: ["Being forgiven", "Being purchased from slavery", "Being baptized", "Being healed"], correct: 1, explanation: "Redemption means Christ purchased us, paying the price to free us from sin's slavery."},
-      {q: "What is 'repentance'?", options: ["Feeling sorry", "Turning from sin to God", "Going to church", "Being baptized"], correct: 1, explanation: "Repentance is a complete change of mind and direction - turning from sin to God."},
-      {q: "What is 'glorification'?", options: ["Present sanctification", "Future completion of salvation", "Being famous", "Going to heaven immediately"], correct: 1, explanation: "Glorification is the future final stage when believers receive resurrection bodies."}
+      {q: "Ephesians 2:8-9 says salvation is by:", options: ["Works", "Grace through faith", "Baptism", "Church"], correct: 1, explanation: "'By grace through faith... not of works.'"},
+      {q: "'Substitutionary atonement' means:", options: ["Christ as example", "Christ in our place", "We die for sin", "Not needed"], correct: 1, explanation: "Christ died as our substitute."},
+      {q: "'Propitiation' means:", options: ["Making God angry", "Satisfying God's wrath", "Ignoring sin", "Punishing sinners"], correct: 1, explanation: "Christ's sacrifice satisfied God's wrath."},
+      {q: "'Justification' is:", options: ["Made sinless", "Declared righteous", "Becoming God", "Joining church"], correct: 1, explanation: "God's legal declaration of righteousness."},
+      {q: "'Regeneration' is:", options: ["Healing", "New birth", "Church membership", "Baptism"], correct: 1, explanation: "The new birth — new nature (John 3:3)."},
+      {q: "'Sanctification' is:", options: ["Initial salvation", "Growing in holiness", "Final judgment", "Ritual"], correct: 1, explanation: "Being set apart, growing in Christlikeness."},
+      {q: "Christ's victory is proved by:", options: ["Teachings", "Miracles", "Resurrection", "Popularity"], correct: 2, explanation: "The resurrection proves victory over death."},
+      {q: "'Redemption' means:", options: ["Forgiven", "Purchased from slavery", "Baptized", "Healed"], correct: 1, explanation: "Christ purchased us from sin's slavery."},
+      {q: "'Repentance' is:", options: ["Feeling sorry", "Turning from sin to God", "Going to church", "Baptism"], correct: 1, explanation: "Complete change — turning from sin to God."},
+      {q: "'Glorification' is:", options: ["Present sanctification", "Future completion", "Being famous", "Immediate heaven"], correct: 1, explanation: "Future final stage with resurrection bodies."}
     ]
   },
   {
-    id: 'ch6', name: 'Holy Spirit', fullName: 'The Doctrine of the Holy Spirit', icon: '🕊️', color: 'from-cyan-500 to-teal-600',
-    description: 'Pneumatology: The person and work of the Spirit.',
-    lessons: [
-      { title: 'The Person of the Holy Spirit', content: '<h3 class="text-xl font-bold mb-4">More Than a Force</h3><p>The Holy Spirit is the third Person of the Trinity — not an impersonal force, but a divine Person with intellect, emotion, and will.</p><p><strong>Personal characteristics:</strong></p><ul><li>He teaches and reminds (John 14:26)</li><li>He can be grieved (Ephesians 4:30)</li><li>He speaks and guides (Acts 13:2)</li><li>He intercedes for us (Romans 8:26)</li></ul><div class="key-point">The Spirit is fully God — omnipresent, omniscient, eternal.</div>' },
-      { title: 'The Work of the Spirit', content: '<h3 class="text-xl font-bold mb-4">What the Spirit Does</h3><div class="scripture">"And when He has come, He will convict the world of sin, and of righteousness, and of judgment." — John 16:8</div><p><strong>The Spirit:</strong></p><ul><li>Convicts of sin, righteousness, judgment</li><li>Regenerates (gives new birth)</li><li>Indwells every believer</li><li>Seals us for redemption</li><li>Produces spiritual fruit</li><li>Gives spiritual gifts</li><li>Guides into all truth</li></ul>' },
-      { title: 'The Baptism with the Holy Spirit', content: '<h3 class="text-xl font-bold mb-4">Power for Witness</h3><div class="scripture">"But you shall receive power when the Holy Spirit has come upon you; and you shall be witnesses to Me." — Acts 1:8</div><p>The baptism with the Holy Spirit is a distinct experience from salvation — an empowering for service and witness.</p><p><strong>According to FOPT, the initial evidence is speaking in tongues</strong> (glossolalia), as seen in Acts 2:4, 10:46, 19:6.</p><div class="key-point">This experience is for all believers (Acts 2:39) and should be earnestly sought.</div>' },
-      { title: 'The Fruit of the Spirit', content: '<h3 class="text-xl font-bold mb-4">Christlike Character</h3><div class="scripture">"But the fruit of the Spirit is love, joy, peace, longsuffering, kindness, goodness, faithfulness, gentleness, self-control." — Galatians 5:22-23</div><p>The fruit (singular) is one cluster of nine characteristics that the Spirit produces as we abide in Christ. This is about <strong>character</strong>, not just actions.</p><p>Fruit grows naturally as we remain connected to Christ the Vine (John 15).</p>' },
-      { title: 'The Gifts of the Spirit', content: '<h3 class="text-xl font-bold mb-4">Supernatural Equipment</h3><p>Spiritual gifts (1 Corinthians 12) are supernatural abilities given by the Spirit for ministry and building up the church.</p><p><strong>Categories:</strong></p><ul><li><strong>Revelation Gifts:</strong> Word of wisdom, word of knowledge, discerning of spirits</li><li><strong>Power Gifts:</strong> Faith, healings, miracles</li><li><strong>Vocal Gifts:</strong> Prophecy, tongues, interpretation</li></ul><div class="key-point">Gifts are for service; Fruit is for character. We need both!</div>' }
+    id: 'ch6', number: 6, name: 'Holy Spirit', fullName: 'The Doctrine of the Holy Spirit (Pneumatology)', icon: '🕊️', color: 'from-cyan-500 to-teal-600',
+    description: 'The person, work, baptism, fruit, and gifts of the Spirit.',
+    studyGuide: [
+      { title: 'Person of the Spirit', content: '<h3 class="text-xl font-bold mb-4">Not a Force — A Person</h3><p>The Holy Spirit is the third Person of the Trinity with intellect, emotion, and will. He teaches, guides, intercedes, and can be grieved.</p>' },
+      { title: 'Work of the Spirit', content: '<h3 class="text-xl font-bold mb-4">What He Does</h3><div class="scripture">"He will convict the world of sin, righteousness, and judgment." — John 16:8</div><p>Convicts, regenerates, indwells, seals, produces fruit, gives gifts, guides into truth.</p>' },
+      { title: 'Baptism with the Spirit', content: '<h3 class="text-xl font-bold mb-4">Power for Witness</h3><div class="scripture">"You shall receive power when the Holy Spirit has come upon you; and you shall be witnesses." — Acts 1:8</div><p>A distinct experience of empowerment. Initial evidence: speaking in tongues (Acts 2:4, 10:46, 19:6).</p>' },
+      { title: 'Fruit of the Spirit', content: '<h3 class="text-xl font-bold mb-4">Character</h3><div class="scripture">"The fruit of the Spirit is love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control." — Galatians 5:22-23</div>' },
+      { title: 'Gifts of the Spirit', content: '<h3 class="text-xl font-bold mb-4">Supernatural Abilities</h3><p><strong>Revelation:</strong> Wisdom, knowledge, discernment</p><p><strong>Power:</strong> Faith, healings, miracles</p><p><strong>Vocal:</strong> Prophecy, tongues, interpretation</p><div class="key-point">Gifts for service; Fruit for character.</div>' }
     ],
     quizzes: [
-      {q: "The Holy Spirit is:", options: ["An impersonal force", "Only God's power", "The third Person of the Trinity", "An angel"], correct: 2, explanation: "The Holy Spirit is the third Person of the Trinity, fully God and personal."},
-      {q: "According to John 16:8, the Spirit convicts of:", options: ["Love, grace, mercy", "Sin, righteousness, judgment", "Faith, hope, charity", "Past, present, future"], correct: 1, explanation: "The Holy Spirit convicts the world of sin, righteousness, and judgment."},
-      {q: "What is the purpose of the baptism with the Holy Spirit?", options: ["Salvation", "Sanctification", "Power for witness", "Forgiveness"], correct: 2, explanation: "Acts 1:8: 'You shall receive power when the Holy Spirit comes... and be My witnesses.'"},
-      {q: "What is the initial evidence of Spirit baptism according to FOPT?", options: ["Joy", "Prophecy", "Speaking in tongues", "Healing"], correct: 2, explanation: "FOPT teaches speaking in tongues (glossolalia) is the initial physical evidence."},
-      {q: "How many fruit of the Spirit are listed in Galatians 5:22-23?", options: ["7", "9", "12", "3"], correct: 1, explanation: "Nine fruit: love, joy, peace, patience, kindness, goodness, faithfulness, gentleness, self-control."},
-      {q: "Where are spiritual gifts listed in detail?", options: ["Matthew 5", "John 3", "1 Corinthians 12", "Revelation 1"], correct: 2, explanation: "1 Corinthians 12-14 provides detailed teaching on spiritual gifts."},
-      {q: "What are the three categories of spiritual gifts?", options: ["Big, medium, small", "Revelation, Power, Vocal", "Past, present, future", "Hebrew, Greek, Latin"], correct: 1, explanation: "Gifts are often categorized as Revelation (knowing), Power (doing), and Vocal (speaking)."},
-      {q: "The Spirit baptism is for:", options: ["Only apostles", "Only pastors", "All believers", "Only mature Christians"], correct: 2, explanation: "The promise is for all believers (Acts 2:39)."},
-      {q: "Which is a fruit of the Spirit?", options: ["Prophecy", "Healing", "Self-control", "Speaking in tongues"], correct: 2, explanation: "Self-control is a fruit of the Spirit (Galatians 5:23); the others are gifts."},
-      {q: "The Spirit helps believers by:", options: ["Only convicting of sin", "Guiding, teaching, reminding of truth", "Only giving power", "Only healing"], correct: 1, explanation: "The Spirit guides, teaches, and reminds believers of Jesus' words (John 14-16)."}
+      {q: "The Holy Spirit is:", options: ["A force", "God's power only", "Third Person of Trinity", "An angel"], correct: 2, explanation: "The Holy Spirit is the third Person of the Trinity."},
+      {q: "John 16:8 — Spirit convicts of:", options: ["Love, grace, mercy", "Sin, righteousness, judgment", "Faith, hope, love", "Past, present, future"], correct: 1, explanation: "Sin, righteousness, and judgment."},
+      {q: "Purpose of Spirit baptism:", options: ["Salvation", "Sanctification", "Power for witness", "Forgiveness"], correct: 2, explanation: "'You shall receive power... witnesses' (Acts 1:8)."},
+      {q: "Initial evidence of Spirit baptism:", options: ["Joy", "Prophecy", "Speaking in tongues", "Healing"], correct: 2, explanation: "FOPT teaches tongues as initial evidence."},
+      {q: "How many fruit of the Spirit?", options: ["7", "9", "12", "3"], correct: 1, explanation: "Nine fruit listed in Galatians 5:22-23."},
+      {q: "Spiritual gifts are in:", options: ["Matthew 5", "John 3", "1 Corinthians 12", "Revelation 1"], correct: 2, explanation: "1 Corinthians 12-14 details spiritual gifts."},
+      {q: "Categories of gifts:", options: ["Big, medium, small", "Revelation, Power, Vocal", "Past, present, future", "Hebrew, Greek, Latin"], correct: 1, explanation: "Revelation, Power, Vocal gifts."},
+      {q: "Spirit baptism is for:", options: ["Apostles only", "Pastors only", "All believers", "Mature only"], correct: 2, explanation: "The promise is for all believers (Acts 2:39)."},
+      {q: "Which is fruit (not gift)?", options: ["Prophecy", "Healing", "Self-control", "Tongues"], correct: 2, explanation: "Self-control is fruit (Gal 5:23)."},
+      {q: "The Spirit helps by:", options: ["Convicting only", "Guiding, teaching, reminding", "Power only", "Healing only"], correct: 1, explanation: "Guides, teaches, reminds of truth."}
     ]
   },
   {
-    id: 'ch7', name: 'Healing', fullName: 'The Doctrine of Divine Healing', icon: '💚', color: 'from-lime-500 to-green-600',
-    description: 'Christ the Healer: Healing in the atonement.',
-    lessons: [
-      { title: 'Healing in the Atonement', content: '<h3 class="text-xl font-bold mb-4">Part of the Cross</h3><div class="scripture">"But He was wounded for our transgressions, He was bruised for our iniquities; the chastisement for our peace was upon Him, and by His stripes we are healed." — Isaiah 53:5</div><p>Divine healing is not separate from salvation — it is part of Christ\'s atonement. As He bore our sins, He also bore our sicknesses (Matthew 8:17).</p><div class="key-point">1 Peter 2:24: "By whose stripes you were healed."</div>' },
-      { title: 'Jesus the Healer', content: '<h3 class="text-xl font-bold mb-4">The Same Yesterday, Today, Forever</h3><p>Healing was central to Jesus\' ministry. He healed ALL who came to Him (Matthew 4:23-24, 8:16, 12:15).</p><div class="scripture">"Jesus Christ is the same yesterday, today, and forever." — Hebrews 13:8</div><p>If Jesus healed then, He heals now. His nature hasn\'t changed. His power hasn\'t diminished.</p>' },
-      { title: 'Healing in the Church', content: '<h3 class="text-xl font-bold mb-4">Instructions for Today</h3><div class="scripture">"Is anyone among you sick? Let him call for the elders of the church, and let them pray over him, anointing him with oil in the name of the Lord. And the prayer of faith will save the sick." — James 5:14-15</div><p>This is not an outdated practice. The Great Commission includes healing (Mark 16:17-18), and James gives instructions for the ongoing church.</p>' },
-      { title: 'Faith and Healing', content: '<h3 class="text-xl font-bold mb-4">Believing God</h3><p>Faith is important in healing, but it\'s not a formula. God is sovereign. Some healings are instant, some progressive, and sometimes God\'s answer is different than we expect.</p><p><strong>Key principles:</strong></p><ul><li>Divine healing doesn\'t negate medical treatment</li><li>Faith is not a work that earns healing</li><li>God cares about the whole person</li><li>Healing continued throughout church history</li></ul><div class="key-point">Healing is a gift of grace, not a reward for great faith.</div>' }
+    id: 'ch7', number: 7, name: 'Divine Healing', fullName: 'The Doctrine of Divine Healing', icon: '💚', color: 'from-lime-500 to-green-600',
+    description: 'Healing in the atonement and available today through faith.',
+    studyGuide: [
+      { title: 'Healing in Atonement', content: '<h3 class="text-xl font-bold mb-4">Part of the Cross</h3><div class="scripture">"By His stripes we are healed." — Isaiah 53:5</div><div class="scripture">"By whose stripes you were healed." — 1 Peter 2:24</div><p>Divine healing is provided in Christ\'s atonement.</p>' },
+      { title: 'Jesus the Healer', content: '<h3 class="text-xl font-bold mb-4">The Same Forever</h3><div class="scripture">"Jesus Christ is the same yesterday, today, and forever." — Hebrews 13:8</div><p>Jesus healed all who came. His power hasn\'t changed.</p>' },
+      { title: 'Healing in the Church', content: '<h3 class="text-xl font-bold mb-4">Instructions for Today</h3><div class="scripture">"Is anyone among you sick? Let him call for the elders of the church, and let them pray over him, anointing him with oil." — James 5:14</div>' },
+      { title: 'Faith and Healing', content: '<h3 class="text-xl font-bold mb-4">Trusting God</h3><p>Faith is important but not a formula. God is sovereign. Some healings are instant, some progressive. Medical treatment is not opposed to faith.</p>' }
     ],
     quizzes: [
-      {q: "Where does Isaiah prophesy about healing in the atonement?", options: ["Isaiah 7:14", "Isaiah 40:31", "Isaiah 53:5", "Isaiah 61:1"], correct: 2, explanation: "Isaiah 53:5: 'By His stripes we are healed.'"},
-      {q: "Hebrews 13:8 says Jesus is:", options: ["Only in heaven", "The same yesterday, today, forever", "Different in each age", "Only for the Jews"], correct: 1, explanation: "'Jesus Christ is the same yesterday, today, and forever' - His power to heal continues."},
-      {q: "According to James 5:14-15, who should pray for the sick?", options: ["Only Jesus", "Only faith healers", "The elders of the church", "Only doctors"], correct: 2, explanation: "James instructs calling for the elders of the church to anoint with oil and pray."},
-      {q: "What should accompany prayer for the sick in James 5?", options: ["Fasting only", "Anointing with oil", "Speaking in tongues", "Financial offerings"], correct: 1, explanation: "James 5:14 instructs anointing with oil in the name of the Lord."},
-      {q: "Divine healing is:", options: ["Separate from the atonement", "Part of Christ's atonement", "Only for apostolic times", "Automatic for all"], correct: 1, explanation: "FOPT teaches healing is provided in the atonement (Isaiah 53, 1 Peter 2:24)."},
-      {q: "Does divine healing negate medical treatment?", options: ["Yes, never use doctors", "No, both can be used", "Only use doctors", "Medicine is sinful"], correct: 1, explanation: "Divine healing and medical treatment are not mutually exclusive."},
-      {q: "How are healings typically experienced?", options: ["Always instantaneous", "Always progressive", "Some instant, some progressive", "Never happen today"], correct: 2, explanation: "Some healings are instantaneous, others are progressive over time."},
-      {q: "Why did sickness enter the world?", options: ["God's punishment", "Random chance", "Through the Fall and sin", "Natural evolution"], correct: 2, explanation: "Sickness entered through the Fall and is connected to sin's effects on creation."},
-      {q: "Did healing continue in church history after the apostles?", options: ["No, it stopped completely", "Yes, throughout history", "Only sometimes", "Only in Catholic church"], correct: 1, explanation: "Historical records show healing continued throughout church history."},
-      {q: "Is faith a formula that guarantees healing?", options: ["Yes, enough faith always works", "No, God remains sovereign", "Faith is not needed", "Only the healer's faith matters"], correct: 1, explanation: "While faith is important, God is sovereign - healing is not a mechanical formula."}
+      {q: "Isaiah 53:5 says:", options: ["God is love", "By His stripes we are healed", "Believe and be saved", "All have sinned"], correct: 1, explanation: "'By His stripes we are healed.'"},
+      {q: "Hebrews 13:8 says Jesus is:", options: ["In heaven only", "Same yesterday, today, forever", "Different each age", "For Jews only"], correct: 1, explanation: "'The same yesterday, today, and forever.'"},
+      {q: "James 5:14-15 says call:", options: ["Jesus only", "Faith healers", "Elders of church", "Doctors only"], correct: 2, explanation: "Call for elders to pray and anoint with oil."},
+      {q: "What accompanies prayer (James 5)?", options: ["Fasting", "Anointing with oil", "Tongues", "Offering"], correct: 1, explanation: "Anointing with oil in the Lord's name."},
+      {q: "Divine healing is:", options: ["Separate from atonement", "Part of atonement", "Apostolic times only", "Automatic"], correct: 1, explanation: "Healing is provided in the atonement."},
+      {q: "Does healing negate medicine?", options: ["Yes, never use doctors", "No, both can be used", "Doctors only", "Medicine is sin"], correct: 1, explanation: "Both can be used together."},
+      {q: "Healings are:", options: ["Always instant", "Always progressive", "Some instant, some progressive", "Never today"], correct: 2, explanation: "Some instant, some progressive."},
+      {q: "Sickness entered through:", options: ["God's punishment", "Random chance", "The Fall and sin", "Evolution"], correct: 2, explanation: "Through the Fall and sin's effects."},
+      {q: "Did healing continue after apostles?", options: ["No, stopped", "Yes, throughout history", "Sometimes", "Catholic only"], correct: 1, explanation: "Healing continued throughout church history."},
+      {q: "Is faith a formula for healing?", options: ["Yes, guaranteed", "No, God is sovereign", "Not needed", "Healer's faith only"], correct: 1, explanation: "Faith matters but God remains sovereign."}
     ]
   },
   {
-    id: 'ch8', name: 'Church', fullName: 'The Doctrine of the Church', icon: '⛪', color: 'from-orange-500 to-amber-600',
-    description: 'Ecclesiology: The body of Christ.',
-    lessons: [
-      { title: 'What is the Church?', content: '<h3 class="text-xl font-bold mb-4">Ekklesia</h3><p><strong>Ekklesia</strong> = "called-out assembly." The church is not a building — it\'s the people of God.</p><p><strong>Two meanings:</strong></p><ul><li><strong>Universal Church:</strong> All believers everywhere, of all time</li><li><strong>Local Church:</strong> Believers gathered in a specific place</li></ul><div class="scripture">"And He put all things under His feet, and gave Him to be head over all things to the church, which is His body." — Ephesians 1:22-23</div>' },
-      { title: 'Images of the Church', content: '<h3 class="text-xl font-bold mb-4">What the Church Is Like</h3><ul><li><strong>Body of Christ</strong> — We are connected to Christ and each other (1 Cor. 12)</li><li><strong>Bride of Christ</strong> — Loved, cherished, being prepared (Eph. 5:25-27)</li><li><strong>Temple of the Spirit</strong> — God dwells in us (1 Cor. 3:16)</li><li><strong>Family of God</strong> — Brothers and sisters in Christ</li><li><strong>Flock of the Shepherd</strong> — Jesus leads and cares for us</li></ul>' },
-      { title: 'Leadership in the Church', content: '<h3 class="text-xl font-bold mb-4">Fivefold Ministry</h3><div class="scripture">"And He Himself gave some to be apostles, some prophets, some evangelists, and some pastors and teachers." — Ephesians 4:11</div><p><strong>Other leaders:</strong></p><ul><li><strong>Elders (Presbyters)</strong> — Spiritual oversight</li><li><strong>Bishops (Overseers)</strong> — Same as elders</li><li><strong>Deacons</strong> — Servants who handle practical needs</li></ul>' },
-      { title: 'The Ordinances', content: '<h3 class="text-xl font-bold mb-4">Baptism and Lord\'s Supper</h3><p><strong>Water Baptism:</strong></p><ul><li>By immersion</li><li>Symbolizes death, burial, resurrection with Christ</li><li>An outward sign of inward change</li></ul><p><strong>Lord\'s Supper (Communion):</strong></p><ul><li>Remembrance of Christ\'s sacrifice</li><li>The bread = His body; the cup = His blood</li><li>"Do this in remembrance of Me" (Luke 22:19)</li></ul>' },
-      { title: 'The Mission of the Church', content: '<h3 class="text-xl font-bold mb-4">Why the Church Exists</h3><div class="scripture">"Go therefore and make disciples of all the nations, baptizing them... teaching them to observe all things that I have commanded you." — Matthew 28:19-20</div><p><strong>The church\'s mission:</strong></p><ul><li>Evangelism — Share the gospel</li><li>Discipleship — Grow believers</li><li>Worship — Glorify God</li><li>Fellowship — Love one another</li><li>Service — Meet needs</li></ul>' }
+    id: 'ch8', number: 8, name: 'Church', fullName: 'The Doctrine of the Church (Ecclesiology)', icon: '⛪', color: 'from-orange-500 to-amber-600',
+    description: 'The body of Christ: nature, leadership, ordinances, mission.',
+    studyGuide: [
+      { title: 'What is the Church?', content: '<h3 class="text-xl font-bold mb-4">Ekklesia = Called-Out Assembly</h3><p><strong>Universal Church:</strong> All believers everywhere</p><p><strong>Local Church:</strong> Believers in one place</p><div class="scripture">"Christ is head of the church, which is His body." — Colossians 1:18</div>' },
+      { title: 'Images of the Church', content: '<h3 class="text-xl font-bold mb-4">Biblical Pictures</h3><ul><li>Body of Christ</li><li>Bride of Christ</li><li>Temple of the Spirit</li><li>Family of God</li><li>Flock of the Shepherd</li></ul>' },
+      { title: 'Leadership', content: '<h3 class="text-xl font-bold mb-4">Fivefold Ministry</h3><div class="scripture">"He gave some to be apostles, prophets, evangelists, pastors and teachers." — Ephesians 4:11</div><p>Also: Elders, Bishops (overseers), Deacons</p>' },
+      { title: 'Ordinances', content: '<h3 class="text-xl font-bold mb-4">Baptism & Lord\'s Supper</h3><p><strong>Baptism:</strong> By immersion; symbolizes death, burial, resurrection with Christ.</p><p><strong>Lord\'s Supper:</strong> Remembrance of Christ\'s sacrifice.</p>' },
+      { title: 'Mission', content: '<h3 class="text-xl font-bold mb-4">Why We Exist</h3><div class="scripture">"Go make disciples of all nations." — Matthew 28:19</div><p>Evangelism, discipleship, worship, fellowship, service.</p>' }
     ],
     quizzes: [
-      {q: "What does 'ekklesia' mean?", options: ["Holy building", "Called-out assembly", "Religious group", "Temple"], correct: 1, explanation: "'Ekklesia' means 'called-out assembly' - those called out for God's purposes."},
-      {q: "Who is the Head of the church?", options: ["The Pope", "The pastor", "Christ", "The elders"], correct: 2, explanation: "Christ is the Head of the church (Ephesians 5:23, Colossians 1:18)."},
-      {q: "What is the universal church?", options: ["The largest denomination", "All believers everywhere", "Catholic church only", "First church in Jerusalem"], correct: 1, explanation: "The universal church includes all true believers everywhere throughout history."},
-      {q: "According to Ephesians 4:11, which is NOT a fivefold ministry?", options: ["Apostle", "Prophet", "Deacon", "Evangelist"], correct: 2, explanation: "Ephesians 4:11 lists apostles, prophets, evangelists, pastors, and teachers."},
-      {q: "What do the two church ordinances include?", options: ["Foot washing and fasting", "Baptism and Lord's Supper", "Tithing and prayer", "Confession and penance"], correct: 1, explanation: "The two ordinances are water baptism and the Lord's Supper."},
-      {q: "Baptism symbolizes:", options: ["Washing away sins", "Death, burial, resurrection with Christ", "Joining a denomination", "Getting wet"], correct: 1, explanation: "Baptism symbolizes our identification with Christ's death, burial, and resurrection."},
-      {q: "The church is called the:", options: ["Body of Christ", "Bride of Christ", "Temple of the Spirit", "All of the above"], correct: 3, explanation: "Scripture uses all these metaphors for the church."},
-      {q: "What is the mission of the church?", options: ["Only worship", "Only evangelism", "Evangelism, discipleship, worship, fellowship, service", "Political action"], correct: 2, explanation: "The church's mission includes evangelism, discipleship, worship, fellowship, and service."},
-      {q: "The Lord's Supper is:", options: ["A common meal", "Remembrance of Christ's sacrifice", "Only for Easter", "Optional"], correct: 1, explanation: "The Lord's Supper is a remembrance of Christ's sacrificial death (1 Corinthians 11:24-25)."},
-      {q: "How should baptism be performed?", options: ["Sprinkling only", "Pouring only", "By immersion", "Any method"], correct: 2, explanation: "FOPT teaches baptism by immersion, symbolizing burial and resurrection."}
+      {q: "'Ekklesia' means:", options: ["Building", "Called-out assembly", "Religious group", "Temple"], correct: 1, explanation: "'Called-out assembly.'"},
+      {q: "Head of the church:", options: ["Pope", "Pastor", "Christ", "Elders"], correct: 2, explanation: "Christ is Head of the church."},
+      {q: "Universal church is:", options: ["Largest denomination", "All believers everywhere", "Catholic only", "First church"], correct: 1, explanation: "All true believers everywhere."},
+      {q: "NOT in Ephesians 4:11:", options: ["Apostle", "Prophet", "Deacon", "Evangelist"], correct: 2, explanation: "Deacon is not in the fivefold ministry."},
+      {q: "Two ordinances:", options: ["Foot washing, fasting", "Baptism, Lord's Supper", "Tithing, prayer", "Confession, penance"], correct: 1, explanation: "Baptism and Lord's Supper."},
+      {q: "Baptism symbolizes:", options: ["Washing sins", "Death, burial, resurrection", "Joining denomination", "Getting wet"], correct: 1, explanation: "Death, burial, resurrection with Christ."},
+      {q: "The church is called:", options: ["Body of Christ", "Bride of Christ", "Temple of Spirit", "All of above"], correct: 3, explanation: "All of these are biblical images."},
+      {q: "Church mission includes:", options: ["Worship only", "Evangelism only", "Evangelism, discipleship, worship, fellowship, service", "Politics"], correct: 2, explanation: "All five aspects."},
+      {q: "Lord's Supper is:", options: ["Common meal", "Remembrance of sacrifice", "Easter only", "Optional"], correct: 1, explanation: "Remembrance of Christ's sacrifice."},
+      {q: "Baptism should be:", options: ["Sprinkling", "Pouring", "By immersion", "Any method"], correct: 2, explanation: "FOPT teaches baptism by immersion."}
     ]
   },
   {
-    id: 'ch9', name: 'Angels', fullName: 'The Doctrine of Angels', icon: '👼', color: 'from-sky-500 to-blue-600',
-    description: 'Angelology: Angels, Satan, and demons.',
-    lessons: [
-      { title: 'Holy Angels', content: '<h3 class="text-xl font-bold mb-4">Ministering Spirits</h3><div class="scripture">"Are they not all ministering spirits sent forth to minister for those who will inherit salvation?" — Hebrews 1:14</div><p>Angels are created spiritual beings who serve God and minister to believers. They are:</p><ul><li>Created by God (not eternal)</li><li>Personal beings with intellect, emotion, will</li><li>Powerful but not all-knowing or all-powerful</li><li>Innumerable (Hebrews 12:22)</li></ul>' },
-      { title: 'Notable Angels', content: '<h3 class="text-xl font-bold mb-4">Named Angels</h3><p><strong>Michael</strong> — The archangel, a warrior who leads God\'s armies (Jude 9, Revelation 12:7).</p><p><strong>Gabriel</strong> — Messenger angel who announced Christ\'s birth (Luke 1:26-38).</p><p>Angels are organized in ranks: thrones, dominions, principalities, powers (Colossians 1:16).</p>' },
-      { title: 'Satan', content: '<h3 class="text-xl font-bold mb-4">The Enemy</h3><p>Satan was originally Lucifer, a high-ranking angel who rebelled against God (Isaiah 14, Ezekiel 28).</p><p><strong>Names for Satan:</strong></p><ul><li>Devil (diabolos) — Accuser, slanderer</li><li>Dragon, Serpent — Revelation 12:9</li><li>Adversary — 1 Peter 5:8</li><li>The Evil One — Matthew 13:19</li></ul><div class="key-point">Satan is real and personal, but he is NOT equal to God. He is a defeated foe!</div>' },
-      { title: 'Demons and Spiritual Warfare', content: '<h3 class="text-xl font-bold mb-4">Fallen Angels</h3><p>Demons are angels who followed Satan in his rebellion. They seek to oppose God\'s work and harm humans.</p><p><strong>Our position:</strong></p><ul><li>Greater is He who is in you (1 John 4:4)</li><li>We have authority through Christ</li><li>Put on the full armor of God (Ephesians 6:10-18)</li><li>Victory is assured in Christ!</li></ul><div class="scripture">"Submit to God. Resist the devil and he will flee from you." — James 4:7</div>' }
+    id: 'ch9', number: 9, name: 'Angels', fullName: 'The Doctrine of Angels (Angelology)', icon: '👼', color: 'from-sky-500 to-blue-600',
+    description: 'Holy angels, Satan, demons, and spiritual warfare.',
+    studyGuide: [
+      { title: 'Holy Angels', content: '<h3 class="text-xl font-bold mb-4">Ministering Spirits</h3><div class="scripture">"Are they not all ministering spirits sent to serve those who will inherit salvation?" — Hebrews 1:14</div><p>Created beings with intellect, emotion, will. Innumerable and organized.</p>' },
+      { title: 'Notable Angels', content: '<h3 class="text-xl font-bold mb-4">Named Angels</h3><p><strong>Michael:</strong> Archangel, warrior, leads God\'s armies</p><p><strong>Gabriel:</strong> Messenger, announced Christ\'s birth</p>' },
+      { title: 'Satan', content: '<h3 class="text-xl font-bold mb-4">The Enemy</h3><p>Originally Lucifer, a high-ranking angel who rebelled (Isaiah 14, Ezekiel 28).</p><p><strong>Names:</strong> Devil, Dragon, Serpent, Adversary, Evil One</p><div class="key-point">Satan is real but NOT equal to God — he is a defeated foe!</div>' },
+      { title: 'Demons & Warfare', content: '<h3 class="text-xl font-bold mb-4">Fallen Angels</h3><p>Demons are angels who followed Satan. Believers have authority through Christ.</p><div class="scripture">"Submit to God. Resist the devil and he will flee." — James 4:7</div>' }
     ],
     quizzes: [
-      {q: "Are angels eternal like God?", options: ["Yes, they always existed", "No, they are created beings", "Only some are eternal", "The Bible doesn't say"], correct: 1, explanation: "Angels are created beings; only God is eternal and uncreated."},
-      {q: "What role do angels have toward believers (Hebrews 1:14)?", options: ["To judge us", "To minister to us", "To ignore us", "To test us"], correct: 1, explanation: "Angels are 'ministering spirits sent to serve those who will inherit salvation.'"},
-      {q: "Which archangel is described as a warrior?", options: ["Gabriel", "Michael", "Lucifer", "Raphael"], correct: 1, explanation: "Michael is the warrior archangel who leads heavenly armies."},
-      {q: "Which angel announced Christ's birth?", options: ["Michael", "Gabriel", "Raphael", "Uriel"], correct: 1, explanation: "Gabriel announced Christ's birth to Mary (Luke 1:26-38)."},
-      {q: "Who was Lucifer before his fall?", options: ["A demon", "A man", "A high-ranking angel", "A god"], correct: 2, explanation: "Lucifer was a high-ranking angel who rebelled and became Satan."},
-      {q: "What are demons?", options: ["Spirits of dead people", "Fallen angels", "Imaginary beings", "Minor gods"], correct: 1, explanation: "Demons are angels who followed Satan in his rebellion against God."},
-      {q: "Is Satan equal to God?", options: ["Yes, they are equals", "No, Satan is a created being", "Satan is more powerful", "They are brothers"], correct: 1, explanation: "Satan is a created being; he is powerful but not equal to the almighty God."},
-      {q: "Which is NOT a name for Satan?", options: ["Devil", "Dragon", "Michael", "Adversary"], correct: 2, explanation: "Michael is an archangel who fights against Satan."},
-      {q: "Do believers have authority over Satan?", options: ["No authority at all", "Yes, through Christ", "Only pastors do", "Only after death"], correct: 1, explanation: "Believers have authority over Satan through Christ's victory."},
-      {q: "Angels have:", options: ["Only bodies", "Intellect, emotion, will", "No personality", "Physical forms only"], correct: 1, explanation: "Angels are personal beings with intellect, emotion, and will."}
+      {q: "Are angels eternal?", options: ["Yes, always existed", "No, created beings", "Some are", "Bible doesn't say"], correct: 1, explanation: "Angels are created; only God is eternal."},
+      {q: "Angels' role (Hebrews 1:14):", options: ["Judge us", "Minister to us", "Ignore us", "Test us"], correct: 1, explanation: "'Ministering spirits sent to serve.'"},
+      {q: "Warrior archangel:", options: ["Gabriel", "Michael", "Lucifer", "Raphael"], correct: 1, explanation: "Michael leads heavenly armies."},
+      {q: "Announced Christ's birth:", options: ["Michael", "Gabriel", "Raphael", "Uriel"], correct: 1, explanation: "Gabriel announced to Mary."},
+      {q: "Lucifer was:", options: ["A demon", "A man", "High-ranking angel", "A god"], correct: 2, explanation: "A high-ranking angel who rebelled."},
+      {q: "Demons are:", options: ["Dead spirits", "Fallen angels", "Imaginary", "Minor gods"], correct: 1, explanation: "Angels who followed Satan's rebellion."},
+      {q: "Is Satan equal to God?", options: ["Yes, equals", "No, created being", "More powerful", "Brothers"], correct: 1, explanation: "Satan is created; not equal to almighty God."},
+      {q: "NOT a name for Satan:", options: ["Devil", "Dragon", "Michael", "Adversary"], correct: 2, explanation: "Michael fights against Satan."},
+      {q: "Believers have authority over Satan:", options: ["No authority", "Yes, through Christ", "Pastors only", "After death"], correct: 1, explanation: "Authority through Christ's victory."},
+      {q: "Angels have:", options: ["Bodies only", "Intellect, emotion, will", "No personality", "Physical only"], correct: 1, explanation: "Personal beings with intellect, emotion, will."}
     ]
   },
   {
-    id: 'ch10', name: 'Last Things', fullName: 'The Doctrine of Last Things', icon: '🌅', color: 'from-indigo-500 to-purple-600',
-    description: 'Eschatology: The return of Christ and future events.',
-    lessons: [
-      { title: 'The Second Coming', content: '<h3 class="text-xl font-bold mb-4">He Is Coming Again!</h3><div class="scripture">"This same Jesus, who was taken up from you into heaven, will so come in like manner as you saw Him go into heaven." — Acts 1:11</div><p>Christ\'s return will be:</p><ul><li><strong>Personal</strong> — "This same Jesus"</li><li><strong>Visible</strong> — "Every eye will see Him" (Rev. 1:7)</li><li><strong>Bodily</strong> — "In like manner"</li><li><strong>Imminent</strong> — Could be at any moment</li></ul>' },
-      { title: 'The Rapture', content: '<h3 class="text-xl font-bold mb-4">Caught Up to Meet the Lord</h3><div class="scripture">"For the Lord Himself will descend from heaven with a shout, with the voice of an archangel, and with the trumpet of God. And the dead in Christ will rise first. Then we who are alive and remain shall be caught up together with them in the clouds to meet the Lord in the air." — 1 Thessalonians 4:16-17</div><p>"Caught up" = Greek "harpazo" = Latin "rapturo" = Rapture.</p>' },
-      { title: 'The Tribulation', content: '<h3 class="text-xl font-bold mb-4">Seven Years of Judgment</h3><p>The Tribulation is a seven-year period of God\'s judgment on earth (Daniel 9:27).</p><p><strong>Key events:</strong></p><ul><li>Rise of the Antichrist</li><li>Great deception and persecution</li><li>God\'s judgments poured out</li><li>The Battle of Armageddon</li></ul><div class="key-point">The Antichrist is a future world ruler who will oppose God and deceive many.</div>' },
-      { title: 'The Millennium', content: '<h3 class="text-xl font-bold mb-4">Christ\'s 1,000-Year Reign</h3><div class="scripture">"And they lived and reigned with Christ for a thousand years." — Revelation 20:4</div><p><strong>Premillennialism:</strong> Christ returns BEFORE the Millennium to establish His kingdom on earth.</p><p>Satan will be bound, Christ will reign, and righteousness will prevail.</p>' },
-      { title: 'Eternal Destiny', content: '<h3 class="text-xl font-bold mb-4">Heaven and Hell</h3><p><strong>Heaven:</strong> Eternal life and fellowship with God for believers. "God will wipe away every tear" (Revelation 21:4).</p><p><strong>Hell:</strong> Eternal separation from God for unbelievers. The Great White Throne Judgment (Revelation 20:11-15).</p><p><strong>New Heaven and New Earth:</strong> Ultimate restoration where God dwells with His people forever (Revelation 21-22).</p><div class="scripture">"But of that day and hour no one knows, not even the angels of heaven, but My Father only." — Matthew 24:36</div><div class="key-point">Be ready! No one knows when Christ will return.</div>' }
+    id: 'ch10', number: 10, name: 'Last Things', fullName: 'The Doctrine of Last Things (Eschatology)', icon: '🌅', color: 'from-indigo-500 to-purple-600',
+    description: 'The return of Christ, rapture, tribulation, millennium, and eternity.',
+    studyGuide: [
+      { title: 'Second Coming', content: '<h3 class="text-xl font-bold mb-4">He Is Coming Again!</h3><div class="scripture">"This same Jesus... will so come in like manner." — Acts 1:11</div><p>Personal, visible, bodily, imminent.</p>' },
+      { title: 'The Rapture', content: '<h3 class="text-xl font-bold mb-4">Caught Up</h3><div class="scripture">"The dead in Christ will rise first. Then we who are alive... shall be caught up together with them in the clouds to meet the Lord in the air." — 1 Thessalonians 4:16-17</div>' },
+      { title: 'Tribulation', content: '<h3 class="text-xl font-bold mb-4">Seven Years</h3><p>Seven-year period of God\'s judgment. Rise of Antichrist. Battle of Armageddon.</p>' },
+      { title: 'Millennium', content: '<h3 class="text-xl font-bold mb-4">Christ\'s 1,000-Year Reign</h3><div class="scripture">"They lived and reigned with Christ for a thousand years." — Revelation 20:4</div><p><strong>Premillennialism:</strong> Christ returns BEFORE the Millennium.</p>' },
+      { title: 'Eternal Destiny', content: '<h3 class="text-xl font-bold mb-4">Heaven and Hell</h3><p><strong>Heaven:</strong> Eternal life with God for believers.</p><p><strong>Hell:</strong> Eternal separation from God for unbelievers.</p><p><strong>New Heaven and Earth:</strong> Ultimate restoration (Revelation 21-22).</p><div class="key-point">No one knows when — be ready!</div>' }
     ],
     quizzes: [
-      {q: "According to 1 Thessalonians 4:16-17, what is the Rapture?", options: ["Death of believers", "Believers caught up to meet Christ", "The final judgment", "Creation of new earth"], correct: 1, explanation: "The Rapture is believers being 'caught up' to meet the Lord in the air."},
-      {q: "Christ's second coming will be:", options: ["Invisible and spiritual", "Personal, visible, bodily", "Symbolic only", "Already happened"], correct: 1, explanation: "Christ will return personally, visibly, and bodily (Acts 1:11)."},
-      {q: "How long is the Tribulation period?", options: ["3.5 years", "7 years", "10 years", "1,000 years"], correct: 1, explanation: "The Tribulation is a seven-year period of judgment on earth."},
-      {q: "What is the Millennium?", options: ["10 years", "100 years", "1,000 years of Christ's reign", "Eternity"], correct: 2, explanation: "The Millennium is Christ's 1,000-year reign on earth (Revelation 20)."},
-      {q: "What is premillennialism?", options: ["Christ returns after the Millennium", "Christ returns before the Millennium", "No Millennium exists", "We are in the Millennium now"], correct: 1, explanation: "Premillennialism teaches Christ returns before establishing His 1,000-year kingdom."},
-      {q: "Who is the Antichrist?", options: ["Satan himself", "End-times world ruler opposing God", "A past emperor", "A symbolic concept"], correct: 1, explanation: "The Antichrist is a future world ruler who opposes God and deceives many."},
-      {q: "What is the Great White Throne Judgment for?", options: ["Believers only", "Angels only", "Unbelievers", "Everyone equally"], correct: 2, explanation: "The Great White Throne Judgment is for unbelievers (Revelation 20:11-15)."},
-      {q: "What is heaven for believers?", options: ["Temporary waiting", "Eternal dwelling with God", "Reincarnation", "Soul sleep"], correct: 1, explanation: "Heaven is eternal life and fellowship with God for believers."},
-      {q: "What does the Bible say about the timing of Christ's return?", options: ["We know the exact date", "No one knows the day or hour", "It already happened", "It will be in 2030"], correct: 1, explanation: "Jesus said no one knows the day or hour (Matthew 24:36)."},
-      {q: "What will ultimately be created?", options: ["Nothing new", "New Heaven and New Earth", "Just new heaven", "Just new earth"], correct: 1, explanation: "God will create a New Heaven and New Earth (Revelation 21:1)."}
+      {q: "The Rapture (1 Thess 4:16-17) is:", options: ["Death", "Caught up to meet Christ", "Final judgment", "New earth"], correct: 1, explanation: "'Caught up... to meet the Lord in the air.'"},
+      {q: "Christ's return will be:", options: ["Invisible", "Personal, visible, bodily", "Symbolic", "Already happened"], correct: 1, explanation: "Personal, visible, bodily (Acts 1:11)."},
+      {q: "Tribulation length:", options: ["3.5 years", "7 years", "10 years", "1,000 years"], correct: 1, explanation: "Seven-year period of judgment."},
+      {q: "The Millennium is:", options: ["10 years", "100 years", "1,000-year reign", "Eternity"], correct: 2, explanation: "Christ's 1,000-year reign (Rev 20)."},
+      {q: "Premillennialism says:", options: ["Christ after Millennium", "Christ before Millennium", "No Millennium", "In Millennium now"], correct: 1, explanation: "Christ returns before the Millennium."},
+      {q: "Antichrist is:", options: ["Satan", "End-times world ruler", "Past emperor", "Symbol"], correct: 1, explanation: "Future world ruler opposing God."},
+      {q: "Great White Throne is for:", options: ["Believers", "Angels", "Unbelievers", "Everyone"], correct: 2, explanation: "Judgment for unbelievers (Rev 20:11-15)."},
+      {q: "Heaven is:", options: ["Temporary", "Eternal with God", "Reincarnation", "Soul sleep"], correct: 1, explanation: "Eternal life with God."},
+      {q: "Timing of Christ's return:", options: ["We know date", "No one knows day/hour", "Already happened", "2030"], correct: 1, explanation: "'No one knows the day or hour' (Matt 24:36)."},
+      {q: "Ultimate creation:", options: ["Nothing new", "New Heaven and Earth", "Just heaven", "Just earth"], correct: 1, explanation: "New Heaven and New Earth (Rev 21:1)."}
     ]
   }
 ];
@@ -450,23 +456,23 @@ var DOMAINS = [
 // STATE
 var currentUser = null;
 var userProgress = null;
-var currentDomain = null;
-var currentLessonIndex = 0;
-var currentQuizIndex = 0;
+var currentChapter = null;
+var currentTab = 'read';
+var studyLessonIndex = 0;
+var quizIndex = 0;
 var selectedAnswer = null;
 var quizScore = 0;
 
 // HELPERS
 function showScreen(id) {
-  var screens = document.querySelectorAll('.screen');
-  for (var i = 0; i < screens.length; i++) { screens[i].classList.remove('active'); }
+  document.querySelectorAll('.screen').forEach(function(s) { s.classList.remove('active'); });
   document.getElementById('screen-' + id).classList.add('active');
 }
 function showError(msg) { var el = document.getElementById('login-error'); el.textContent = msg; el.classList.remove('hidden'); }
 function hideError() { document.getElementById('login-error').classList.add('hidden'); }
 function showLoading(show) { document.getElementById('login-loading').classList.toggle('hidden', !show); }
 function showSaveStatus() { var el = document.getElementById('save-status'); el.classList.remove('hidden'); setTimeout(function() { el.classList.add('hidden'); }, 2000); }
-function createDefaultProgress() { var p = {}; for (var i = 0; i < DOMAINS.length; i++) { p[DOMAINS[i].id] = { lessonsCompleted: [], quizScores: [], completed: false }; } return p; }
+function createDefaultProgress() { var p = {}; CHAPTERS.forEach(function(c) { p[c.id] = { readComplete: false, studyComplete: false, quizScores: [], completed: false }; }); return p; }
 
 // AUTH
 async function handleRegister() {
@@ -475,13 +481,13 @@ async function handleRegister() {
   var password = document.getElementById('reg-password').value;
   if (!name || !email || !password) { showError('Please fill all fields'); return; }
   if (password.length < 6) { showError('Password must be at least 6 characters'); return; }
-  if (!supabase) { showError('Still connecting... Please wait and try again.'); return; }
+  if (!supabase) { showError('Connecting... try again.'); return; }
   hideError(); showLoading(true);
   try {
     var result = await supabase.auth.signUp({ email: email, password: password, options: { data: { name: name } } });
     if (result.error) throw result.error;
     if (result.data.user) { currentUser = result.data.user; userProgress = createDefaultProgress(); await saveProgress(); showApp(); }
-  } catch (e) { showError(e.message || 'Registration failed'); }
+  } catch (e) { showError(e.message); }
   showLoading(false);
 }
 
@@ -489,26 +495,25 @@ async function handleLogin() {
   var email = document.getElementById('login-email').value.trim();
   var password = document.getElementById('login-password').value;
   if (!email || !password) { showError('Please fill all fields'); return; }
-  if (!supabase) { showError('Still connecting... Please wait and try again.'); return; }
+  if (!supabase) { showError('Connecting... try again.'); return; }
   hideError(); showLoading(true);
   try {
     var result = await supabase.auth.signInWithPassword({ email: email, password: password });
     if (result.error) throw result.error;
     currentUser = result.data.user; await loadProgress(); showApp();
-  } catch (e) { showError(e.message || 'Login failed'); }
+  } catch (e) { showError(e.message); }
   showLoading(false);
 }
 
 async function handleLogout() { if (supabase) await supabase.auth.signOut(); currentUser = null; userProgress = null; showScreen('login'); }
 
-// PROGRESS
 async function loadProgress() {
   try {
     var result = await supabase.from('progress').select('data').eq('user_id', currentUser.id).single();
     if (result.data && result.data.data) { userProgress = result.data.data; } 
     else { userProgress = createDefaultProgress(); await saveProgress(); }
   } catch (e) { userProgress = createDefaultProgress(); }
-  for (var i = 0; i < DOMAINS.length; i++) { if (!userProgress[DOMAINS[i].id]) { userProgress[DOMAINS[i].id] = { lessonsCompleted: [], quizScores: [], completed: false }; } }
+  CHAPTERS.forEach(function(c) { if (!userProgress[c.id]) { userProgress[c.id] = { readComplete: false, studyComplete: false, quizScores: [], completed: false }; } });
 }
 
 async function saveProgress() {
@@ -520,7 +525,7 @@ function checkExistingSession() {
   if (supabase) {
     supabase.auth.getSession().then(function(result) {
       if (result.data.session) { currentUser = result.data.session.user; loadProgress().then(function() { showApp(); }); }
-    }).catch(function(e) { console.error('Session check error:', e); });
+    }).catch(function(e) { console.error(e); });
   }
 }
 
@@ -528,172 +533,261 @@ function checkExistingSession() {
 function showApp() {
   showScreen('app');
   var name = 'Student';
-  if (currentUser && currentUser.user_metadata && currentUser.user_metadata.name) { name = currentUser.user_metadata.name; } 
+  if (currentUser && currentUser.user_metadata && currentUser.user_metadata.name) { name = currentUser.user_metadata.name; }
   else if (currentUser && currentUser.email) { name = currentUser.email.split('@')[0]; }
   document.getElementById('user-greeting').textContent = 'Welcome, ' + name + '!';
-  renderDomainCards(); updateOverallProgress();
+  renderChapterCards();
+  updateOverallProgress();
 }
 
 function backToApp() { showApp(); }
 
-function renderDomainCards() {
-  var container = document.getElementById('domain-cards');
+function renderChapterCards() {
   var html = '';
-  for (var i = 0; i < DOMAINS.length; i++) {
-    var d = DOMAINS[i];
-    var p = userProgress[d.id];
-    var done = p.lessonsCompleted.length;
-    var total = d.lessons.length;
-    var pct = Math.round((done/total)*100);
+  CHAPTERS.forEach(function(c) {
+    var p = userProgress[c.id];
     var complete = p.completed;
-    html += '<div class="bg-white rounded-xl shadow-sm border p-5">';
+    var bestScore = p.quizScores.length > 0 ? Math.max.apply(null, p.quizScores) : 0;
+    html += '<div class="bg-white rounded-xl shadow-sm border p-5 cursor-pointer hover:shadow-md transition-shadow" onclick="openChapter(\'' + c.id + '\')">';
     html += '<div class="flex items-center justify-between mb-3">';
-    html += '<div class="flex items-center gap-3"><span class="text-2xl">' + d.icon + '</span><div><h3 class="font-bold text-slate-800">Ch.' + d.number + ': ' + d.name + '</h3><p class="text-xs text-slate-500">' + d.fullName + '</p></div></div>';
+    html += '<div class="flex items-center gap-3"><span class="text-2xl">' + c.icon + '</span>';
+    html += '<div><h3 class="font-bold text-slate-800">Ch.' + c.number + ': ' + c.name + '</h3>';
+    html += '<p class="text-xs text-slate-500">' + c.fullName + '</p></div></div>';
     if (complete) html += '<span class="text-green-500 text-xl">✓</span>';
     html += '</div>';
-    html += '<p class="text-slate-500 text-sm mb-3">' + d.description + '</p>';
-    html += '<div class="mb-3"><div class="flex justify-between text-xs mb-1"><span>Study Progress</span><span>' + done + '/' + total + '</span></div>';
-    html += '<div class="w-full bg-slate-100 rounded-full h-1.5"><div class="bg-gradient-to-r ' + d.color + ' h-1.5 rounded-full" style="width:' + pct + '%"></div></div></div>';
-    if (complete) {
-      html += '<div class="flex gap-2"><button class="flex-1 py-2 text-sm rounded-lg border hover:bg-slate-50" onclick="startLessons(\'' + d.id + '\')">Review</button>';
-      html += '<button class="flex-1 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700" onclick="startQuiz(\'' + d.id + '\')">Retake Quiz</button></div>';
-    } else if (done === total) {
-      html += '<button class="w-full py-2 text-sm rounded-lg bg-gradient-to-r ' + d.color + ' text-white" onclick="startQuiz(\'' + d.id + '\')">Take Quiz →</button>';
-    } else {
-      html += '<button class="w-full py-2 text-sm rounded-lg bg-gradient-to-r ' + d.color + ' text-white" onclick="startLessons(\'' + d.id + '\')">' + (done > 0 ? 'Continue' : 'Start') + ' Study →</button>';
-    }
-    html += '</div>';
-  }
-  container.innerHTML = html;
+    html += '<p class="text-slate-500 text-sm mb-3">' + c.description + '</p>';
+    html += '<div class="flex gap-2 text-xs">';
+    html += '<span class="px-2 py-1 rounded ' + (p.readComplete ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500') + '">📖 Read</span>';
+    html += '<span class="px-2 py-1 rounded ' + (p.studyComplete ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500') + '">📝 Study</span>';
+    html += '<span class="px-2 py-1 rounded ' + (bestScore >= 80 ? 'bg-green-100 text-green-700' : 'bg-slate-100 text-slate-500') + '">✅ Quiz' + (bestScore > 0 ? ' (' + bestScore + '%)' : '') + '</span>';
+    html += '</div></div>';
+  });
+  document.getElementById('domain-cards').innerHTML = html;
 }
 
 function updateOverallProgress() {
-  var total = 0, done = 0;
-  for (var i = 0; i < DOMAINS.length; i++) { total += DOMAINS[i].lessons.length; done += userProgress[DOMAINS[i].id].lessonsCompleted.length; }
+  var total = CHAPTERS.length;
+  var done = 0;
+  CHAPTERS.forEach(function(c) { if (userProgress[c.id].completed) done++; });
   var pct = Math.round((done/total)*100);
   document.getElementById('overall-progress').textContent = pct + '%';
   document.getElementById('progress-bar').style.width = pct + '%';
 }
 
-// LESSONS
-function startLessons(id) {
-  for (var i = 0; i < DOMAINS.length; i++) { if (DOMAINS[i].id === id) { currentDomain = DOMAINS[i]; break; } }
-  var p = userProgress[id];
-  currentLessonIndex = 0;
-  for (var j = 0; j < currentDomain.lessons.length; j++) { if (p.lessonsCompleted.indexOf(j) === -1) { currentLessonIndex = j; break; } currentLessonIndex = j; }
-  showLesson();
+// CHAPTER VIEW
+function openChapter(id) {
+  currentChapter = CHAPTERS.find(function(c) { return c.id === id; });
+  studyLessonIndex = 0;
+  quizIndex = 0;
+  quizScore = 0;
+  selectedAnswer = null;
+  showScreen('chapter');
+  document.getElementById('chapter-title').textContent = 'Chapter ' + currentChapter.number + ': ' + currentChapter.fullName;
+  updateChapterBadge();
+  switchTab('read');
 }
 
-function showLesson() {
-  showScreen('lesson');
-  var lesson = currentDomain.lessons[currentLessonIndex];
-  document.getElementById('lesson-domain-label').textContent = 'Chapter ' + currentDomain.number + ': ' + currentDomain.name;
-  document.getElementById('lesson-title').textContent = lesson.title;
-  document.getElementById('lesson-progress').textContent = (currentLessonIndex + 1) + '/' + currentDomain.lessons.length;
-  document.getElementById('lesson-content').innerHTML = lesson.content;
-  document.getElementById('btn-prev').classList.toggle('hidden', currentLessonIndex === 0);
-  document.getElementById('btn-next').textContent = currentLessonIndex === currentDomain.lessons.length - 1 ? 'Take Quiz →' : 'Continue →';
+function updateChapterBadge() {
+  var p = userProgress[currentChapter.id];
+  var badge = '';
+  if (p.completed) badge = '✓ Complete';
+  else if (p.quizScores.length > 0) badge = 'Best: ' + Math.max.apply(null, p.quizScores) + '%';
+  document.getElementById('chapter-progress-badge').textContent = badge;
 }
 
-function prevLesson() { if (currentLessonIndex > 0) { currentLessonIndex--; showLesson(); } }
-
-async function nextLesson() {
-  var p = userProgress[currentDomain.id];
-  if (p.lessonsCompleted.indexOf(currentLessonIndex) === -1) { p.lessonsCompleted.push(currentLessonIndex); await saveProgress(); }
-  if (currentLessonIndex < currentDomain.lessons.length - 1) { currentLessonIndex++; showLesson(); } 
-  else { startQuiz(currentDomain.id); }
+function switchTab(tab) {
+  currentTab = tab;
+  document.querySelectorAll('.tab-btn').forEach(function(btn) { btn.classList.toggle('active', btn.dataset.tab === tab); });
+  document.querySelectorAll('.tab-content').forEach(function(el) { el.classList.add('hidden'); });
+  document.getElementById('tab-' + tab).classList.remove('hidden');
+  
+  if (tab === 'read') loadFullChapter();
+  else if (tab === 'study') renderStudyLesson();
+  else if (tab === 'quiz') startQuiz();
 }
+
+// FULL CHAPTER READING
+function loadFullChapter() {
+  var chId = currentChapter.id;
+  document.getElementById('reading-loading').classList.remove('hidden');
+  document.getElementById('reading-content').classList.add('hidden');
+  
+  if (loadedChapters[chId]) {
+    displayFullChapter(loadedChapters[chId]);
+  } else {
+    var script = document.createElement('script');
+    script.src = 'chapters/' + chId + '.js';
+    script.onload = function() {
+      var varName = 'FOPT_' + chId.toUpperCase();
+      if (window[varName]) {
+        loadedChapters[chId] = window[varName].content;
+        displayFullChapter(loadedChapters[chId]);
+      }
+    };
+    script.onerror = function() {
+      document.getElementById('reading-loading').innerHTML = '<p class="text-red-500">Failed to load chapter. Make sure the chapters folder is uploaded.</p>';
+    };
+    document.head.appendChild(script);
+  }
+}
+
+function displayFullChapter(content) {
+  document.getElementById('reading-loading').classList.add('hidden');
+  document.getElementById('reading-content').classList.remove('hidden');
+  
+  // Format the text with paragraphs
+  var formatted = content.split('\n\n').map(function(p) {
+    return '<p>' + p.trim().replace(/\n/g, '<br>') + '</p>';
+  }).join('');
+  
+  document.getElementById('full-chapter-text').innerHTML = formatted;
+  
+  // Mark as read
+  if (!userProgress[currentChapter.id].readComplete) {
+    userProgress[currentChapter.id].readComplete = true;
+    checkChapterComplete();
+    saveProgress();
+  }
+}
+
+// STUDY GUIDE
+function renderStudyLesson() {
+  var lessons = currentChapter.studyGuide;
+  var lesson = lessons[studyLessonIndex];
+  var html = '<div class="mb-4 text-sm text-slate-500">Lesson ' + (studyLessonIndex + 1) + ' of ' + lessons.length + '</div>';
+  html += '<h2 class="text-2xl font-bold text-slate-800 mb-4">' + lesson.title + '</h2>';
+  html += '<div class="lesson-content">' + lesson.content + '</div>';
+  document.getElementById('study-lessons').innerHTML = html;
+  
+  document.getElementById('study-prev').classList.toggle('hidden', studyLessonIndex === 0);
+  document.getElementById('study-next').textContent = studyLessonIndex === lessons.length - 1 ? 'Complete Study →' : 'Next →';
+}
+
+document.getElementById('study-prev').onclick = function() {
+  if (studyLessonIndex > 0) { studyLessonIndex--; renderStudyLesson(); }
+};
+
+document.getElementById('study-next').onclick = function() {
+  if (studyLessonIndex < currentChapter.studyGuide.length - 1) {
+    studyLessonIndex++;
+    renderStudyLesson();
+  } else {
+    if (!userProgress[currentChapter.id].studyComplete) {
+      userProgress[currentChapter.id].studyComplete = true;
+      checkChapterComplete();
+      saveProgress();
+    }
+    switchTab('quiz');
+  }
+};
 
 // QUIZ
-function startQuiz(id) {
-  for (var i = 0; i < DOMAINS.length; i++) { if (DOMAINS[i].id === id) { currentDomain = DOMAINS[i]; break; } }
-  currentQuizIndex = 0; selectedAnswer = null; quizScore = 0; showQuizQuestion();
+function startQuiz() {
+  quizIndex = 0;
+  quizScore = 0;
+  selectedAnswer = null;
+  document.getElementById('quiz-container').classList.remove('hidden');
+  document.getElementById('quiz-results').classList.add('hidden');
+  renderQuizQuestion();
 }
 
-function showQuizQuestion() {
-  showScreen('quiz');
-  var q = currentDomain.quizzes[currentQuizIndex];
-  document.getElementById('quiz-domain-label').textContent = 'Chapter ' + currentDomain.number + ': ' + currentDomain.name;
-  document.getElementById('quiz-progress').textContent = (currentQuizIndex + 1) + '/' + currentDomain.quizzes.length;
+function renderQuizQuestion() {
+  var q = currentChapter.quizzes[quizIndex];
+  document.getElementById('quiz-counter').textContent = 'Question ' + (quizIndex + 1) + ' of ' + currentChapter.quizzes.length;
   document.getElementById('quiz-question').textContent = q.q;
+  
   var letters = ['A', 'B', 'C', 'D'];
-  var optionsHtml = '';
-  for (var i = 0; i < q.options.length; i++) {
-    optionsHtml += '<button class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" onclick="selectQuizOption(' + i + ')" data-index="' + i + '">';
-    optionsHtml += '<span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">' + letters[i] + '</span>';
-    optionsHtml += '<span>' + q.options[i] + '</span></button>';
-  }
-  document.getElementById('quiz-options').innerHTML = optionsHtml;
+  var html = '';
+  q.options.forEach(function(opt, i) {
+    html += '<button class="quiz-option w-full p-4 border-2 rounded-lg text-left flex items-center gap-3" onclick="selectAnswer(' + i + ')" data-index="' + i + '">';
+    html += '<span class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center font-bold">' + letters[i] + '</span>';
+    html += '<span>' + opt + '</span></button>';
+  });
+  document.getElementById('quiz-options').innerHTML = html;
   document.getElementById('quiz-feedback').classList.add('hidden');
-  document.getElementById('btn-submit').classList.remove('hidden');
-  document.getElementById('btn-submit').disabled = true;
-  document.getElementById('btn-next-q').classList.add('hidden');
+  document.getElementById('quiz-submit').classList.remove('hidden');
+  document.getElementById('quiz-submit').disabled = true;
+  document.getElementById('quiz-next').classList.add('hidden');
   selectedAnswer = null;
 }
 
-function selectQuizOption(index) {
-  selectedAnswer = index;
-  var options = document.querySelectorAll('.quiz-option');
-  for (var i = 0; i < options.length; i++) { options[i].classList.toggle('selected', i === index); }
-  document.getElementById('btn-submit').disabled = false;
+function selectAnswer(i) {
+  selectedAnswer = i;
+  document.querySelectorAll('.quiz-option').forEach(function(btn, idx) {
+    btn.classList.toggle('selected', idx === i);
+  });
+  document.getElementById('quiz-submit').disabled = false;
 }
 
-function submitAnswer() {
-  var q = currentDomain.quizzes[currentQuizIndex];
+document.getElementById('quiz-submit').onclick = function() {
+  var q = currentChapter.quizzes[quizIndex];
   var correct = selectedAnswer === q.correct;
   if (correct) quizScore++;
-  var options = document.querySelectorAll('.quiz-option');
-  for (var i = 0; i < options.length; i++) {
-    options[i].classList.remove('selected'); options[i].onclick = null;
-    var idx = parseInt(options[i].getAttribute('data-index'));
-    if (idx === q.correct) { options[i].classList.add('correct'); } 
-    else if (idx === selectedAnswer && !correct) { options[i].classList.add('incorrect'); }
-  }
+  
+  document.querySelectorAll('.quiz-option').forEach(function(btn) {
+    var idx = parseInt(btn.dataset.index);
+    btn.onclick = null;
+    if (idx === q.correct) btn.classList.add('correct');
+    else if (idx === selectedAnswer && !correct) btn.classList.add('incorrect');
+  });
+  
   var fb = document.getElementById('quiz-feedback');
   fb.classList.remove('hidden');
   fb.className = 'mt-6 p-4 rounded-lg ' + (correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200');
-  fb.innerHTML = '<div class="font-medium ' + (correct ? 'text-green-800' : 'text-red-800') + '">' + (correct ? '✓ Correct!' : '✗ Incorrect') + '</div><div class="text-sm mt-1">' + q.explanation + '</div>';
-  document.getElementById('btn-submit').classList.add('hidden');
-  document.getElementById('btn-next-q').classList.remove('hidden');
-  document.getElementById('btn-next-q').textContent = currentQuizIndex === currentDomain.quizzes.length - 1 ? 'See Results' : 'Next →';
-}
+  fb.innerHTML = '<div class="font-medium ' + (correct ? 'text-green-800">✓ Correct!' : 'text-red-800">✗ Incorrect') + '</div><div class="text-sm mt-1">' + q.explanation + '</div>';
+  
+  document.getElementById('quiz-submit').classList.add('hidden');
+  document.getElementById('quiz-next').classList.remove('hidden');
+  document.getElementById('quiz-next').textContent = quizIndex === currentChapter.quizzes.length - 1 ? 'See Results' : 'Next →';
+};
 
-function nextQuestion() {
-  if (currentQuizIndex < currentDomain.quizzes.length - 1) { currentQuizIndex++; showQuizQuestion(); } 
-  else { showResults(); }
-}
+document.getElementById('quiz-next').onclick = function() {
+  if (quizIndex < currentChapter.quizzes.length - 1) {
+    quizIndex++;
+    renderQuizQuestion();
+  } else {
+    showQuizResults();
+  }
+};
 
-async function showResults() {
-  showScreen('results');
-  var total = currentDomain.quizzes.length;
+async function showQuizResults() {
+  var total = currentChapter.quizzes.length;
   var pct = Math.round((quizScore / total) * 100);
   var passed = pct >= 80;
-  var p = userProgress[currentDomain.id];
-  p.quizScores.push(pct);
-  if (passed && !p.completed) p.completed = true;
+  
+  userProgress[currentChapter.id].quizScores.push(pct);
+  if (passed) {
+    userProgress[currentChapter.id].completed = true;
+  }
+  checkChapterComplete();
   await saveProgress();
+  updateChapterBadge();
+  
+  document.getElementById('quiz-container').classList.add('hidden');
+  document.getElementById('quiz-results').classList.remove('hidden');
   document.getElementById('results-icon').textContent = passed ? '🎉' : '📚';
   document.getElementById('results-title').textContent = passed ? 'Great Job!' : 'Keep Studying';
-  document.getElementById('results-message').textContent = passed ? 'You passed with ' + quizScore + '/' + total + '!' : quizScore + '/' + total + ' - Need 80% to pass.';
+  document.getElementById('results-message').textContent = passed ? 'You passed Chapter ' + currentChapter.number + '!' : 'You need 80% to pass. Review and try again.';
   document.getElementById('results-correct').textContent = quizScore;
   document.getElementById('results-incorrect').textContent = total - quizScore;
   document.getElementById('results-percent').textContent = pct + '%';
 }
 
-function retakeQuiz() { startQuiz(currentDomain.id); }
+function retakeQuiz() {
+  startQuiz();
+}
+
+function checkChapterComplete() {
+  var p = userProgress[currentChapter.id];
+  var bestScore = p.quizScores.length > 0 ? Math.max.apply(null, p.quizScores) : 0;
+  p.completed = p.readComplete && p.studyComplete && bestScore >= 80;
+}
 
 // EVENT LISTENERS
 document.getElementById('btn-login').onclick = handleLogin;
 document.getElementById('btn-register').onclick = handleRegister;
 document.getElementById('btn-logout').onclick = handleLogout;
-document.getElementById('lesson-back').onclick = backToApp;
-document.getElementById('quiz-back').onclick = backToApp;
-document.getElementById('btn-prev').onclick = prevLesson;
-document.getElementById('btn-next').onclick = nextLesson;
-document.getElementById('btn-submit').onclick = submitAnswer;
-document.getElementById('btn-next-q').onclick = nextQuestion;
-document.getElementById('btn-retake').onclick = retakeQuiz;
-document.getElementById('btn-continue').onclick = backToApp;
+document.getElementById('chapter-back').onclick = backToApp;
 </script>
 </body>
 </html>
