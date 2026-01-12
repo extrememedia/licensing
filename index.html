@@ -11,30 +11,103 @@
     * { box-sizing: border-box; }
     body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; }
     
-    /* Desktop constraint */
-    .app-container { max-width: 480px; margin: 0 auto; min-height: 100vh; background: #f8fafc; position: relative; }
+    /* Responsive app container */
+    .app-container { 
+      width: 100%; 
+      min-height: 100vh; 
+      background: #f8fafc; 
+      position: relative;
+      padding-bottom: 70px;
+    }
+    
+    /* Tablet (768px+) */
     @media (min-width: 768px) {
       body { background: #e2e8f0; }
-      .app-container { box-shadow: 0 0 40px rgba(0,0,0,0.1); }
+      .app-container { 
+        max-width: 768px; 
+        margin: 0 auto; 
+        box-shadow: 0 0 40px rgba(0,0,0,0.1); 
+      }
+      .bottom-nav { max-width: 768px; }
+      .main-content { padding: 20px 24px; }
+      .metric-grid { grid-template-columns: repeat(4, 1fr); }
+      .chapter-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+      .study-section-content { font-size: 17px; line-height: 1.9; }
+    }
+    
+    /* Desktop (1024px+) */
+    @media (min-width: 1024px) {
+      .app-container { 
+        max-width: 1024px; 
+      }
+      .bottom-nav { max-width: 1024px; }
+      .main-content { padding: 24px 32px; }
+      .domain-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+      .study-section-content { font-size: 18px; line-height: 2; padding: 20px; }
+      .reading-content { font-size: 18px; }
+    }
+    
+    /* Large Desktop (1280px+) */
+    @media (min-width: 1280px) {
+      .app-container { 
+        max-width: 1200px; 
+      }
+      .bottom-nav { max-width: 1200px; }
+      .chapter-grid { grid-template-columns: repeat(3, 1fr); }
     }
     
     .screen { display: none; }
     .screen.active { display: block; }
-    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 480px; background: white; border-top: 1px solid #e5e7eb; z-index: 100; }
-    .nav-item { flex: 1; padding: 8px 4px; text-align: center; color: #64748b; cursor: pointer; }
+    .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; background: white; border-top: 1px solid #e5e7eb; z-index: 100; }
+    .nav-item { flex: 1; padding: 8px 4px; text-align: center; color: #64748b; cursor: pointer; transition: all 0.2s; }
+    .nav-item:hover { color: #dc2626; }
     .nav-item.active { color: #dc2626; }
     .nav-item svg { width: 24px; height: 24px; margin: 0 auto 2px; }
+    @media (min-width: 768px) {
+      .nav-item { padding: 12px 8px; }
+      .nav-item svg { width: 28px; height: 28px; }
+      .nav-item span { font-size: 13px; }
+    }
     
     .main-card { background: white; border-radius: 16px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); overflow: hidden; margin-bottom: 16px; }
     .section-header { padding: 16px 20px; cursor: pointer; }
     .section-content { max-height: 0; overflow: hidden; transition: max-height 0.3s; }
     .section-content.expanded { max-height: 5000px; }
-    .chapter-item { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; }
+    .chapter-item { display: flex; align-items: center; padding: 14px 20px; border-bottom: 1px solid #f1f5f9; cursor: pointer; transition: all 0.2s; }
     .chapter-item:last-child { border-bottom: none; }
-    .chapter-item:hover { background: #f8fafc; }
+    .chapter-item:hover { background: #f8fafc; transform: translateX(4px); }
     
     .progress-ring { transform: rotate(-90deg); }
     .metric-card { background: white; border-radius: 12px; padding: 12px 8px; text-align: center; border: 1px solid #e5e7eb; }
+    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (min-width: 480px) { .metric-grid { grid-template-columns: repeat(4, 1fr); } }
+    
+    /* Study section with fixed navigation */
+    .study-container { position: relative; min-height: calc(100vh - 200px); padding-bottom: 80px; }
+    .study-section { padding: 16px; }
+    .study-section h4 { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin-bottom: 16px; }
+    .study-section-content { font-size: 16px; line-height: 1.8; color: #374151; }
+    .study-section-content p { margin-bottom: 16px; }
+    .study-section-content ul, .study-section-content ol { margin: 16px 0; padding-left: 24px; }
+    .study-section-content li { margin-bottom: 12px; }
+    .study-nav-fixed { 
+      position: fixed; 
+      bottom: 70px; 
+      left: 50%; 
+      transform: translateX(-50%); 
+      width: 100%; 
+      max-width: inherit;
+      background: white; 
+      padding: 12px 16px; 
+      border-top: 1px solid #e5e7eb; 
+      display: flex; 
+      justify-content: space-between; 
+      gap: 12px;
+      z-index: 90;
+    }
+    @media (min-width: 768px) { .study-nav-fixed { max-width: 768px; padding: 16px 24px; } }
+    @media (min-width: 1024px) { .study-nav-fixed { max-width: 1024px; } }
+    @media (min-width: 1280px) { .study-nav-fixed { max-width: 1200px; } }
     
     /* Reading styles */
     .reader-container { min-height: 100vh; }
@@ -60,12 +133,14 @@
     
     /* Tabs */
     .tab-bar { display: flex; background: #f1f5f9; border-radius: 12px; padding: 4px; margin-bottom: 16px; }
-    .tab-btn { flex: 1; padding: 10px 4px; border-radius: 8px; text-align: center; font-weight: 500; color: #64748b; font-size: 13px; cursor: pointer; }
+    .tab-btn { flex: 1; padding: 10px 4px; border-radius: 8px; text-align: center; font-weight: 500; color: #64748b; font-size: 13px; cursor: pointer; transition: all 0.2s; }
+    .tab-btn:hover { color: #1e293b; }
     .tab-btn.active { background: white; color: #1e293b; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    @media (min-width: 768px) { .tab-btn { font-size: 14px; padding: 12px 8px; } }
     
     /* Quiz */
     .quiz-option { transition: all 0.2s; cursor: pointer; }
-    .quiz-option:hover { transform: translateX(4px); }
+    .quiz-option:hover { transform: translateX(4px); background: #f8fafc; }
     .quiz-option.selected { border-color: #3b82f6 !important; background: #eff6ff !important; }
     .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
     .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
@@ -796,23 +871,145 @@ var BOOKS = [
 
 // Default study guide for chapters without full study content
 function getDefaultStudyGuide(ch) {
+  var title = ch.title || 'Chapter';
   return {
-    objectives: ['Read and understand the chapter content', 'Identify key theological concepts', 'Apply truths to personal faith and ministry'],
+    objectives: [
+      'Understand the historical and theological context of ' + title,
+      'Identify and define key theological terms and concepts',
+      'Recognize biblical foundations and scriptural support',
+      'Analyze the practical implications for ministry',
+      'Apply learned truths to personal faith journey',
+      'Prepare to articulate these concepts in licensing interview'
+    ],
     keyTerms: [],
     keyScriptures: [],
     sections: [
-      {title: 'Overview', content: '<p>This chapter covers important theological foundations. Read through the full chapter content carefully, taking notes on key concepts.</p>'},
-      {title: 'Key Concepts', content: '<p>Pay attention to: (1) Biblical foundations cited, (2) Theological terms defined, (3) Practical applications suggested.</p>'},
-      {title: 'Application', content: '<p>Consider how these truths apply to your personal faith journey and future ministry.</p><div class="discussion-q"><strong>How will you apply what you\'ve learned?</strong></div>'}
+      {
+        title: 'Introduction & Context',
+        content: '<p>Welcome to the study guide for <strong>' + title + '</strong>. This comprehensive guide will help you deeply understand and internalize the content of this chapter.</p>' +
+          '<div class="key-point"><strong>Study Objectives:</strong><ul><li>Grasp the foundational concepts presented</li><li>Connect theological truths to Scripture</li><li>Prepare for your licensing interview</li></ul></div>' +
+          '<p>Before proceeding, ensure you have completed reading the full chapter content. Take your time with each section of this study guide, making notes and reflecting on how each concept applies to your calling.</p>' +
+          '<p>The Foursquare Church places great emphasis on ministers who can articulate their beliefs with clarity and biblical grounding. This study guide is designed to help you achieve that goal.</p>'
+      },
+      {
+        title: 'Historical Background',
+        content: '<p>Understanding the historical context enriches your grasp of this material. The Foursquare Church was founded on timeless biblical principles that remain relevant today.</p>' +
+          '<div class="scripture-box"><strong>Key Historical Points:</strong><p>Consider how the early church fathers, the Reformation, and the Pentecostal revival movements all contributed to our understanding of these truths.</p></div>' +
+          '<p>Aimee Semple McPherson founded the Foursquare Church in 1923, but the truths we hold are rooted in Scripture and have been affirmed throughout church history. As you study, consider how these doctrines have been preserved and passed down through generations of faithful believers.</p>' +
+          '<p>The theological positions of Foursquare are not innovations but recoveries of biblical Christianity that emphasize the full ministry of Jesus Christ as Savior, Baptizer with the Holy Spirit, Healer, and Soon-Coming King.</p>'
+      },
+      {
+        title: 'Core Theological Concepts',
+        content: '<p>This section focuses on the central theological ideas presented in the chapter. Pay careful attention to definitions and distinctions.</p>' +
+          '<div class="key-point"><strong>Theological Framework:</strong><p>Foursquare theology is grounded in evangelical orthodoxy while embracing the continuing work of the Holy Spirit. We affirm the authority of Scripture, salvation by grace through faith, and the priesthood of all believers.</p></div>' +
+          '<p>Key concepts to master include:</p><ul><li>The relationship between doctrine and practice</li><li>How biblical interpretation shapes our beliefs</li><li>The balance between theological precision and spiritual vitality</li><li>Our distinctive emphasis on the fourfold ministry of Christ</li></ul>' +
+          '<p>Take time to write out definitions in your own words. Being able to explain these concepts simply and clearly is essential for effective ministry.</p>'
+      },
+      {
+        title: 'Biblical Foundations',
+        content: '<p>Every Foursquare doctrine is built on the foundation of Scripture. This section helps you identify and understand the biblical texts that support the teachings in this chapter.</p>' +
+          '<div class="scripture-box"><strong>Scripture Study Method:</strong><p>For each key verse: (1) Read it in context, (2) Identify the main point, (3) Consider how it supports the doctrine, (4) Memorize key references.</p></div>' +
+          '<p>The Declaration of Faith states that Scripture is "the divine, supreme and eternal tribunal by whose standards all men, nations, creeds, and motives shall be tried." This means we must always ground our beliefs in biblical truth.</p>' +
+          '<p>As you study, create a list of Scripture references that support each major point. Being able to cite chapter and verse demonstrates both your knowledge and your commitment to biblical authority.</p>' +
+          '<div class="key-point"><strong>Practice Exercise:</strong><p>Choose three key Scriptures from this chapter and write a brief explanation of how each supports Foursquare teaching.</p></div>'
+      },
+      {
+        title: 'Practical Applications',
+        content: '<p>Theology must move from head to heart to hands. This section explores how the truths in this chapter apply to real-life ministry situations.</p>' +
+          '<p>Consider these practical dimensions:</p><ul><li><strong>Personal Devotion:</strong> How does this truth affect your prayer life and spiritual disciplines?</li><li><strong>Preaching & Teaching:</strong> How would you communicate this to your congregation?</li><li><strong>Pastoral Care:</strong> How does this doctrine provide comfort or guidance to those you shepherd?</li><li><strong>Evangelism:</strong> How does this truth relate to sharing the Gospel?</li></ul>' +
+          '<div class="key-point"><strong>Ministry Scenario:</strong><p>Imagine a church member asks you to explain this topic. How would you answer in a way that is theologically accurate yet accessible?</p></div>' +
+          '<p>The best ministers are those who can take deep theological truths and make them understandable and applicable to everyday life. Practice explaining these concepts to friends or family members.</p>'
+      },
+      {
+        title: 'Foursquare Distinctives',
+        content: '<p>While Foursquare shares much in common with other evangelical and Pentecostal traditions, we have distinctive emphases worth understanding.</p>' +
+          '<div class="key-point"><strong>The Foursquare Gospel:</strong><p>Jesus Christ as Savior, Baptizer with the Holy Spirit, Healer, and Soon-Coming King. This fourfold message is the heart of our identity.</p></div>' +
+          '<p>Our distinctives include:</p><ul><li>A balanced approach to the gifts of the Spirit</li><li>Affirmation of women in all levels of ministry leadership</li><li>A connectional structure that provides both accountability and local church freedom</li><li>Commitment to both evangelism and compassion ministry</li><li>A global perspective with indigenous leadership development</li></ul>' +
+          '<p>Understanding what makes Foursquare unique helps you articulate why you are pursuing licensing in this movement rather than another.</p>'
+      },
+      {
+        title: 'Common Questions & Answers',
+        content: '<p>Licensing panels often ask similar questions. This section prepares you for common inquiries related to this chapter.</p>' +
+          '<div class="key-point"><strong>Sample Questions:</strong><ol><li>Can you explain the biblical basis for this doctrine?</li><li>How does this teaching affect your personal ministry?</li><li>What are common misconceptions about this topic?</li><li>How would you teach this to new believers?</li></ol></div>' +
+          '<p>Practice answering these questions out loud. Many candidates know the material but struggle to articulate it verbally. Regular practice builds confidence.</p>' +
+          '<p>Remember that licensing panels are not trying to trip you up. They want to confirm that you understand and embrace Foursquare beliefs, and that you can communicate them effectively.</p>' +
+          '<div class="scripture-box"><strong>Tip:</strong><p>Begin answers with Scripture when possible. This demonstrates that your beliefs are biblically grounded.</p></div>'
+      },
+      {
+        title: 'Study Review & Self-Assessment',
+        content: '<p>Before moving to the quiz, take time for self-assessment. Can you:</p>' +
+          '<ul><li>Define the key terms from this chapter?</li><li>Cite relevant Scripture references from memory?</li><li>Explain the historical context of these teachings?</li><li>Articulate how these truths apply to ministry?</li><li>Describe what makes the Foursquare perspective distinctive?</li><li>Answer common questions clearly and confidently?</li></ul>' +
+          '<div class="key-point"><strong>Final Preparation:</strong><p>Write a one-paragraph summary of this chapter in your own words. This exercise consolidates your learning and prepares you for the quiz.</p></div>' +
+          '<p>If you feel uncertain about any area, return to the reading and previous study sections. The goal is not just to pass a quiz but to truly understand and embrace these truths.</p>' +
+          '<p>When you are ready, proceed to the quiz to test your knowledge. The quiz contains 50 questions covering all aspects of this chapter.</p>'
+      }
     ]
   };
 }
 
-// Default quizzes for chapters without full quiz content
+// Comprehensive 50-question quiz generator
 function getDefaultQuizzes(ch) {
+  var title = ch.title || 'this chapter';
   return [
-    {q:'Have you read this chapter completely?', options:['Yes, I read it all','Partially','Not yet','I need to review'], correct:0, explanation:'Complete reading is essential for understanding.', difficulty:'easy'},
-    {q:'Did you take notes while reading?', options:['Yes, detailed notes','Some notes','Mental notes only','No notes'], correct:0, explanation:'Note-taking improves retention and understanding.', difficulty:'easy'}
+    // Section 1: Basic Comprehension (Questions 1-10)
+    {q:'What is the primary purpose of studying ' + title + '?', options:['To pass a test','To understand Foursquare beliefs and prepare for ministry','To fulfill a requirement','To impress the licensing panel'], correct:1, explanation:'Study prepares us for effective ministry by deepening our understanding of biblical truth.', difficulty:'easy'},
+    {q:'Have you completed reading the full chapter content?', options:['Yes, completely','Mostly','Partially','Not yet'], correct:0, explanation:'Complete reading is foundational to understanding the material.', difficulty:'easy'},
+    {q:'Did you take written notes while studying?', options:['Yes, detailed notes','Some notes','Mental notes only','No notes'], correct:0, explanation:'Written notes improve retention and provide study material for review.', difficulty:'easy'},
+    {q:'Why is understanding Foursquare doctrine important for licensing?', options:['It is merely tradition','Ministers must articulate and teach these beliefs','It is optional knowledge','Only senior pastors need this'], correct:1, explanation:'Licensed ministers represent Foursquare and must understand and communicate our beliefs.', difficulty:'easy'},
+    {q:'What is the foundation of all Foursquare doctrine?', options:['Church tradition','The Holy Scripture','Human philosophy','Cultural relevance'], correct:1, explanation:'Scripture is the divine, supreme and eternal tribunal for all Foursquare beliefs.', difficulty:'easy'},
+    {q:'How should theological knowledge affect ministry practice?', options:['It should remain academic','It should inform and guide all ministry','Practice is separate from doctrine','Theology is only for seminaries'], correct:1, explanation:'Sound doctrine produces sound practice. Theology must move from head to heart to hands.', difficulty:'easy'},
+    {q:'What year was the Foursquare Church founded?', options:['1906','1915','1923','1944'], correct:2, explanation:'Aimee Semple McPherson founded the International Church of the Foursquare Gospel in 1923.', difficulty:'easy'},
+    {q:'Who founded the Foursquare Church?', options:['Billy Graham','Aimee Semple McPherson','Charles Spurgeon','John Wesley'], correct:1, explanation:'Aimee Semple McPherson founded Foursquare and established Angelus Temple in Los Angeles.', difficulty:'easy'},
+    {q:'What does "Foursquare" refer to in our name?', options:['Four founding churches','The shape of our buildings','The fourfold ministry of Christ','Four core practices'], correct:2, explanation:'Foursquare refers to Jesus as Savior, Baptizer, Healer, and Soon-Coming King.', difficulty:'easy'},
+    {q:'Where is Foursquare headquarters located?', options:['New York','Chicago','Los Angeles','Dallas'], correct:2, explanation:'Foursquare remains headquartered at Angelus Temple in Los Angeles, California.', difficulty:'easy'},
+    
+    // Section 2: Theological Understanding (Questions 11-20)
+    {q:'What is the relationship between the Old and New Testaments in Foursquare theology?', options:['Only New Testament matters','They contradict each other','Both are inspired Scripture and complement each other','Old Testament is just history'], correct:2, explanation:'Both Testaments are the inspired Word of God and together reveal His plan of redemption.', difficulty:'medium'},
+    {q:'How does Foursquare view the authority of Scripture?', options:['One source among many','The supreme authority for faith and practice','Subject to modern reinterpretation','Historically interesting but not binding'], correct:1, explanation:'Scripture is the divine, supreme and eternal tribunal by whose standards all beliefs are measured.', difficulty:'medium'},
+    {q:'What is the Foursquare position on the Trinity?', options:['Three separate Gods','One God in three modes','One God eternally existing in three persons','A symbolic concept'], correct:2, explanation:'We believe in one God eternally existing in three persons: Father, Son, and Holy Spirit.', difficulty:'medium'},
+    {q:'How is salvation received according to Foursquare belief?', options:['By good works','By grace through faith in Jesus Christ','By church membership','By keeping the law'], correct:1, explanation:'Salvation is wholly through grace, received by faith in Jesus Christ alone.', difficulty:'medium'},
+    {q:'What does Foursquare teach about the Baptism of the Holy Spirit?', options:['It is the same as salvation','It is a separate experience empowering believers','It is not for today','It is only for leaders'], correct:1, explanation:'The Baptism of the Holy Spirit is a distinct experience that endues believers with power for witness and service.', difficulty:'medium'},
+    {q:'What is the Foursquare view on divine healing?', options:['Healing ended with the apostles','Jesus still heals in answer to believing prayer','Medical care replaces prayer','Healing is guaranteed for all'], correct:1, explanation:'Divine healing is the power of Jesus Christ to heal in answer to believing prayer - He is the same yesterday, today, and forever.', difficulty:'medium'},
+    {q:'What does Foursquare believe about the Second Coming?', options:['It is symbolic only','Christ will return personally and imminently','It already happened spiritually','The date can be calculated'], correct:1, explanation:'We believe in the personal, imminent return of Jesus Christ in the clouds of glory.', difficulty:'medium'},
+    {q:'What is the purpose of water baptism in Foursquare practice?', options:['To earn salvation','An outward sign of an inward work','A meaningless tradition','Required for church membership only'], correct:1, explanation:'Water baptism is a blessed outward sign of the inward work of salvation, identifying with Christ in death and resurrection.', difficulty:'medium'},
+    {q:'How often should communion be celebrated according to Foursquare?', options:['Only at Easter','Never','Regularly as the church determines','Only once in a lifetime'], correct:2, explanation:'The Lords Supper should be celebrated regularly, with the frequency determined by local church practice.', difficulty:'medium'},
+    {q:'What is the Foursquare view on speaking in tongues?', options:['It is required for salvation','It is a gift of the Spirit for today','It ceased after the apostolic age','It is demonic'], correct:1, explanation:'Speaking in tongues is one of the gifts of the Spirit, available to believers today.', difficulty:'medium'},
+    
+    // Section 3: Foursquare Distinctives (Questions 21-30)
+    {q:'What is distinctive about Foursquare regarding women in ministry?', options:['Women cannot lead','Women can only teach children','Women are affirmed in all levels of ministry leadership','This is a recent change'], correct:2, explanation:'From our founding by a woman evangelist, Foursquare has affirmed women in all forms of ministry leadership.', difficulty:'medium'},
+    {q:'How does Foursquare balance accountability and local church freedom?', options:['Total independence for each church','Total denominational control','A connectional structure with both accountability and freedom','No structure at all'], correct:2, explanation:'Foursquare provides connectional accountability while empowering local churches to contextualize ministry.', difficulty:'medium'},
+    {q:'What is the role of the Foursquare Convention?', options:['A social gathering','The chief decision-making body','A missions event only','A worship conference'], correct:1, explanation:'The Foursquare Convention is the chief decision-making body of the movement.', difficulty:'medium'},
+    {q:'How are Foursquare ministers licensed?', options:['Self-appointment','Through the credentialing process with panel interview','By online application only','Automatically after training'], correct:1, explanation:'Ministers are licensed through a process that includes training, examination, and panel interview.', difficulty:'medium'},
+    {q:'What is unique about Foursquare church property?', options:['Each church owns independently','Property is held in trust for ICFG','There is no church property','The pastor owns everything'], correct:1, explanation:'Foursquare churches hold property in trust for the International Church of the Foursquare Gospel.', difficulty:'medium'},
+    {q:'How many countries have Foursquare presence?', options:['About 50','About 100','Over 150','Over 200'], correct:2, explanation:'Foursquare has a presence in over 150 nations worldwide.', difficulty:'medium'},
+    {q:'What verse is inscribed behind the pulpit at Angelus Temple?', options:['John 3:16','Hebrews 13:8','Matthew 28:19','Acts 1:8'], correct:1, explanation:'Hebrews 13:8 - "Jesus Christ is the same yesterday, today, and forever" captures our conviction about Christ\'s unchanging ministry.', difficulty:'medium'},
+    {q:'What institution trains Foursquare ministers?', options:['Fuller Seminary','Life Pacific University (formerly L.I.F.E.)','Biola University','Azusa Pacific'], correct:1, explanation:'Life Pacific University (formerly L.I.F.E. Bible College) was founded by Aimee in 1923 to train ministers.', difficulty:'medium'},
+    {q:'What is KFSG?', options:['A Foursquare conference','The first religious radio station founded by Aimee','A missions organization','A worship album'], correct:1, explanation:'KFSG (Kall FourSquare Gospel) was the radio station Aimee founded in 1924, making her the first woman to preach on radio.', difficulty:'medium'},
+    {q:'What ministry did Angelus Temple provide during the Great Depression?', options:['Only worship services','Fed an estimated 1.5 million people','Political advocacy','Closed during the Depression'], correct:1, explanation:'The commissary at Angelus Temple fed approximately 1.5 million people during the Great Depression.', difficulty:'medium'},
+    
+    // Section 4: Application & Practice (Questions 31-40)
+    {q:'How should a Foursquare minister approach someone with questions about healing?', options:['Avoid the topic','Pray with faith while avoiding false promises','Promise guaranteed healing','Refer them elsewhere'], correct:1, explanation:'We pray with faith for healing while acknowledging that God is sovereign and works according to His will.', difficulty:'hard'},
+    {q:'What is the proper response when asked about speaking in tongues by a new believer?', options:['Demand they speak in tongues immediately','Explain it is a gift of the Spirit available to all believers','Say it is not important','Discourage the practice'], correct:1, explanation:'We teach that tongues is a biblical gift available to believers, while not making it a requirement for salvation or spirituality.', difficulty:'hard'},
+    {q:'How should a Foursquare minister handle doctrinal disagreement?', options:['Leave the denomination','Ignore core beliefs','Work within Foursquare structures with grace and integrity','Publicly criticize leadership'], correct:2, explanation:'Ministers should address concerns through proper channels while maintaining unity and respect.', difficulty:'hard'},
+    {q:'What approach should be taken in preaching?', options:['Entertainment only','Biblical exposition with practical application','Academic lecture','Political commentary'], correct:1, explanation:'Effective preaching grounds truth in Scripture and applies it to the lives of hearers.', difficulty:'hard'},
+    {q:'How does Foursquare view the relationship between evangelism and compassion?', options:['Only evangelism matters','Only social work matters','Both proclamation and compassion are essential','They should be separate'], correct:2, explanation:'Following Aimees example, Foursquare combines Gospel proclamation with compassion ministry.', difficulty:'hard'},
+    {q:'What is the ministers responsibility regarding continuing education?', options:['Training ends at licensing','Lifelong learning is essential','Only required if mandated','Not important after ordination'], correct:1, explanation:'Ministers should pursue ongoing development throughout their ministry career.', difficulty:'hard'},
+    {q:'How should a minister approach cultural contextualization?', options:['Ignore culture entirely','Adapt the Gospel message itself','Adapt methods while maintaining biblical truth','Follow American culture only'], correct:2, explanation:'We contextualize ministry methods while maintaining the unchanging truth of Scripture.', difficulty:'hard'},
+    {q:'What is the proper understanding of church discipline?', options:['Never needed','Harsh punishment','Redemptive process aimed at restoration','Public shaming'], correct:2, explanation:'Church discipline should be redemptive, seeking restoration while protecting the body.', difficulty:'hard'},
+    {q:'How should Foursquare ministers view other denominations?', options:['All others are wrong','Partner with those who share core gospel convictions','Ignore them entirely','Compete against them'], correct:1, explanation:'While distinct, we partner with other believers who share commitment to biblical Christianity.', difficulty:'hard'},
+    {q:'What is the role of prayer in Foursquare ministry?', options:['A nice addition','Central to all ministry','Only for personal devotions','Reserved for special occasions'], correct:1, explanation:'Prayer is central to Spirit-empowered ministry and should permeate all we do.', difficulty:'hard'},
+    
+    // Section 5: Deep Theology & Advanced (Questions 41-50)
+    {q:'How does Foursquare understand the inspiration of Scripture?', options:['Human writings only','Dictated word-for-word','God-breathed through human authors','Partially inspired'], correct:2, explanation:'Scripture is God-breathed (inspired) through human authors, fully divine and fully reflecting human personality.', difficulty:'hard'},
+    {q:'What is the Foursquare position on the eternal security of the believer?', options:['Once saved, always saved without exception','Believers must maintain faith but God preserves His children','Salvation can be lost by any sin','There is no security'], correct:1, explanation:'Foursquare teaches that genuine believers are kept by Gods power through faith, emphasizing both divine preservation and human responsibility.', difficulty:'hard'},
+    {q:'How does Foursquare view the relationship between faith and works?', options:['Works earn salvation','Faith alone saves, and genuine faith produces good works','Works are unnecessary','Faith and works are equal'], correct:1, explanation:'Salvation is by grace through faith alone, but genuine saving faith inevitably produces good works.', difficulty:'hard'},
+    {q:'What does Foursquare teach about spiritual warfare?', options:['Satan is not real','Believers have authority in Christ over spiritual forces','Ignore demonic activity','Focus only on demons'], correct:1, explanation:'We acknowledge spiritual warfare and the believers authority in Christ, while maintaining a balanced, Scripture-based approach.', difficulty:'hard'},
+    {q:'How should ministers approach the gifts of the Spirit?', options:['Forbid all gifts','Seek all gifts earnestly with biblical order','Focus on tongues only','Gifts are not for today'], correct:1, explanation:'We earnestly desire spiritual gifts while ensuring they operate according to biblical guidelines and for edification.', difficulty:'hard'},
+    {q:'What is the proper understanding of sanctification?', options:['Instant sinless perfection','Progressive growth in holiness through the Spirit','Unnecessary for believers','Achieved by human effort'], correct:1, explanation:'Sanctification is a progressive work of the Spirit conforming believers to Christs image throughout life.', difficulty:'hard'},
+    {q:'How does Foursquare approach biblical interpretation?', options:['Literal only','Grammatical-historical method considering context and genre','Allegorical only','Personal interpretation without guidelines'], correct:1, explanation:'We use sound hermeneutical principles, considering grammar, history, context, and literary genre.', difficulty:'hard'},
+    {q:'What is the Foursquare view of the Church universal?', options:['Only Foursquare churches','All true believers in Christ across denominations','Only one physical organization','There is no universal Church'], correct:1, explanation:'The Church universal consists of all genuine believers in Jesus Christ across all denominations and nations.', difficulty:'hard'},
+    {q:'How should Foursquare ministers understand their calling?', options:['A job like any other','A sacred trust and divine appointment','Self-chosen career','Only for the specially talented'], correct:1, explanation:'Ministry is a sacred calling from God, a trust that requires faithfulness and accountability.', difficulty:'hard'},
+    {q:'What summarizes the heart of Foursquare mission?', options:['Building large churches','Glorifying God by proclaiming the Gospel and making disciples','Political influence','Preserving tradition'], correct:1, explanation:'Our mission is to glorify God by proclaiming the Gospel of Jesus Christ and making disciples of all nations.', difficulty:'hard'}
   ];
 }
 
@@ -1399,13 +1596,16 @@ function renderStudySection() {
   var sg = currentChapter.studyGuide || getDefaultStudyGuide(currentChapter);
   var section = sg.sections[studyIndex];
   
-  var html = '<div class="flex items-center justify-between mb-4"><span class="text-sm text-slate-500">Section ' + (studyIndex + 1) + ' of ' + sg.sections.length + '</span><div class="h-2 flex-1 bg-slate-200 rounded-full mx-4"><div class="h-full bg-red-500 rounded-full transition-all" style="width:' + ((studyIndex + 1) / sg.sections.length * 100) + '%"></div></div></div>';
+  var html = '<div class="study-container">';
+  html += '<div class="flex items-center justify-between mb-4"><span class="text-sm text-slate-500">Section ' + (studyIndex + 1) + ' of ' + sg.sections.length + '</span><div class="h-2 flex-1 bg-slate-200 rounded-full mx-4"><div class="h-full bg-red-500 rounded-full transition-all" style="width:' + ((studyIndex + 1) / sg.sections.length * 100) + '%"></div></div></div>';
   
   html += '<div class="study-section"><h4>' + section.title + '</h4><div class="study-section-content">' + section.content + '</div></div>';
+  html += '</div>';
   
-  html += '<div class="flex justify-between mt-6">';
-  html += '<button onclick="prevStudySection()" class="px-6 py-3 border border-slate-300 rounded-xl ' + (studyIndex === 0 ? 'opacity-30 cursor-not-allowed' : 'hover:bg-slate-50') + '" ' + (studyIndex === 0 ? 'disabled' : '') + '>← Previous</button>';
-  html += '<button onclick="nextStudySection()" class="px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700">' + (studyIndex === sg.sections.length - 1 ? 'Complete Study ✓' : 'Next →') + '</button>';
+  // Fixed navigation at bottom
+  html += '<div class="study-nav-fixed">';
+  html += '<button onclick="prevStudySection()" class="flex-1 px-6 py-3 border border-slate-300 rounded-xl font-medium ' + (studyIndex === 0 ? 'opacity-30 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 bg-white') + '" ' + (studyIndex === 0 ? 'disabled' : '') + '>← Previous</button>';
+  html += '<button onclick="nextStudySection()" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700">' + (studyIndex === sg.sections.length - 1 ? 'Complete Study ✓' : 'Next →') + '</button>';
   html += '</div>';
   
   document.getElementById('chapter-tab-study').innerHTML = html;
