@@ -257,7 +257,7 @@
       <div class="section-header flex items-center justify-between" onclick="toggleSection('domains')">
         <div class="flex items-center gap-3">
           <div class="w-11 h-11 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-          <div><h2 class="font-bold text-slate-800">Licensing Domains</h2><p class="text-xs text-slate-500">5 Core Areas â€¢ Required</p></div>
+          <div><h2 class="font-bold text-slate-800">Licensing Domains</h2><p class="text-xs text-slate-500">5 Core Areas ¢ Required</p></div>
         </div>
         <div class="flex items-center gap-2"><div class="text-sm font-bold text-slate-600" id="domains-progress">0%</div><svg class="w-5 h-5 text-slate-400 transition-transform" id="domains-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></div>
       </div>
@@ -330,7 +330,7 @@
   </header>
   <main class="px-4 py-4 pb-24">
     <div class="main-card p-4 mb-4">
-      <h3 class="font-bold text-slate-800 mb-4">ðŸ“Š Your Statistics</h3>
+      <h3 class="font-bold text-slate-800 mb-4">"Š Your Statistics</h3>
       <div class="space-y-3">
         <div class="flex justify-between items-center"><span class="text-slate-600">Chapters Read</span><span class="font-bold text-lg" id="profile-chapters">0</span></div>
         <div class="flex justify-between items-center"><span class="text-slate-600">Study Guides Completed</span><span class="font-bold text-lg" id="profile-studied">0</span></div>
@@ -340,7 +340,7 @@
       </div>
     </div>
     <div class="main-card p-4 mb-4">
-      <h3 class="font-bold text-slate-800 mb-4">ðŸŽ¯ Licensing Progress</h3>
+      <h3 class="font-bold text-slate-800 mb-4">Ž¯ Licensing Progress</h3>
       <div class="space-y-3">
         <div><div class="flex justify-between text-sm mb-1"><span>Domains</span><span id="profile-domains-pct">0%</span></div><div class="h-2 bg-slate-200 rounded-full"><div class="h-full bg-red-500 rounded-full transition-all" id="profile-domains-bar" style="width:0%"></div></div></div>
         <div><div class="flex justify-between text-sm mb-1"><span>Required Books</span><span id="profile-books-pct">0%</span></div><div class="h-2 bg-slate-200 rounded-full"><div class="h-full bg-indigo-500 rounded-full transition-all" id="profile-books-bar" style="width:0%"></div></div></div>
@@ -398,13 +398,13 @@
       <button onclick="addHighlight('yellow')" class="w-8 h-8 rounded-full bg-yellow-300 border-2 border-yellow-400 hover:scale-110 transition"></button>
       <button onclick="addHighlight('green')" class="w-8 h-8 rounded-full bg-green-300 border-2 border-green-400 hover:scale-110 transition"></button>
       <button onclick="addHighlight('blue')" class="w-8 h-8 rounded-full bg-blue-300 border-2 border-blue-400 hover:scale-110 transition"></button>
-      <button onclick="addNoteToSelection()" class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-sm hover:scale-110 transition">ðŸ“</button>
+      <button onclick="addNoteToSelection()" class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-sm hover:scale-110 transition">"</button>
     </div>
     <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t z-40 px-4 py-3" id="reader-footer" style="max-width:480px;margin:0 auto;">
       <div class="flex items-center justify-between">
         <button onclick="prevPage()" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-30" id="btn-prev">â† Prev</button>
         <div class="flex items-center gap-2"><input type="number" id="page-input" class="w-14 text-center border border-slate-300 rounded-lg py-1" min="1"><span class="text-slate-500">/ <span id="total-pages">1</span></span></div>
-        <button onclick="nextPage()" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-30" id="btn-next">Next â†’</button>
+        <button onclick="nextPage()" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-30" id="btn-next">Next â†'</button>
       </div>
       <div class="flex items-center justify-center gap-4 mt-3 pt-3 border-t">
         <button onclick="ttsRewind()" class="p-2 text-slate-600 hover:text-slate-900"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg></button>
@@ -484,18 +484,18 @@ try{var rs=localStorage.getItem('readerSettings');if(rs)readerSettings=JSON.pars
 // ========== LICENSING DOMAINS ==========
 var DOMAINS = [
   {
-    id: 'heritage', name: 'Heritage', icon: 'ðŸ›ï¸', color: 'from-amber-500 to-orange-600', desc: 'History of Foursquare',
+    id: 'heritage', name: 'Heritage', icon: '›ï¸', color: 'from-amber-500 to-orange-600', desc: 'History of Foursquare',
     chapters: [
       {
         id: 'heritage-1', title: 'Aimee Semple McPherson: Our Founder',
-        summary: 'Discover the extraordinary life of Sister Aimeeâ€”from her conversion at 17, missionary tragedy in China, to becoming one of America\'s most influential evangelists.',
+        summary: 'Discover the extraordinary life of Sister Aimee"from her conversion at 17, missionary tragedy in China, to becoming one of America\'s most influential evangelists.',
         reading: `<h2>Aimee Semple McPherson (1890-1944)</h2>
 <p>Aimee Semple McPherson was a woman of intense passion, creativity, and energy who led an incredible life exemplifying God's miraculous mercy. She sparked revival across North America, established a major evangelical center in Los Angeles, and changed the lives of countless individuals around the world.</p>
 
 <h3>Early Life and Dramatic Conversion</h3>
 <p>Born Aimee Elizabeth Kennedy on October 9, 1890, near Ingersoll, Ontario, Canada, she grew up in a Christian home but began questioning her faith as a teenager. At age 17, she attended a Pentecostal revival meeting led by Robert Semple, a young Irish evangelist.</p>
 
-<div class="scripture-box">"Oh, Godâ€¦ if there be a Godâ€¦ reveal yourself to me!" â€” Aimee's desperate prayer at age 17 that would change the course of her life and impact millions.</div>
+<div class="scripture-box">"Oh, God¦ if there be a God¦ reveal yourself to me!" " Aimee's desperate prayer at age 17 that would change the course of her life and impact millions.</div>
 
 <p>After three days of fierce internal struggle, Aimee surrendered her life to Christ and was filled with the Holy Spirit. This dramatic conversion set the trajectory for her entire ministry.</p>
 
@@ -525,9 +525,9 @@ var DOMAINS = [
 </ul>
 
 <h3>Death and Legacy</h3>
-<p>On September 27, 1944, Aimee preached her final sermon in Oakland, Californiaâ€”the same city where she had received the "Foursquare Gospel" revelation 22 years earlier. She died that night from an accidental overdose of sleeping medication. She was 53 years old.</p>
+<p>On September 27, 1944, Aimee preached her final sermon in Oakland, California"the same city where she had received the "Foursquare Gospel" revelation 22 years earlier. She died that night from an accidental overdose of sleeping medication. She was 53 years old.</p>
 
-<p>But the movement she started survived and thrived. Her son Rolf succeeded her as president and led Foursquare for 44 years. Today, The Foursquare Church ministers in over 150 nations with millions of members carrying forward Sister Aimee's passion for Jesus Christâ€”the Savior, Baptizer with the Holy Spirit, Healer, and Soon-Coming King.</p>`,
+<p>But the movement she started survived and thrived. Her son Rolf succeeded her as president and led Foursquare for 44 years. Today, The Foursquare Church ministers in over 150 nations with millions of members carrying forward Sister Aimee's passion for Jesus Christ"the Savior, Baptizer with the Holy Spirit, Healer, and Soon-Coming King.</p>`,
         studyGuide: {
           objectives: [
             'Describe the key events in Aimee Semple McPherson\'s life from birth to conversion',
@@ -547,12 +547,12 @@ var DOMAINS = [
           keyScriptures: ['Acts 1:8', 'Mark 16:15-18', 'Matthew 28:19-20', 'Isaiah 61:1-3'],
           sections: [
             {title: '1. Early Life (1890-1907)', content: '<p>Aimee Elizabeth Kennedy was born October 9, 1890, near Ingersoll, Ontario, Canada. Her mother Minnie was a Salvation Army worker who dedicated baby Aimee to God\'s service. Growing up, Aimee was bright and theatrical, winning oratory contests. However, as a teenager, she began questioning her faith after exposure to evolutionary theory at school.</p><div class="discussion-q"><strong>Discussion:</strong> How might Aimee\'s early theatrical talents have prepared her for innovative ministry methods later?</div>'},
-            {title: '2. Dramatic Conversion (1907-1908)', content: '<p>At age 17, Aimee attended a Pentecostal revival where Robert Semple preached. Initially skeptical, she wrestled with God for three days. Her desperate prayerâ€”"Oh God, if there be a God, reveal yourself to me!"â€”was dramatically answered. She was converted and filled with the Holy Spirit, speaking in tongues.</p><div class="discussion-q"><strong>Reflection:</strong> What does Aimee\'s honest questioning teach us about authentic faith journeys?</div>'},
+            {title: '2. Dramatic Conversion (1907-1908)', content: '<p>At age 17, Aimee attended a Pentecostal revival where Robert Semple preached. Initially skeptical, she wrestled with God for three days. Her desperate prayer""Oh God, if there be a God, reveal yourself to me!""was dramatically answered. She was converted and filled with the Holy Spirit, speaking in tongues.</p><div class="discussion-q"><strong>Reflection:</strong> What does Aimee\'s honest questioning teach us about authentic faith journeys?</div>'},
             {title: '3. Marriage and Missionary Tragedy (1908-1910)', content: '<p>Aimee married Robert Semple in 1908. Together they sailed for China as missionaries in 1910. Shortly after arriving in Hong Kong, both contracted malaria. Robert died August 19, 1910, leaving 19-year-old Aimee widowed, pregnant, and penniless in a foreign land. She gave birth to daughter Roberta Star Semple one month later.</p><div class="discussion-q"><strong>Application:</strong> How does God use our deepest pain to prepare us for greater ministry?</div>'},
             {title: '4. Years of Preparation (1910-1918)', content: '<p>Returning to America, Aimee briefly married Harold McPherson (1912), giving birth to son Rolf Kennedy McPherson (1913). During these years she struggled between domestic life and the burning call to preach. By 1915, she could no longer resist and began itinerant evangelism, eventually separating from Harold.</p>'},
             {title: '5. Rise to National Prominence (1918-1923)', content: '<p>The October 1918 Transcontinental Gospel Car Tour launched Aimee\'s national ministry. Driving nearly 6,000 miles with her mother and children, she preached across America. By 1919, crowds exceeded venue capacities everywhere. The 1920 Washington D.C. revival saw 50,000+ attendees. The 1921 AMA investigation verified healings as "genuine, beneficial and wonderful."</p>'},
             {title: '6. Ministry Innovations', content: '<p>Aimee pioneered multiple ministry innovations: (1) First woman with FCC broadcast license - KFSG launched 1924; (2) Illustrated sermons using theatrical presentation; (3) Massive compassion ministry feeding 1.5 million during Depression; (4) Racial integration decades before civil rights; (5) Training both men and women equally for ministry at L.I.F.E. Bible College.</p>'},
-            {title: '7. Death and Lasting Legacy (1944-Present)', content: '<p>Aimee died September 27, 1944, in Oaklandâ€”the same city where she received the Foursquare revelation in 1922. Her son Rolf succeeded her, leading Foursquare for 44 years. Today, The Foursquare Church operates in 150+ nations with millions of members, continuing Sister Aimee\'s vision of Jesus as Savior, Baptizer, Healer, and Coming King.</p><div class="discussion-q"><strong>Legacy Question:</strong> Which of Aimee\'s innovations do you see continuing in churches today?</div>'}
+            {title: '7. Death and Lasting Legacy (1944-Present)', content: '<p>Aimee died September 27, 1944, in Oakland"the same city where she received the Foursquare revelation in 1922. Her son Rolf succeeded her, leading Foursquare for 44 years. Today, The Foursquare Church operates in 150+ nations with millions of members, continuing Sister Aimee\'s vision of Jesus as Savior, Baptizer, Healer, and Coming King.</p><div class="discussion-q"><strong>Legacy Question:</strong> Which of Aimee\'s innovations do you see continuing in churches today?</div>'}
           ]
         },
         quizzes: [
@@ -569,7 +569,7 @@ var DOMAINS = [
           {q:'What was L.I.F.E. Bible College?', options:['A correspondence school','Lighthouse of International Foursquare Evangelism - a ministry training school','A secular university partnership','A children\'s program'], correct:1, explanation:'L.I.F.E. stood for Lighthouse of International Foursquare Evangelism, founded in 1923 to train ministers.', difficulty:'medium'},
           {q:'What was significant about who L.I.F.E. Bible College trained?', options:['Only men were admitted','Only women were admitted','Both men and women were trained equally for ministry','Only married couples'], correct:2, explanation:'Aimee trained and ordained both men and women equally, revolutionary for her time.', difficulty:'hard'},
           {q:'When did Aimee die?', options:['January 1, 1950','September 27, 1944','December 25, 1940','October 9, 1948'], correct:1, explanation:'Aimee died September 27, 1944, in Oakland, California, after preaching her final sermon.', difficulty:'easy'},
-          {q:'What is significant about the location of Aimee\'s final sermon?', options:['It was her birthplace','It was where she received the Foursquare revelation 22 years earlier','It was the largest venue she ever preached in','It was where she was converted'], correct:1, explanation:'Oakland was where Aimee received the "Foursquare Gospel" revelation in 1922â€”she died there 22 years later.', difficulty:'hard'},
+          {q:'What is significant about the location of Aimee\'s final sermon?', options:['It was her birthplace','It was where she received the Foursquare revelation 22 years earlier','It was the largest venue she ever preached in','It was where she was converted'], correct:1, explanation:'Oakland was where Aimee received the "Foursquare Gospel" revelation in 1922"she died there 22 years later.', difficulty:'hard'},
           {q:'Who succeeded Aimee as president of Foursquare?', options:['Her daughter Roberta','Her son Rolf Kennedy McPherson','Her mother Minnie Kennedy','Jack Hayford'], correct:1, explanation:'Her son Rolf Kennedy McPherson succeeded her and led Foursquare for 44 years (1944-1988).', difficulty:'medium'},
           {q:'How many nations does Foursquare currently minister in?', options:['About 50','About 100','Over 150','Over 200'], correct:2, explanation:'Today, The Foursquare Church ministers in over 150 nations worldwide.', difficulty:'easy'},
           {q:'What four aspects of Jesus does the Foursquare Gospel emphasize?', options:['Teacher, Prophet, Priest, King','Creator, Sustainer, Redeemer, Judge','Savior, Baptizer with Holy Spirit, Healer, Soon-Coming King','Lord, Master, Friend, Shepherd'], correct:2, explanation:'The Foursquare Gospel presents Jesus as Savior, Baptizer with the Holy Spirit, Healer, and Soon-Coming King.', difficulty:'easy'},
@@ -585,32 +585,32 @@ var DOMAINS = [
     chapters: [
       {
         id: 'identity-1', title: 'The Foursquare Gospel: Our Name & Message',
-        summary: 'Understand the powerful biblical vision that gave Foursquare its nameâ€”four faces from Ezekiel representing Jesus as Savior, Baptizer, Healer, and Coming King.',
+        summary: 'Understand the powerful biblical vision that gave Foursquare its name"four faces from Ezekiel representing Jesus as Savior, Baptizer, Healer, and Coming King.',
         reading: `<h2>The Origin of the Foursquare Name</h2>
-<p>The name "Foursquare Gospel" came to Aimee Semple McPherson during a revival in Oakland, California in July 1922. It wasn't a name she inventedâ€”it was a revelation she received while preaching on the vision of Ezekiel.</p>
+<p>The name "Foursquare Gospel" came to Aimee Semple McPherson during a revival in Oakland, California in July 1922. It wasn't a name she invented"it was a revelation she received while preaching on the vision of Ezekiel.</p>
 
-<div class="scripture-box">"Jesus Christ is the same yesterday, today, and forever." â€” Hebrews 13:8 (The foundational Scripture of the Foursquare Gospel)</div>
+<div class="scripture-box">"Jesus Christ is the same yesterday, today, and forever." " Hebrews 13:8 (The foundational Scripture of the Foursquare Gospel)</div>
 
 <h3>The Vision of Ezekiel</h3>
 <p>During the Oakland revival, Aimee was preaching on Ezekiel chapter 1, which describes the prophet's vision of four living creatures. Each creature had four faces: the face of a man, the face of a lion, the face of an ox, and the face of an eagle (Ezekiel 1:10).</p>
 
-<p>As she preached, suddenly the significance struck herâ€”she saw a complete picture of Christ's ministry in these four faces!</p>
+<p>As she preached, suddenly the significance struck her"she saw a complete picture of Christ's ministry in these four faces!</p>
 
-<div class="key-point"><strong>The Revelation:</strong> "Whyâ€”why, it's the Foursquare Gospel! The Foursquare Gospel!" burst from Aimee's heart as waves of praise and understanding rocked the audience.</div>
+<div class="key-point"><strong>The Revelation:</strong> "Why"why, it's the Foursquare Gospel! The Foursquare Gospel!" burst from Aimee's heart as waves of praise and understanding rocked the audience.</div>
 
 <h3>The Four Faces of Jesus</h3>
 
-<p><strong>1. The Face of a MAN â€” Jesus the SAVIOR</strong></p>
+<p><strong>1. The Face of a MAN " Jesus the SAVIOR</strong></p>
 <p>Jesus came as a man to save humanity. He took on human flesh to redeem fallen mankind. "For the Son of Man has come to seek and to save that which was lost" (Luke 19:10). As the perfect man, Jesus lived a sinless life and offered Himself as the sacrifice for our sins.</p>
 
-<p><strong>2. The Face of a LION â€” Jesus the BAPTIZER with the Holy Spirit</strong></p>
+<p><strong>2. The Face of a LION " Jesus the BAPTIZER with the Holy Spirit</strong></p>
 <p>The lion represents royalty and power. Jesus, the Lion of the tribe of Judah, baptizes believers with the Holy Spirit and fire. "He will baptize you with the Holy Spirit and fire" (Matthew 3:11). This baptism empowers believers for witness and service.</p>
 
-<p><strong>3. The Face of an OX â€” Jesus the HEALER</strong></p>
+<p><strong>3. The Face of an OX " Jesus the HEALER</strong></p>
 <p>The ox was the animal of sacrifice and burden-bearing. Jesus bore our sicknesses and carried our diseases. "By His stripes we are healed" (Isaiah 53:5). Divine healing is provided for in the atonement of Christ.</p>
 
-<p><strong>4. The Face of an EAGLE â€” Jesus the SOON-COMING KING</strong></p>
-<p>The eagle soars above all, representing the heavenly realm. Jesus is coming againâ€”personally, visibly, and triumphantly! "For the Lord Himself will descend from heaven with a shout, with the voice of an archangel, and with the trumpet of God" (1 Thessalonians 4:16-17).</p>
+<p><strong>4. The Face of an EAGLE " Jesus the SOON-COMING KING</strong></p>
+<p>The eagle soars above all, representing the heavenly realm. Jesus is coming again"personally, visibly, and triumphantly! "For the Lord Himself will descend from heaven with a shout, with the voice of an archangel, and with the trumpet of God" (1 Thessalonians 4:16-17).</p>
 
 <h3>The Unchanging Christ</h3>
 <p>The foundation of the Foursquare Gospel is Hebrews 13:8: "Jesus Christ is the same yesterday, today, and forever." The Jesus who saved, baptized, healed, and promised to return in the New Testament is the same Jesus today. He hasn't changed His nature, His power, or His promises.</p>`,
@@ -630,10 +630,10 @@ var DOMAINS = [
           keyScriptures: ['Ezekiel 1:4-10', 'Hebrews 13:8', 'Luke 19:10', 'Matthew 3:11', 'Isaiah 53:5', '1 Thessalonians 4:16-17'],
           sections: [
             {title: '1. The Oakland Revelation (1922)', content: '<p>During a revival in Oakland, California in July 1922, Aimee Semple McPherson was preaching on Ezekiel chapter 1. As she described the four faces of the living creatures, she suddenly saw a complete picture of Christ\'s ministry. "The Foursquare Gospel!" burst from her heart.</p><div class="discussion-q"><strong>Reflection:</strong> Why do you think God chose to reveal this message through an Old Testament vision?</div>'},
-            {title: '2. Face of Man â€” SAVIOR', content: '<p>Jesus became fully human to save humanity. Luke 19:10 declares, "The Son of Man has come to seek and to save that which was lost." The face of a man represents Jesus\' incarnationâ€”God becoming flesh to redeem fallen mankind through His perfect life and sacrificial death.</p>'},
-            {title: '3. Face of Lion â€” BAPTIZER', content: '<p>The lion represents royalty and power. As the Lion of Judah (Revelation 5:5), Jesus baptizes believers with the Holy Spirit and fire (Matthew 3:11). This baptism empowers believers for witness (Acts 1:8) with the initial evidence of speaking in tongues (Acts 2:4).</p>'},
-            {title: '4. Face of Ox â€” HEALER', content: '<p>The ox was the animal of sacrifice and burden-bearing. Isaiah 53:4-5 declares Jesus "bore our griefs and carried our sorrows" and "by His stripes we are healed." Divine healing is provided in the atonementâ€”Jesus paid for our physical healing on the cross.</p>'},
-            {title: '5. Face of Eagle â€” COMING KING', content: '<p>The eagle soars above all earthly things. Jesus will return personally, visibly, and triumphantly from heaven (1 Thessalonians 4:16-17). The blessed hope of Christ\'s return motivates holy living and urgent evangelism.</p>'},
+            {title: '2. Face of Man " SAVIOR', content: '<p>Jesus became fully human to save humanity. Luke 19:10 declares, "The Son of Man has come to seek and to save that which was lost." The face of a man represents Jesus\' incarnation"God becoming flesh to redeem fallen mankind through His perfect life and sacrificial death.</p>'},
+            {title: '3. Face of Lion " BAPTIZER', content: '<p>The lion represents royalty and power. As the Lion of Judah (Revelation 5:5), Jesus baptizes believers with the Holy Spirit and fire (Matthew 3:11). This baptism empowers believers for witness (Acts 1:8) with the initial evidence of speaking in tongues (Acts 2:4).</p>'},
+            {title: '4. Face of Ox " HEALER', content: '<p>The ox was the animal of sacrifice and burden-bearing. Isaiah 53:4-5 declares Jesus "bore our griefs and carried our sorrows" and "by His stripes we are healed." Divine healing is provided in the atonement"Jesus paid for our physical healing on the cross.</p>'},
+            {title: '5. Face of Eagle " COMING KING', content: '<p>The eagle soars above all earthly things. Jesus will return personally, visibly, and triumphantly from heaven (1 Thessalonians 4:16-17). The blessed hope of Christ\'s return motivates holy living and urgent evangelism.</p>'},
             {title: '6. The Unchanging Foundation', content: '<p>Hebrews 13:8 anchors the Foursquare message: "Jesus Christ is the same yesterday, today, and forever." The Jesus of the Gospels who saved, baptized with the Spirit, healed the sick, and promised to return is the same Jesus today. His nature, power, and promises remain unchanged.</p><div class="discussion-q"><strong>Application:</strong> How does the unchanging nature of Christ give you confidence in prayer and ministry?</div>'}
           ]
         },
@@ -642,9 +642,9 @@ var DOMAINS = [
           {q:'What Scripture was Aimee preaching on when she received the revelation?', options:['Revelation 4','Isaiah 6','Ezekiel 1','Daniel 7'], correct:2, explanation:'She was preaching on Ezekiel chapter 1, which describes the four living creatures.', difficulty:'medium'},
           {q:'What is the foundational Scripture for the Foursquare Gospel?', options:['John 3:16','Romans 8:28','Hebrews 13:8','Acts 2:38'], correct:2, explanation:'Hebrews 13:8: "Jesus Christ is the same yesterday, today, and forever."', difficulty:'easy'},
           {q:'The face of a MAN represents Jesus as?', options:['Healer','Savior','Baptizer','Coming King'], correct:1, explanation:'The face of a man represents Jesus the Savior who became human to save humanity.', difficulty:'easy'},
-          {q:'The face of a LION represents Jesus as?', options:['Savior','Healer','Baptizer with the Holy Spirit','Coming King'], correct:2, explanation:'The lion represents royalty and powerâ€”Jesus the Baptizer with the Holy Spirit.', difficulty:'easy'},
-          {q:'The face of an OX represents Jesus as?', options:['Savior','Healer','Baptizer','Coming King'], correct:1, explanation:'The ox was the burden-bearing sacrifice animalâ€”Jesus the Healer who bore our sicknesses.', difficulty:'easy'},
-          {q:'The face of an EAGLE represents Jesus as?', options:['Savior','Healer','Baptizer','Soon-Coming King'], correct:3, explanation:'The eagle soars above allâ€”Jesus the Soon-Coming King returning from heaven.', difficulty:'easy'},
+          {q:'The face of a LION represents Jesus as?', options:['Savior','Healer','Baptizer with the Holy Spirit','Coming King'], correct:2, explanation:'The lion represents royalty and power"Jesus the Baptizer with the Holy Spirit.', difficulty:'easy'},
+          {q:'The face of an OX represents Jesus as?', options:['Savior','Healer','Baptizer','Coming King'], correct:1, explanation:'The ox was the burden-bearing sacrifice animal"Jesus the Healer who bore our sicknesses.', difficulty:'easy'},
+          {q:'The face of an EAGLE represents Jesus as?', options:['Savior','Healer','Baptizer','Soon-Coming King'], correct:3, explanation:'The eagle soars above all"Jesus the Soon-Coming King returning from heaven.', difficulty:'easy'},
           {q:'Which Scripture supports Jesus as Savior (face of man)?', options:['Matthew 3:11','Luke 19:10','Isaiah 53:5','1 Thessalonians 4:16'], correct:1, explanation:'Luke 19:10: "The Son of Man has come to seek and to save that which was lost."', difficulty:'medium'},
           {q:'Which Scripture supports Jesus as Healer (face of ox)?', options:['Matthew 3:11','Luke 19:10','Isaiah 53:5','1 Thessalonians 4:16'], correct:2, explanation:'Isaiah 53:5: "By His stripes we are healed."', difficulty:'medium'},
           {q:'What does "Foursquare" specifically refer to?', options:['The shape of Angelus Temple','The four Gospels','The four faces in Ezekiel\'s vision representing Christ','Four church departments'], correct:2, explanation:'Foursquare refers to the four faces representing Jesus as Savior, Baptizer, Healer, and Coming King.', difficulty:'medium'}
@@ -653,7 +653,7 @@ var DOMAINS = [
     ]
   },
   {
-    id: 'doctrine', name: 'Doctrine', icon: 'ðŸ“–', color: 'from-blue-500 to-indigo-600', desc: 'Core beliefs',
+    id: 'doctrine', name: 'Doctrine', icon: '"-', color: 'from-blue-500 to-indigo-600', desc: 'Core beliefs',
     chapters: [
       {
         id: 'doctrine-1', title: 'The Declaration of Faith',
@@ -665,7 +665,7 @@ var DOMAINS = [
 
 <p><strong>Scripture (Statement 1):</strong> The Bible is verbally inspired by God and without error in the original manuscripts. It is the supreme authority for faith and practice.</p>
 
-<p><strong>The Trinity (Statement 2):</strong> There is one God eternally existing in three personsâ€”Father, Son, and Holy Spiritâ€”coequal and coeternal.</p>
+<p><strong>The Trinity (Statement 2):</strong> There is one God eternally existing in three persons"Father, Son, and Holy Spirit"coequal and coeternal.</p>
 
 <p><strong>Humanity and Sin (Statements 3-4):</strong> Humans were created in God's image but fell through sin. All have sinned and need salvation.</p>
 
@@ -688,7 +688,7 @@ var DOMAINS = [
           ],
           keyScriptures: ['2 Timothy 3:16-17', 'Acts 2:4', 'Isaiah 53:5', '1 Thessalonians 4:16-17'],
           sections: [
-            {title: 'Scripture & God', content: '<p>The Declaration affirms: (1) Scripture is verbally inspired and inerrant in the originals; (2) God exists eternally as Trinityâ€”Father, Son, and Holy Spirit.</p>'},
+            {title: 'Scripture & God', content: '<p>The Declaration affirms: (1) Scripture is verbally inspired and inerrant in the originals; (2) God exists eternally as Trinity"Father, Son, and Holy Spirit.</p>'},
             {title: 'Salvation', content: '<p>Salvation is by grace through faith alone (Ephesians 2:8-9). It includes repentance, new birth, and justification. Good works are evidence of, not means to, salvation.</p>'},
             {title: 'Holy Spirit Baptism', content: '<p>Spirit baptism is subsequent to salvation with initial evidence of speaking in tongues (Acts 2:4). This empowers believers for witness and service.</p>'},
             {title: 'Divine Healing', content: '<p>Physical healing is provided in Christ\'s atonement (Isaiah 53:5). While not guaranteed in timing, healing is available through faith and prayer.</p>'}
@@ -698,14 +698,14 @@ var DOMAINS = [
           {q:'How many statements are in the Declaration of Faith?', options:['12','18','22','28'], correct:2, explanation:'There are 22 statements in the Declaration of Faith.', difficulty:'easy'},
           {q:'What does Foursquare believe about the Bible?', options:['Contains God\'s Word among human writings','Verbally inspired and without error in the originals','A good moral guide','One of many holy books'], correct:1, explanation:'The Declaration affirms the Bible is verbally inspired and without error in the original manuscripts.', difficulty:'medium'},
           {q:'What is the initial evidence of Spirit baptism according to Foursquare?', options:['Deep joy','Physical manifestations','Speaking in tongues','Prophesying'], correct:2, explanation:'Speaking in tongues as the Spirit gives utterance is the initial evidence.', difficulty:'easy'},
-          {q:'What view does Foursquare hold about Christ\'s return?', options:['Postmillennial','Amillennial','Premillennial','Preterist'], correct:2, explanation:'Foursquare holds a premillennial viewâ€”Christ returns before the thousand-year reign.', difficulty:'medium'},
+          {q:'What view does Foursquare hold about Christ\'s return?', options:['Postmillennial','Amillennial','Premillennial','Preterist'], correct:2, explanation:'Foursquare holds a premillennial view"Christ returns before the thousand-year reign.', difficulty:'medium'},
           {q:'According to the Declaration, how is salvation received?', options:['By good works','By baptism','By grace through faith','By church membership'], correct:2, explanation:'Salvation is by grace through faith in Jesus Christ, not by works.', difficulty:'easy'}
         ]
       }
     ]
   },
   {
-    id: 'polity', name: 'Polity', icon: 'âš–ï¸', color: 'from-emerald-500 to-teal-600', desc: 'Church governance',
+    id: 'polity', name: 'Polity', icon: 'âš-ï¸', color: 'from-emerald-500 to-teal-600', desc: 'Church governance',
     chapters: [
       {
         id: 'polity-1', title: 'Foursquare Church Government',
@@ -757,7 +757,7 @@ var DOMAINS = [
     ]
   },
   {
-    id: 'practice', name: 'Ministry Practice', icon: 'ðŸ™', color: 'from-pink-500 to-rose-600', desc: 'Ordinances & Christian living',
+    id: 'practice', name: 'Ministry Practice', icon: '™', color: 'from-pink-500 to-rose-600', desc: 'Ordinances & Christian living',
     chapters: [
       {
         id: 'practice-1', title: 'The Ordinances & Spirit-Filled Living',
@@ -765,7 +765,7 @@ var DOMAINS = [
         reading: `<h2>The Two Ordinances</h2>
 
 <h3>Water Baptism</h3>
-<p>Water baptism is by <strong>immersion</strong> in the name of the Father, Son, and Holy Spirit. It symbolizes our identification with Christ in His death, burial, and resurrection (Romans 6:3-4). Baptism is for believers only and does not saveâ€”it is an outward testimony of an inward transformation.</p>
+<p>Water baptism is by <strong>immersion</strong> in the name of the Father, Son, and Holy Spirit. It symbolizes our identification with Christ in His death, burial, and resurrection (Romans 6:3-4). Baptism is for believers only and does not save"it is an outward testimony of an inward transformation.</p>
 
 <h3>The Lord's Supper (Communion)</h3>
 <p>The bread represents Christ's body broken for us; the cup represents His blood shed for the remission of sins. Communion is a memorial (remembering Christ's sacrifice), a proclamation (proclaiming His death until He comes), and an examination (examining our hearts before partaking).</p>
@@ -798,7 +798,7 @@ var DOMAINS = [
         quizzes: [
           {q:'How many ordinances does Foursquare observe?', options:['1','2','5','7'], correct:1, explanation:'Two ordinances: Water Baptism and the Lord\'s Supper.', difficulty:'easy'},
           {q:'How is baptism performed in Foursquare?', options:['Sprinkling','Pouring','Immersion','Any method'], correct:2, explanation:'Baptism is by immersion, symbolizing burial and resurrection with Christ.', difficulty:'easy'},
-          {q:'When does Spirit baptism occur relative to salvation?', options:['Before salvation','At the moment of salvation','Subsequent to (after) salvation','Never'], correct:2, explanation:'Spirit baptism is subsequent to salvationâ€”a distinct experience after being saved.', difficulty:'medium'},
+          {q:'When does Spirit baptism occur relative to salvation?', options:['Before salvation','At the moment of salvation','Subsequent to (after) salvation','Never'], correct:2, explanation:'Spirit baptism is subsequent to salvation"a distinct experience after being saved.', difficulty:'medium'},
           {q:'What is the initial evidence of Spirit baptism?', options:['Deep peace','Physical manifestations','Speaking in tongues','Prophesying'], correct:2, explanation:'Speaking in tongues as the Spirit gives utterance (Acts 2:4).', difficulty:'easy'},
           {q:'How many spiritual gifts are listed in 1 Corinthians 12?', options:['7','9','12','15'], correct:1, explanation:'Nine spiritual gifts are listed in 1 Corinthians 12.', difficulty:'easy'}
         ]
@@ -810,11 +810,11 @@ var DOMAINS = [
 // ========== REQUIRED BOOKS ==========
 var BOOKS = [
   {
-    id: 'fopt', name: 'Foundations of Pentecostal Theology', icon: 'ðŸ“š', color: 'from-indigo-500 to-purple-600', desc: 'Complete Textbook',
+    id: 'fopt', name: 'Foundations of Pentecostal Theology', icon: '"š', color: 'from-indigo-500 to-purple-600', desc: 'Complete Textbook',
     chapters: [
       {
         id: 'ch1', num: 1, title: 'The Doctrine of Scripture', hasFullText: true,
-        summary: 'Explore bibliologyâ€”the doctrine of Scripture including its inspiration, inerrancy, canonization, and transmission to us today.',
+        summary: 'Explore bibliology"the doctrine of Scripture including its inspiration, inerrancy, canonization, and transmission to us today.',
         studyGuide: {
           objectives: [
             'Explain the meaning and significance of biblical inspiration',
@@ -825,7 +825,7 @@ var BOOKS = [
           ],
           keyTerms: [
             {term: 'Bibliology', def: 'The study of the doctrine of Scripture'},
-            {term: 'Inspiration', def: 'God-breathedâ€”the process by which God directed human authors to write Scripture without error'},
+            {term: 'Inspiration', def: 'God-breathed"the process by which God directed human authors to write Scripture without error'},
             {term: 'Inerrancy', def: 'The autographs (original manuscripts) contain no errors'},
             {term: 'Canon', def: 'The collection of books recognized as authoritative Scripture'},
             {term: 'Verbal Plenary Inspiration', def: 'Every word of Scripture is God-breathed and without error'},
@@ -837,40 +837,40 @@ var BOOKS = [
           ],
           keyScriptures: ['2 Timothy 3:16-17', '2 Peter 1:20-21', 'Psalm 119:105', 'Hebrews 4:12', 'John 1:1-14'],
           sections: [
-            {title: 'I. The Names of Scripture', content: '<p>The English word "Bible" comes from the Greek <em>biblos</em> meaning "book." Other names include: Scripture/Scriptures (holy writings), Holy Scriptures, Oracles of God, and Word of Godâ€”the most descriptive name (Mark 7:13; Hebrews 4:12).</p><div class="discussion-q"><strong>Why is "Word of God" the most significant title for Scripture?</strong></div>'},
-            {title: 'II. Divisions of Scripture', content: '<p><strong>Two Testaments:</strong> Old Testament (39 books) and New Testament (27 books). "Testament" means covenant.</p><p><strong>Hebrew OT Division:</strong> Law (Torah), Prophets (Nevi\'im), Writings (Ketuvim)â€”referenced by Jesus in Luke 24:44.</p><p><strong>NT Division:</strong> Biographical (Gospels), Historical (Acts), Pedagogical (Epistles), Prophetic (Revelation).</p><p><strong>Chapter/Verse divisions</strong> were added later (chapters by Stephen Langton c.1228; verses by Robert Stephens 1551).</p>'},
-            {title: 'III. The Writers of Scripture', content: '<p>The Bible was written by at least 40 authors over 1,500+ years, yet maintains remarkable unityâ€”evidence of one divine Author. Authors came from diverse backgrounds: kings (David, Solomon), priests (Jeremiah, Ezekiel), physician (Luke), fishermen (Peter, John), shepherds (Moses, Amos), tax collector (Matthew), Pharisee/theologian (Paul), and more.</p>'},
-            {title: 'IV. The Canon of Scripture', content: '<p><strong>Canon</strong> (Greek <em>kanon</em>) means "measuring rod" or standardâ€”books worthy of inclusion in Scripture.</p><p><strong>OT Canon:</strong> Complete by time of Christ. Jesus affirmed it (Luke 24:44; 11:51â€”from Abel to Zechariah = Genesis to 2 Chronicles in Hebrew order).</p><p><strong>NT Canon:</strong> Recognized gradually through the first centuries. Tests for canonicity: (1) Apostolicity, (2) Spiritual content, (3) Doctrinal soundness, (4) Universal usage, (5) Divine inspiration.</p><p><strong>Apocrypha:</strong> 14 books included in Septuagint and Catholic Bible but rejected by Protestantsâ€”not quoted in NT, contain doctrinal inconsistencies.</p>'},
-            {title: 'V. The Inerrancy of Scripture', content: '<p><strong>Definition:</strong> The autographs contain no mistakesâ€”the Bible is infallible without error.</p><p><strong>The Bible testifies to its own inerrancy:</strong> "All Scripture is God-breathed" (2 Tim 3:16); 3,808 times OT writers claimed to speak God\'s words.</p><p><strong>Jesus confirmed inerrancy</strong>â€”He referenced specific people/events (Noah, Jonah, Sodom) and never identified errors.</p><p>The Bible is a unique revelation of truth, unchanging, and proven morally/spiritually effective.</p>'},
-            {title: 'VI. The Inspiration of Scripture', content: '<p><strong>Inspiration</strong> = God breathed His life into Scripture (2 Tim 3:16). Holy men "spoke as they were moved [borne along] by the Holy Spirit" (2 Pet 1:21).</p><p><strong>Liberal views</strong> see Bible as mix of divine and human error. <strong>Neo-orthodox views</strong> say Bible "becomes" God\'s Word existentially.</p><p><strong>Conservative views:</strong> (1) Verbal dictationâ€”God dictated every word (few hold this); (2) Inspired conceptâ€”thoughts inspired but not words; (3) <strong>Verbal Plenary Inspiration</strong>â€”every word is God-breathed while using human authors\' personalities/styles. This is the Foursquare position.</p>'},
-            {title: 'VII. Symbols of Scripture', content: '<p>Scripture uses symbols to describe itself: <strong>Seed</strong> (1 Pet 1:23)â€”brings new life; <strong>Water</strong> (Eph 5:26)â€”cleanses; <strong>Lamp/Light</strong> (Ps 119:105)â€”guides; <strong>Fire</strong> (Jer 23:29)â€”consumes; <strong>Hammer</strong> (Jer 23:29)â€”breaks; <strong>Sword</strong> (Eph 6:17)â€”spiritual weapon; <strong>Milk</strong> (1 Pet 2:2)â€”nourishes; <strong>Honey</strong> (Ps 119:103)â€”sweetness.</p>'},
-            {title: 'VIII. The Holy Spirit and Scripture', content: '<p>The Holy Spirit inspired the writing of Scripture (2 Sam 23:2; 2 Pet 1:21). Spirit-filled manifestations must be judged by Scriptureâ€”the Spirit\'s Word is the "court of appeal" for all spiritual activity. "The prophetic word confirmed" (2 Pet 1:19).</p>'},
-            {title: 'IX. How Scripture Came to Us', content: '<p><strong>Writing surfaces:</strong> Stone, clay tablets, wood, leather, papyrus, vellum/parchment.</p><p><strong>Languages:</strong> Hebrew (most OT), Aramaic (portions of Daniel, Ezra), Greek (NTâ€”Koine Greek).</p><p><strong>Major Manuscripts:</strong> Sinaitic (Codex Aleph, c.AD 340), Vaticanus (Codex B, c.AD 325-350), Alexandrian (Codex A, c.AD 450), Ephraem (palimpsest), Beza.</p><p><strong>Important Discoveries:</strong> Dead Sea Scrolls (1947)â€”confirmed OT accuracy; Chester Beatty Papyri; John Rylands Fragment.</p>'},
-            {title: 'X. Scripture in English', content: '<p><strong>Early translations:</strong> Caedmon (7th c.), Aldhelm (AD 705 Psalms), Venerable Bede (John, AD 735).</p><p><strong>Wycliffe</strong> (1382)â€”first complete English Bible (from Latin Vulgate).</p><p><strong>Tyndale</strong> (1525)â€”father of English Bible, translated from Greek/Hebrew, martyred 1536.</p><p><strong>Major versions:</strong> Coverdale (1535), Matthew\'s (1537), Great Bible (1539â€”first authorized), Geneva (1560â€”first with verses), King James (1611â€”"Authorized Version").</p><p><strong>Modern:</strong> ERV (1885), ASV (1901), RSV (1952), NASB (1970), NIV (1978), NKJV (1982).</p><div class="discussion-q"><strong>Why is understanding how we got our Bible important for faith?</strong></div>'}
+            {title: 'I. The Names of Scripture', content: '<p>The English word "Bible" comes from the Greek <em>biblos</em> meaning "book." Other names include: Scripture/Scriptures (holy writings), Holy Scriptures, Oracles of God, and Word of God"the most descriptive name (Mark 7:13; Hebrews 4:12).</p><div class="discussion-q"><strong>Why is "Word of God" the most significant title for Scripture?</strong></div>'},
+            {title: 'II. Divisions of Scripture', content: '<p><strong>Two Testaments:</strong> Old Testament (39 books) and New Testament (27 books). "Testament" means covenant.</p><p><strong>Hebrew OT Division:</strong> Law (Torah), Prophets (Nevi\'im), Writings (Ketuvim)"referenced by Jesus in Luke 24:44.</p><p><strong>NT Division:</strong> Biographical (Gospels), Historical (Acts), Pedagogical (Epistles), Prophetic (Revelation).</p><p><strong>Chapter/Verse divisions</strong> were added later (chapters by Stephen Langton c.1228; verses by Robert Stephens 1551).</p>'},
+            {title: 'III. The Writers of Scripture', content: '<p>The Bible was written by at least 40 authors over 1,500+ years, yet maintains remarkable unity"evidence of one divine Author. Authors came from diverse backgrounds: kings (David, Solomon), priests (Jeremiah, Ezekiel), physician (Luke), fishermen (Peter, John), shepherds (Moses, Amos), tax collector (Matthew), Pharisee/theologian (Paul), and more.</p>'},
+            {title: 'IV. The Canon of Scripture', content: '<p><strong>Canon</strong> (Greek <em>kanon</em>) means "measuring rod" or standard"books worthy of inclusion in Scripture.</p><p><strong>OT Canon:</strong> Complete by time of Christ. Jesus affirmed it (Luke 24:44; 11:51"from Abel to Zechariah = Genesis to 2 Chronicles in Hebrew order).</p><p><strong>NT Canon:</strong> Recognized gradually through the first centuries. Tests for canonicity: (1) Apostolicity, (2) Spiritual content, (3) Doctrinal soundness, (4) Universal usage, (5) Divine inspiration.</p><p><strong>Apocrypha:</strong> 14 books included in Septuagint and Catholic Bible but rejected by Protestants"not quoted in NT, contain doctrinal inconsistencies.</p>'},
+            {title: 'V. The Inerrancy of Scripture', content: '<p><strong>Definition:</strong> The autographs contain no mistakes"the Bible is infallible without error.</p><p><strong>The Bible testifies to its own inerrancy:</strong> "All Scripture is God-breathed" (2 Tim 3:16); 3,808 times OT writers claimed to speak God\'s words.</p><p><strong>Jesus confirmed inerrancy</strong>"He referenced specific people/events (Noah, Jonah, Sodom) and never identified errors.</p><p>The Bible is a unique revelation of truth, unchanging, and proven morally/spiritually effective.</p>'},
+            {title: 'VI. The Inspiration of Scripture', content: '<p><strong>Inspiration</strong> = God breathed His life into Scripture (2 Tim 3:16). Holy men "spoke as they were moved [borne along] by the Holy Spirit" (2 Pet 1:21).</p><p><strong>Liberal views</strong> see Bible as mix of divine and human error. <strong>Neo-orthodox views</strong> say Bible "becomes" God\'s Word existentially.</p><p><strong>Conservative views:</strong> (1) Verbal dictation"God dictated every word (few hold this); (2) Inspired concept"thoughts inspired but not words; (3) <strong>Verbal Plenary Inspiration</strong>"every word is God-breathed while using human authors\' personalities/styles. This is the Foursquare position.</p>'},
+            {title: 'VII. Symbols of Scripture', content: '<p>Scripture uses symbols to describe itself: <strong>Seed</strong> (1 Pet 1:23)"brings new life; <strong>Water</strong> (Eph 5:26)"cleanses; <strong>Lamp/Light</strong> (Ps 119:105)"guides; <strong>Fire</strong> (Jer 23:29)"consumes; <strong>Hammer</strong> (Jer 23:29)"breaks; <strong>Sword</strong> (Eph 6:17)"spiritual weapon; <strong>Milk</strong> (1 Pet 2:2)"nourishes; <strong>Honey</strong> (Ps 119:103)"sweetness.</p>'},
+            {title: 'VIII. The Holy Spirit and Scripture', content: '<p>The Holy Spirit inspired the writing of Scripture (2 Sam 23:2; 2 Pet 1:21). Spirit-filled manifestations must be judged by Scripture"the Spirit\'s Word is the "court of appeal" for all spiritual activity. "The prophetic word confirmed" (2 Pet 1:19).</p>'},
+            {title: 'IX. How Scripture Came to Us', content: '<p><strong>Writing surfaces:</strong> Stone, clay tablets, wood, leather, papyrus, vellum/parchment.</p><p><strong>Languages:</strong> Hebrew (most OT), Aramaic (portions of Daniel, Ezra), Greek (NT"Koine Greek).</p><p><strong>Major Manuscripts:</strong> Sinaitic (Codex Aleph, c.AD 340), Vaticanus (Codex B, c.AD 325-350), Alexandrian (Codex A, c.AD 450), Ephraem (palimpsest), Beza.</p><p><strong>Important Discoveries:</strong> Dead Sea Scrolls (1947)"confirmed OT accuracy; Chester Beatty Papyri; John Rylands Fragment.</p>'},
+            {title: 'X. Scripture in English', content: '<p><strong>Early translations:</strong> Caedmon (7th c.), Aldhelm (AD 705 Psalms), Venerable Bede (John, AD 735).</p><p><strong>Wycliffe</strong> (1382)"first complete English Bible (from Latin Vulgate).</p><p><strong>Tyndale</strong> (1525)"father of English Bible, translated from Greek/Hebrew, martyred 1536.</p><p><strong>Major versions:</strong> Coverdale (1535), Matthew\'s (1537), Great Bible (1539"first authorized), Geneva (1560"first with verses), King James (1611""Authorized Version").</p><p><strong>Modern:</strong> ERV (1885), ASV (1901), RSV (1952), NASB (1970), NIV (1978), NKJV (1982).</p><div class="discussion-q"><strong>Why is understanding how we got our Bible important for faith?</strong></div>'}
           ]
         },
         quizzes: [
-          {q:'What does the Greek word "biblos" mean?', options:['Holy','Scripture','Book','Inspired'], correct:2, explanation:'Biblos means "book"â€”the root of our word "Bible."', difficulty:'easy'},
+          {q:'What does the Greek word "biblos" mean?', options:['Holy','Scripture','Book','Inspired'], correct:2, explanation:'Biblos means "book""the root of our word "Bible."', difficulty:'easy'},
           {q:'How many books are in the Old Testament?', options:['27','39','46','66'], correct:1, explanation:'There are 39 books in the Old Testament.', difficulty:'easy'},
           {q:'How many books are in the New Testament?', options:['22','27','31','39'], correct:1, explanation:'There are 27 books in the New Testament.', difficulty:'easy'},
-          {q:'What are the three divisions of the Hebrew Old Testament?', options:['History, Poetry, Prophecy','Law, Prophets, Writings','Major Prophets, Minor Prophets, Wisdom','Genesis, Psalms, Isaiah'], correct:1, explanation:'Torah (Law), Nevi\'im (Prophets), and Ketuvim (Writings)â€”referenced by Jesus in Luke 24:44.', difficulty:'medium'},
+          {q:'What are the three divisions of the Hebrew Old Testament?', options:['History, Poetry, Prophecy','Law, Prophets, Writings','Major Prophets, Minor Prophets, Wisdom','Genesis, Psalms, Isaiah'], correct:1, explanation:'Torah (Law), Nevi\'im (Prophets), and Ketuvim (Writings)"referenced by Jesus in Luke 24:44.', difficulty:'medium'},
           {q:'Approximately how many authors wrote the Bible?', options:['12','25','40+','66'], correct:2, explanation:'At least 40 authors wrote the Bible over a span of 1,500+ years.', difficulty:'easy'},
-          {q:'What does "canon" mean?', options:['A religious law','A measuring rod or standard','A type of manuscript','An ancient book'], correct:1, explanation:'Canon (Greek kanon) means "measuring rod"â€”the standard for books worthy of Scripture.', difficulty:'medium'},
+          {q:'What does "canon" mean?', options:['A religious law','A measuring rod or standard','A type of manuscript','An ancient book'], correct:1, explanation:'Canon (Greek kanon) means "measuring rod""the standard for books worthy of Scripture.', difficulty:'medium'},
           {q:'Which test was NOT used to determine a book\'s canonicity?', options:['Apostolicity','Length of the book','Doctrinal soundness','Universal usage'], correct:1, explanation:'Length was not a criterion. The tests were: apostolicity, spiritual content, doctrinal soundness, universal usage, and divine inspiration.', difficulty:'hard'},
           {q:'What is the Septuagint (LXX)?', options:['A Hebrew manuscript','A Greek translation of the OT','The Latin Vulgate','A Dead Sea Scroll'], correct:1, explanation:'The Septuagint is the Greek translation of the Hebrew OT made between 280-180 BC.', difficulty:'medium'},
           {q:'What does "inerrancy" mean regarding Scripture?', options:['The Bible has no copies','The originals contain no errors','All translations are perfect','The Bible cannot be changed'], correct:1, explanation:'Inerrancy means the autographs (original manuscripts) contain no mistakes.', difficulty:'medium'},
           {q:'What is verbal plenary inspiration?', options:['Only the thoughts are inspired','Only the NT is inspired','Every word is God-breathed and without error','God dictated every word verbatim'], correct:2, explanation:'Verbal plenary inspiration holds that every word of Scripture is God-breathed while using human authors.', difficulty:'hard'},
-          {q:'According to 2 Timothy 3:16, Scripture is:', options:['Good for teaching','Useful but not authoritative','God-breathed','A human product'], correct:2, explanation:'"All Scripture is God-breathed (theopneustos)" â€” 2 Timothy 3:16.', difficulty:'easy'},
+          {q:'According to 2 Timothy 3:16, Scripture is:', options:['Good for teaching','Useful but not authoritative','God-breathed','A human product'], correct:2, explanation:'"All Scripture is God-breathed (theopneustos)" " 2 Timothy 3:16.', difficulty:'easy'},
           {q:'How many times did OT writers claim to speak God\'s words?', options:['About 100 times','About 1,000 times','3,808 times','Over 10,000 times'], correct:2, explanation:'OT writers claimed to speak God\'s words 3,808 times.', difficulty:'hard'},
           {q:'Who added chapter divisions to the Bible?', options:['Moses','The apostles','Stephen Langton (c.1228)','King James'], correct:2, explanation:'Stephen Langton, Archbishop of Canterbury, introduced chapter divisions around 1228.', difficulty:'hard'},
           {q:'Who added verse divisions to the New Testament?', options:['Jerome','Robert Stephens (1551)','William Tyndale','The Council of Carthage'], correct:1, explanation:'Robert Stephens added verse divisions in 1551.', difficulty:'hard'},
           {q:'What manuscript discovered at Mount Sinai contains the complete NT?', options:['Vaticanus','Alexandrian','Sinaitic (Codex Aleph)','Ephraem'], correct:2, explanation:'The Sinaitic (Codex Aleph, c.AD 340) is the only ancient manuscript containing the complete NT.', difficulty:'hard'},
           {q:'When were the Dead Sea Scrolls discovered?', options:['1847','1917','1947','1967'], correct:2, explanation:'A Bedouin boy discovered the Dead Sea Scrolls in 1947 near the Dead Sea.', difficulty:'medium'},
-          {q:'What did the Dead Sea Scrolls confirm?', options:['The NT is accurate','The OT text accuracy','Jesus was a real person','Daniel wrote in Hebrew'], correct:1, explanation:'The Dead Sea Scrolls confirmed the accuracy of the OT textâ€”the Isaiah scroll matched later manuscripts.', difficulty:'medium'},
+          {q:'What did the Dead Sea Scrolls confirm?', options:['The NT is accurate','The OT text accuracy','Jesus was a real person','Daniel wrote in Hebrew'], correct:1, explanation:'The Dead Sea Scrolls confirmed the accuracy of the OT text"the Isaiah scroll matched later manuscripts.', difficulty:'medium'},
           {q:'Who produced the first complete English Bible?', options:['William Tyndale','Miles Coverdale','John Wycliffe','King James'], correct:2, explanation:'John Wycliffe produced the first complete English Bible in 1382 (translated from Latin Vulgate).', difficulty:'medium'},
-          {q:'Who is called the "father of the English Bible"?', options:['John Wycliffe','William Tyndale','Miles Coverdale','Jerome'], correct:1, explanation:'William Tyndale is the father of the English Bibleâ€”first to translate from Greek/Hebrew into English.', difficulty:'medium'},
-          {q:'What happened to William Tyndale?', options:['He became Archbishop','He was strangled and burned at the stake','He lived to old age','He became King James\' translator'], correct:1, explanation:'Tyndale was martyred in 1536â€”strangled and burned at the stake.', difficulty:'medium'},
-          {q:'What was Tyndale\'s dying prayer?', options:['"Forgive them Father"','"Lord, open the King of England\'s eyes"','"Into your hands I commit my spirit"','"The Word endures forever"'], correct:1, explanation:'"Lord, open the King of England\'s eyes"â€”and God answered: later kings authorized the English Bible.', difficulty:'hard'},
+          {q:'Who is called the "father of the English Bible"?', options:['John Wycliffe','William Tyndale','Miles Coverdale','Jerome'], correct:1, explanation:'William Tyndale is the father of the English Bible"first to translate from Greek/Hebrew into English.', difficulty:'medium'},
+          {q:'What happened to William Tyndale?', options:['He became Archbishop','He was strangled and burned at the stake','He lived to old age','He became King James\' translator'], correct:1, explanation:'Tyndale was martyred in 1536"strangled and burned at the stake.', difficulty:'medium'},
+          {q:'What was Tyndale\'s dying prayer?', options:['"Forgive them Father"','"Lord, open the King of England\'s eyes"','"Into your hands I commit my spirit"','"The Word endures forever"'], correct:1, explanation:'"Lord, open the King of England\'s eyes""and God answered: later kings authorized the English Bible.', difficulty:'hard'},
           {q:'What was the first "authorized" English Bible?', options:['Tyndale\'s Bible','The Great Bible (1539)','The Geneva Bible','King James Version'], correct:1, explanation:'The Great Bible (1539) was the first Bible officially authorized by a king (Henry VIII).', difficulty:'hard'},
           {q:'What English Bible was the first with verse divisions throughout?', options:['King James Version','The Great Bible','The Geneva Bible (1560)','Tyndale\'s Bible'], correct:2, explanation:'The Geneva Bible (1560) was the first English Bible divided entirely into verses.', difficulty:'hard'},
           {q:'When was the King James Version published?', options:['1525','1582','1611','1769'], correct:2, explanation:'The King James Version was published in 1611.', difficulty:'easy'},
@@ -878,25 +878,25 @@ var BOOKS = [
           {q:'The Vulgate is:', options:['A Greek OT translation','Jerome\'s Latin Bible','A Dead Sea Scroll','An English translation'], correct:1, explanation:'The Vulgate is Jerome\'s Latin translation of the Bible (AD 382-405).', difficulty:'medium'},
           {q:'What writing surface was made from animal skins?', options:['Papyrus','Vellum/Parchment','Clay','Stone'], correct:1, explanation:'Vellum (from calves/antelopes) and parchment (from sheep/goats) were made from animal skins.', difficulty:'medium'},
           {q:'What language was most of the Old Testament written in?', options:['Greek','Latin','Hebrew','Aramaic'], correct:2, explanation:'Almost all of the OT was written in Hebrew.', difficulty:'easy'},
-          {q:'What language was the New Testament written in?', options:['Hebrew','Latin','Aramaic','Koine Greek'], correct:3, explanation:'The NT was written in Koine Greekâ€”the common language of the first century.', difficulty:'easy'},
-          {q:'Jesus affirmed the OT canon by reference to martyrs from Abel to:', options:['Daniel','Malachi','Zechariah','John the Baptist'], correct:2, explanation:'Luke 11:51â€”from Abel (Genesis) to Zechariah (2 Chronicles, last book in Hebrew order).', difficulty:'hard'}
+          {q:'What language was the New Testament written in?', options:['Hebrew','Latin','Aramaic','Koine Greek'], correct:3, explanation:'The NT was written in Koine Greek"the common language of the first century.', difficulty:'easy'},
+          {q:'Jesus affirmed the OT canon by reference to martyrs from Abel to:', options:['Daniel','Malachi','Zechariah','John the Baptist'], correct:2, explanation:'Luke 11:51"from Abel (Genesis) to Zechariah (2 Chronicles, last book in Hebrew order).', difficulty:'hard'}
         ]
       },
-      {id:'ch2', num:2, title:'The Doctrine of God', hasFullText:true, summary:'Study theology properâ€”the nature, attributes, and works of God, including the Trinity.'},
-      {id:'ch3', num:3, title:'The Doctrine of Humankind', hasFullText:true, summary:'Understand anthropologyâ€”human nature, creation in God\'s image, and the constitution of humanity.'},
-      {id:'ch4', num:4, title:'The Doctrine of Sin', hasFullText:true, summary:'Examine hamartiologyâ€”the origin, nature, and consequences of sin.'},
-      {id:'ch5', num:5, title:'The Doctrine of Salvation', hasFullText:true, summary:'Discover soteriologyâ€”how God saves through Christ, including justification, sanctification, and glorification.'},
-      {id:'ch6', num:6, title:'The Doctrine of the Holy Spirit', hasFullText:true, summary:'Study pneumatologyâ€”the person and work of the Holy Spirit, including baptism and gifts.'},
+      {id:'ch2', num:2, title:'The Doctrine of God', hasFullText:true, summary:'Study theology proper"the nature, attributes, and works of God, including the Trinity.'},
+      {id:'ch3', num:3, title:'The Doctrine of Humankind', hasFullText:true, summary:'Understand anthropology"human nature, creation in God\'s image, and the constitution of humanity.'},
+      {id:'ch4', num:4, title:'The Doctrine of Sin', hasFullText:true, summary:'Examine hamartiology"the origin, nature, and consequences of sin.'},
+      {id:'ch5', num:5, title:'The Doctrine of Salvation', hasFullText:true, summary:'Discover soteriology"how God saves through Christ, including justification, sanctification, and glorification.'},
+      {id:'ch6', num:6, title:'The Doctrine of the Holy Spirit', hasFullText:true, summary:'Study pneumatology"the person and work of the Holy Spirit, including baptism and gifts.'},
       {id:'ch7', num:7, title:'The Doctrine of Divine Healing', hasFullText:true, summary:'Learn about healing in the atonement and its practice in the church today.'},
-      {id:'ch8', num:8, title:'The Doctrine of the Church', hasFullText:true, summary:'Explore ecclesiologyâ€”the nature, mission, government, and ordinances of the church.'},
-      {id:'ch9', num:9, title:'The Doctrine of Angels', hasFullText:true, summary:'Study angelologyâ€”angels, Satan, and demons in Scripture.'},
-      {id:'ch10', num:10, title:'The Doctrine of Last Things', hasFullText:true, summary:'Discover eschatologyâ€”death, resurrection, rapture, tribulation, millennium, and eternal state.'}
+      {id:'ch8', num:8, title:'The Doctrine of the Church', hasFullText:true, summary:'Explore ecclesiology"the nature, mission, government, and ordinances of the church.'},
+      {id:'ch9', num:9, title:'The Doctrine of Angels', hasFullText:true, summary:'Study angelology"angels, Satan, and demons in Scripture.'},
+      {id:'ch10', num:10, title:'The Doctrine of Last Things', hasFullText:true, summary:'Discover eschatology"death, resurrection, rapture, tribulation, millennium, and eternal state.'}
     ]
   },
-  {id:'aimee-bio', name:'Aimee: Life Story', icon:'ðŸ‘©', color:'from-rose-400 to-pink-500', desc:'Biography', comingSoon:true, chapters:[]},
-  {id:'women-ministry', name:'Women in Ministry', icon:'ðŸ‘©â€ðŸ«', color:'from-fuchsia-400 to-purple-500', desc:'Biblical position', comingSoon:true, chapters:[]},
-  {id:'disciples-nations', name:'Disciples of All Nations', icon:'ðŸŒ', color:'from-cyan-400 to-blue-500', desc:'Missions', comingSoon:true, chapters:[]},
-  {id:'keystones', name:'Foursquare Keystones', icon:'ðŸ”‘', color:'from-amber-400 to-orange-500', desc:'Five key areas', comingSoon:true, chapters:[]}
+  {id:'aimee-bio', name:'Aimee: Life Story', icon:'‘©', color:'from-rose-400 to-pink-500', desc:'Biography', comingSoon:true, chapters:[]},
+  {id:'women-ministry', name:'Women in Ministry', icon:'‘©«', color:'from-fuchsia-400 to-purple-500', desc:'Biblical position', comingSoon:true, chapters:[]},
+  {id:'disciples-nations', name:'Disciples of All Nations', icon:'Œ', color:'from-cyan-400 to-blue-500', desc:'Missions', comingSoon:true, chapters:[]},
+  {id:'keystones', name:'Foursquare Keystones', icon:'"‘', color:'from-amber-400 to-orange-500', desc:'Five key areas', comingSoon:true, chapters:[]}
 ];
 
 // Default study guide for chapters without full study content
@@ -1237,9 +1237,9 @@ function renderGuidanceSection() {
   
   if (nextStep.isNew) {
     // New user - show welcome
-    html += '<div class="guidance-card"><div class="flex items-center gap-3 mb-3"><div class="text-3xl">ðŸŽ“</div><div><h3 class="font-bold text-lg">Welcome to Licensing!</h3><p class="text-red-100 text-sm">Start your journey to Foursquare ministry</p></div></div>';
+    html += '<div class="guidance-card"><div class="flex items-center gap-3 mb-3"><div class="text-3xl">Ž"</div><div><h3 class="font-bold text-lg">Welcome to Licensing!</h3><p class="text-red-100 text-sm">Start your journey to Foursquare ministry</p></div></div>';
     html += '<p class="text-red-100 mb-4">Begin with the <strong>Heritage</strong> domain to learn about our founder, Aimee Semple McPherson, and the history of The Foursquare Church.</p>';
-    html += '<button onclick="openCategory(\'domain\',\'heritage\')" class="w-full bg-white text-red-700 py-3 rounded-xl font-semibold">Start Here â†’</button></div>';
+    html += '<button onclick="openCategory(\'domain\',\'heritage\')" class="w-full bg-white text-red-700 py-3 rounded-xl font-semibold">Start Here â†'</button></div>';
   } else if (nextStep.type === 'continue') {
     // Continue reading
     html += '<div class="next-step-card" onclick="' + nextStep.action + '"><div class="flex items-center gap-3"><div class="text-2xl">' + nextStep.icon + '</div><div class="flex-1"><p class="text-green-100 text-xs uppercase font-medium">Continue Where You Left Off</p><h3 class="font-bold">' + nextStep.title + '</h3><p class="text-green-100 text-sm">' + nextStep.details + '</p></div><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
@@ -1274,9 +1274,9 @@ function findNextStep() {
         var p = userProgress[cat.id]?.[ch.id] || {};
         if (!p.read) {
           return {
-            type: 'continue', icon: 'ðŸ“–',
+            type: 'continue', icon: '"-',
             title: ch.num ? 'Chapter ' + ch.num + ': ' + ch.title : ch.title,
-            details: 'Page ' + lr.page + ' â€¢ ' + cat.name,
+            details: 'Page ' + lr.page + ' ¢ ' + cat.name,
             action: 'resumeLastReading()'
           };
         }
@@ -1295,7 +1295,7 @@ function findNextStep() {
       
       if (!p.read) {
         return {
-          type: 'next', icon: 'ðŸ“–',
+          type: 'next', icon: '"-',
           title: 'Read: ' + (ch.num ? 'Chapter ' + ch.num : ch.title),
           details: cat.name,
           action: "openChapter('" + (DOMAINS.includes(cat) ? 'domain' : 'book') + "','" + cat.id + "','" + ch.id + "')"
@@ -1303,9 +1303,9 @@ function findNextStep() {
       }
       if (!p.studied) {
         return {
-          type: 'next', icon: 'ðŸ“',
+          type: 'next', icon: '"',
           title: 'Study: ' + (ch.num ? 'Chapter ' + ch.num : ch.title),
-          details: cat.name + ' â€¢ Complete the study guide',
+          details: cat.name + ' ¢ Complete the study guide',
           action: "openChapter('" + (DOMAINS.includes(cat) ? 'domain' : 'book') + "','" + cat.id + "','" + ch.id + "')"
         };
       }
@@ -1313,14 +1313,14 @@ function findNextStep() {
         return {
           type: 'next', icon: 'âœ…',
           title: 'Quiz: ' + (ch.num ? 'Chapter ' + ch.num : ch.title),
-          details: cat.name + ' â€¢ Score 80%+ to pass',
+          details: cat.name + ' ¢ Score 80%+ to pass',
           action: "openChapter('" + (DOMAINS.includes(cat) ? 'domain' : 'book') + "','" + cat.id + "','" + ch.id + "')"
         };
       }
     }
   }
   
-  return {type: 'next', icon: 'ðŸŽ‰', title: 'All Complete!', details: 'Review any material', action: 'showNav(\'study\')'};
+  return {type: 'next', icon: 'Ž‰', title: 'All Complete!', details: 'Review any material', action: 'showNav(\'study\')'};
 }
 
 function renderQuickBookmarks() {
@@ -1330,7 +1330,7 @@ function renderQuickBookmarks() {
   }
   
   var recent = annotations.bookmarks.slice(0, 3);
-  var html = '<h3 class="text-sm font-semibold text-slate-500 uppercase mb-2">ðŸ“‘ Quick Bookmarks</h3>';
+  var html = '<h3 class="text-sm font-semibold text-slate-500 uppercase mb-2">"‘ Quick Bookmarks</h3>';
   recent.forEach(b => {
     html += '<div class="bookmark-quick" onclick="goToBookmark(\'' + b.chapterId + '\',' + b.page + ')"><div class="flex items-center justify-between"><span class="font-medium text-sm">' + (b.chapterTitle || 'Chapter') + '</span><span class="text-xs text-amber-700">Page ' + b.page + '</span></div></div>';
   });
@@ -1366,9 +1366,9 @@ function renderRecentActivity() {
     return;
   }
   
-  var html = '<h3 class="text-sm font-semibold text-slate-500 uppercase mb-2">ðŸ• Recent Activity</h3>';
+  var html = '<h3 class="text-sm font-semibold text-slate-500 uppercase mb-2">• Recent Activity</h3>';
   recentActivity.slice(0, 3).forEach(a => {
-    var icon = a.type === 'read' ? 'ðŸ“–' : a.type === 'study' ? 'ðŸ“' : a.type === 'quiz' ? 'âœ…' : 'ðŸ“Œ';
+    var icon = a.type === 'read' ? '"-' : a.type === 'study' ? '"' : a.type === 'quiz' ? 'âœ…' : '"Œ';
     var timeAgo = getTimeAgo(a.time);
     html += '<div class="recent-activity"><div class="flex items-center justify-between"><span class="font-medium text-sm">' + icon + ' ' + a.title + '</span><span class="text-xs text-slate-400">' + timeAgo + '</span></div><p class="text-xs text-slate-500 mt-1">' + a.details + '</p></div>';
   });
@@ -1436,11 +1436,11 @@ function openCategory(type, id) {
     
     html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openChapter(\'' + type + '\',\'' + cat.id + '\',\'' + ch.id + '\')">';
     html += '<div class="flex items-center gap-3">';
-    html += allDone ? '<div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">âœ“</div>' : '<div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold">' + (ch.num || 'â€¢') + '</div>';
+    html += allDone ? '<div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">✔</div>' : '<div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold">' + (ch.num || '¢') + '</div>';
     html += '<div class="flex-1"><div class="font-medium">' + title + '</div>';
     html += '<div class="flex gap-3 mt-1">';
-    html += '<span class="text-xs ' + (p.read ? 'text-green-600' : 'text-slate-400') + '">ðŸ“– Read</span>';
-    html += '<span class="text-xs ' + (p.studied ? 'text-green-600' : 'text-slate-400') + '">ðŸ“ Study</span>';
+    html += '<span class="text-xs ' + (p.read ? 'text-green-600' : 'text-slate-400') + '">"- Read</span>';
+    html += '<span class="text-xs ' + (p.studied ? 'text-green-600' : 'text-slate-400') + '">" Study</span>';
     html += '<span class="text-xs ' + (p.quizScore >= 80 ? 'text-green-600' : p.quizScore > 0 ? 'text-amber-600' : 'text-slate-400') + '">âœ… ' + (p.quizScore > 0 ? p.quizScore + '%' : 'Quiz') + '</span>';
     html += '</div></div>';
     html += '<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
@@ -1453,21 +1453,21 @@ function openCategory(type, id) {
 function renderStudyList() {
   var html = '<h2 class="font-bold text-lg mb-4">All Study Materials</h2>';
   
-  html += '<h3 class="font-medium text-slate-500 text-sm uppercase mb-3">ðŸ“‹ Licensing Domains</h3>';
+  html += '<h3 class="font-medium text-slate-500 text-sm uppercase mb-3">"‹ Licensing Domains</h3>';
   DOMAINS.forEach(d => {
     var done = 0;
     d.chapters.forEach(c => { var p = userProgress[d.id]?.[c.id] || {}; if (p.read && p.studied && p.quizScore >= 80) done++; });
-    html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory(\'domain\',\'' + d.id + '\')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + d.color + ' flex items-center justify-center text-xl">' + d.icon + '</div><div class="flex-1"><div class="font-medium">' + d.name + '</div><div class="text-xs text-slate-500">' + d.chapters.length + ' chapters â€¢ ' + done + ' complete</div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+    html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory(\'domain\',\'' + d.id + '\')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + d.color + ' flex items-center justify-center text-xl">' + d.icon + '</div><div class="flex-1"><div class="font-medium">' + d.name + '</div><div class="text-xs text-slate-500">' + d.chapters.length + ' chapters ¢ ' + done + ' complete</div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
   });
   
-  html += '<h3 class="font-medium text-slate-500 text-sm uppercase mb-3 mt-6">ðŸ“š Required Books</h3>';
+  html += '<h3 class="font-medium text-slate-500 text-sm uppercase mb-3 mt-6">"š Required Books</h3>';
   BOOKS.forEach(b => {
     if (b.comingSoon) {
       html += '<div class="main-card p-4 mb-3 opacity-50"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl">' + b.icon + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">Coming Soon</div></div></div></div>';
     } else {
       var done = 0;
       b.chapters.forEach(c => { var p = userProgress[b.id]?.[c.id] || {}; if (p.read && p.studied && p.quizScore >= 80) done++; });
-      html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory(\'book\',\'' + b.id + '\')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl">' + b.icon + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">' + b.chapters.length + ' chapters â€¢ ' + done + ' complete</div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+      html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory(\'book\',\'' + b.id + '\')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl">' + b.icon + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">' + b.chapters.length + ' chapters ¢ ' + done + ' complete</div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
     }
   });
   
@@ -1506,33 +1506,33 @@ function renderOverviewTab() {
   var p = userProgress[currentCategory.id]?.[ch.id] || {};
   var sg = ch.studyGuide || getDefaultStudyGuide(ch);
   
-  var html = '<div class="main-card p-4 mb-4"><h3 class="font-bold text-lg mb-2">ðŸ“‹ Chapter Summary</h3><p class="text-slate-600 leading-relaxed">' + (ch.summary || 'Study this chapter to learn important theological foundations.') + '</p></div>';
+  var html = '<div class="main-card p-4 mb-4"><h3 class="font-bold text-lg mb-2">"‹ Chapter Summary</h3><p class="text-slate-600 leading-relaxed">' + (ch.summary || 'Study this chapter to learn important theological foundations.') + '</p></div>';
   
   // Progress card
   html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">Your Progress</h3><div class="space-y-3">';
-  html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">ðŸ“–</span> Reading</span>' + (p.read ? '<span class="text-green-600 font-medium">âœ“ Complete</span>' : '<span class="text-slate-400">Not started</span>') + '</div>';
-  html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">ðŸ“</span> Study Guide</span>' + (p.studied ? '<span class="text-green-600 font-medium">âœ“ Complete</span>' : '<span class="text-slate-400">Not started</span>') + '</div>';
+  html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">"-</span> Reading</span>' + (p.read ? '<span class="text-green-600 font-medium">✔ Complete</span>' : '<span class="text-slate-400">Not started</span>') + '</div>';
+  html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">"</span> Study Guide</span>' + (p.studied ? '<span class="text-green-600 font-medium">✔ Complete</span>' : '<span class="text-slate-400">Not started</span>') + '</div>';
   html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">âœ…</span> Quiz</span>';
-  if (p.quizScore >= 80) html += '<span class="text-green-600 font-medium">âœ“ Passed ' + p.quizScore + '%</span>';
+  if (p.quizScore >= 80) html += '<span class="text-green-600 font-medium">✔ Passed ' + p.quizScore + '%</span>';
   else if (p.quizScore > 0) html += '<span class="text-amber-600">' + p.quizScore + '% (need 80%)</span>';
   else html += '<span class="text-slate-400">Not taken</span>';
   html += '</div></div></div>';
   
   // Learning objectives
   if (sg.objectives && sg.objectives.length > 0) {
-    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">ðŸŽ¯ Learning Objectives</h3><div class="space-y-2">';
+    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">Ž¯ Learning Objectives</h3><div class="space-y-2">';
     sg.objectives.forEach(obj => {
-      html += '<div class="flex items-start gap-2"><span class="text-green-500 mt-0.5">â—‹</span><span class="text-slate-600 text-sm">' + obj + '</span></div>';
+      html += '<div class="flex items-start gap-2"><span class="text-green-500 mt-0.5">â-‹</span><span class="text-slate-600 text-sm">' + obj + '</span></div>';
     });
     html += '</div></div>';
   }
   
   // Key terms
   if (sg.keyTerms && sg.keyTerms.length > 0) {
-    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">ðŸ“š Key Terms</h3><div class="space-y-2">';
+    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">"š Key Terms</h3><div class="space-y-2">';
     sg.keyTerms.forEach(t => {
       if (typeof t === 'object') {
-        html += '<div class="pb-2 border-b border-slate-100 last:border-0"><span class="key-term">' + t.term + '</span><span class="text-slate-600 text-sm ml-2">â€” ' + t.def + '</span></div>';
+        html += '<div class="pb-2 border-b border-slate-100 last:border-0"><span class="key-term">' + t.term + '</span><span class="text-slate-600 text-sm ml-2">" ' + t.def + '</span></div>';
       } else {
         html += '<span class="key-term mr-2 mb-2 inline-block">' + t + '</span>';
       }
@@ -1542,7 +1542,7 @@ function renderOverviewTab() {
   
   // Key scriptures
   if (sg.keyScriptures && sg.keyScriptures.length > 0) {
-    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">ðŸ“– Key Scriptures</h3><div class="flex flex-wrap gap-2">';
+    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">"- Key Scriptures</h3><div class="flex flex-wrap gap-2">';
     sg.keyScriptures.forEach(ref => {
       html += '<span class="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm">' + ref + '</span>';
     });
@@ -1550,7 +1550,7 @@ function renderOverviewTab() {
   }
   
   // Action buttons
-  html += '<div class="grid grid-cols-2 gap-3"><button onclick="switchChapterTab(\'read\')" class="py-3 bg-red-600 text-white rounded-xl font-medium">ðŸ“– Read Chapter</button><button onclick="switchChapterTab(\'study\')" class="py-3 border border-red-600 text-red-600 rounded-xl font-medium">ðŸ“ Study Guide</button></div>';
+  html += '<div class="grid grid-cols-2 gap-3"><button onclick="switchChapterTab(\'read\')" class="py-3 bg-red-600 text-white rounded-xl font-medium">"- Read Chapter</button><button onclick="switchChapterTab(\'study\')" class="py-3 border border-red-600 text-red-600 rounded-xl font-medium">" Study Guide</button></div>';
   
   document.getElementById('chapter-tab-overview').innerHTML = html;
 }
@@ -1585,16 +1585,22 @@ function showReadPreview(content) {
   document.getElementById('read-loading').classList.add('hidden');
   document.getElementById('read-preview').classList.remove('hidden');
   
-  var preview = content.substring(0, 1500).replace(/<[^>]+>/g, '');
+  var preview = content.substring(0, 1500).replace(/<[^>]+>/g, '').replace(/\n+/g, ' ').trim();
   var p = userProgress[currentCategory.id]?.[currentChapter.id] || {};
   
   var html = '<div class="main-card p-4 mb-4"><div class="text-slate-600 leading-relaxed">' + preview + '...</div></div>';
   html += '<div class="space-y-3">';
-  html += '<button onclick="openReader()" class="w-full py-3 bg-red-600 text-white rounded-xl font-medium">ðŸ“– Open Full Reader</button>';
+  html += '<button onclick="openReader()" class="w-full py-3 bg-red-600 text-white rounded-xl font-medium">Open Full Reader</button>';
   if (p.lastPage > 1) {
-    html += '<button onclick="openReader(' + p.lastPage + ')" class="w-full py-3 border border-red-600 text-red-600 rounded-xl font-medium">ðŸ“‘ Resume from Page ' + p.lastPage + '</button>';
+    html += '<button onclick="openReader(' + p.lastPage + ')" class="w-full py-3 border border-red-600 text-red-600 rounded-xl font-medium">Resume from Page ' + p.lastPage + '</button>';
   }
-  html += '<button onclick="markRead()" class="w-full py-3 border border-slate-300 rounded-xl text-slate-600">' + (p.read ? 'âœ“ Marked as Read' : 'Mark as Read (skip reading)') + '</button>';
+  html += '<button onclick="markRead()" class="w-full py-3 border border-slate-300 rounded-xl text-slate-600">' + (p.read ? 'Marked as Read' : 'Mark as Read (skip reading)') + '</button>';
+  html += '</div>';
+  
+  document.getElementById('read-preview').innerHTML = html;
+}
+
+  html += '<button onclick="markRead()" class="w-full py-3 border border-slate-300 rounded-xl text-slate-600">' + (p.read ? '✔ Marked as Read' : 'Mark as Read (skip reading)') + '</button>';
   html += '</div>';
   
   document.getElementById('read-preview').innerHTML = html;
@@ -1635,7 +1641,7 @@ function renderStudySection() {
   // Fixed navigation at bottom
   html += '<div class="study-nav-fixed">';
   html += '<button onclick="prevStudySection()" class="flex-1 px-6 py-3 border border-slate-300 rounded-xl font-medium ' + (studyIndex === 0 ? 'opacity-30 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 bg-white') + '" ' + (studyIndex === 0 ? 'disabled' : '') + '>â† Previous</button>';
-  html += '<button onclick="nextStudySection()" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700">' + (studyIndex === sg.sections.length - 1 ? 'Complete Study âœ“' : 'Next â†’') + '</button>';
+  html += '<button onclick="nextStudySection()" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700">' + (studyIndex === sg.sections.length - 1 ? 'Complete Study ✔' : 'Next â†'') + '</button>';
   html += '</div>';
   
   document.getElementById('chapter-tab-study').innerHTML = html;
@@ -1708,7 +1714,7 @@ function renderQuizQuestion() {
   html += '</div>';
   
   html += '<button id="quiz-submit-btn" onclick="submitQuizAnswer()" class="w-full py-3 bg-red-600 text-white rounded-xl font-medium disabled:opacity-30 disabled:cursor-not-allowed" disabled>Check Answer</button>';
-  html += '<button id="quiz-next-btn" onclick="nextQuizQuestion()" class="w-full py-3 bg-green-600 text-white rounded-xl font-medium hidden">Next Question â†’</button>';
+  html += '<button id="quiz-next-btn" onclick="nextQuizQuestion()" class="w-full py-3 bg-green-600 text-white rounded-xl font-medium hidden">Next Question â†'</button>';
   
   document.getElementById('chapter-tab-quiz').innerHTML = html;
 }
@@ -1735,11 +1741,11 @@ function submitQuizAnswer() {
   var fb = document.getElementById('quiz-feedback');
   fb.classList.remove('hidden');
   fb.className = 'mt-4 p-4 rounded-xl ' + (correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200');
-  fb.innerHTML = '<div class="font-bold ' + (correct ? 'text-green-800' : 'text-red-800') + '">' + (correct ? 'âœ“ Correct!' : 'âœ— Incorrect') + '</div><div class="text-sm mt-2 ' + (correct ? 'text-green-700' : 'text-red-700') + '">' + q.explanation + '</div>';
+  fb.innerHTML = '<div class="font-bold ' + (correct ? 'text-green-800' : 'text-red-800') + '">' + (correct ? '✔ Correct!' : 'âœ- Incorrect') + '</div><div class="text-sm mt-2 ' + (correct ? 'text-green-700' : 'text-red-700') + '">' + q.explanation + '</div>';
   
   document.getElementById('quiz-submit-btn').classList.add('hidden');
   document.getElementById('quiz-next-btn').classList.remove('hidden');
-  document.getElementById('quiz-next-btn').textContent = quizIndex === currentQuizSet.length - 1 ? 'See Results' : 'Next Question â†’';
+  document.getElementById('quiz-next-btn').textContent = quizIndex === currentQuizSet.length - 1 ? 'See Results' : 'Next Question â†'';
 }
 
 function nextQuizQuestion() {
@@ -1763,7 +1769,7 @@ function showQuizResults() {
   saveProgress();
   
   var html = '<div class="text-center py-8">';
-  html += '<div class="text-6xl mb-4">' + (passed ? 'ðŸŽ‰' : 'ðŸ“š') + '</div>';
+  html += '<div class="text-6xl mb-4">' + (passed ? 'Ž‰' : '"š') + '</div>';
   html += '<h2 class="text-2xl font-bold mb-2">' + (passed ? 'Congratulations!' : 'Keep Studying') + '</h2>';
   html += '<p class="text-slate-600 mb-6">' + (passed ? 'You passed with ' + pct + '%!' : 'You need 80% to pass. You scored ' + pct + '%.') + '</p>';
   
@@ -1822,11 +1828,42 @@ function paginateContent(content) {
   contentPages = [];
   var charsPerPage = 2500;
   
-  // Clean up the content
-  var text = content.replace(/\n/g, ' ').replace(/\t/g, ' ');
+  // Check if content is HTML or plain text
+  var isHTML = /<[a-z][\s\S]*>/i.test(content);
+  var formattedContent = content;
   
-  // Split into paragraphs
-  var paragraphs = text.split(/(<\/p>|<\/h[123]>|<\/div>|<\/li>|<\/ul>|<\/ol>)/gi);
+  if (!isHTML) {
+    // Convert plain text to HTML
+    // Split by double newlines for paragraphs
+    var paragraphs = content.split(/\n\n+/);
+    formattedContent = paragraphs.map(function(para) {
+      para = para.trim();
+      if (!para) return '';
+      
+      // Check if it's a heading (all caps or Roman numerals)
+      if (/^[IVX]+\.\s/.test(para) || /^[A-Z]\.\s/.test(para)) {
+        return '<h3 class="text-lg font-bold text-slate-800 mt-6 mb-2">' + para + '</h3>';
+      }
+      if (/^Chapter\s+(One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|\d+)/i.test(para)) {
+        return '<h2 class="text-xl font-bold text-red-700 mt-4 mb-2">' + para + '</h2>';
+      }
+      if (/^(INTRODUCTION|CONCLUSION)$/i.test(para.trim())) {
+        return '<h3 class="text-lg font-bold text-slate-800 mt-6 mb-2">' + para + '</h3>';
+      }
+      if (/^The Doctrine of/i.test(para)) {
+        return '<h2 class="text-xl font-bold text-red-700 mb-2">' + para + '</h2>';
+      }
+      if (/^\d+\.\s/.test(para)) {
+        return '<p class="ml-4 mb-3">' + para.replace(/\n/g, ' ') + '</p>';
+      }
+      
+      // Regular paragraph - replace single newlines with spaces
+      return '<p class="mb-4 leading-relaxed">' + para.replace(/\n/g, ' ') + '</p>';
+    }).join('\n');
+  }
+  
+  // Split into pages
+  var paragraphs = formattedContent.split(/(<\/p>|<\/h[123]>|<\/div>)/gi);
   var page = '';
   
   for (var i = 0; i < paragraphs.length; i++) {
@@ -1841,7 +1878,7 @@ function paginateContent(content) {
     }
   }
   if (page.trim()) contentPages.push(page);
-  if (contentPages.length === 0) contentPages = ['No content available'];
+  if (contentPages.length === 0) contentPages = ['<p>No content available</p>'];
 }
 
 function renderReaderPage() {
@@ -2169,7 +2206,7 @@ function filterNotes(filter) {
   items.sort((a, b) => new Date(b.created) - new Date(a.created));
   
   if (items.length === 0) {
-    document.getElementById('notes-list').innerHTML = '<div class="text-center py-12 text-slate-500"><div class="text-4xl mb-4">ðŸ“</div><p>No ' + filter + ' yet</p><p class="text-sm mt-2">Highlight text or add notes while reading</p></div>';
+    document.getElementById('notes-list').innerHTML = '<div class="text-center py-12 text-slate-500"><div class="text-4xl mb-4">"</div><p>No ' + filter + ' yet</p><p class="text-sm mt-2">Highlight text or add notes while reading</p></div>';
     return;
   }
   
@@ -2187,7 +2224,7 @@ function filterNotes(filter) {
     } else if (item.type === 'highlight') {
       html += '<div class="text-sm"><span class="highlight-' + item.color + ' px-1">' + item.text.substring(0, 150) + (item.text.length > 150 ? '...' : '') + '</span></div>';
     } else {
-      html += '<div class="text-sm text-slate-600 flex items-center gap-2"><span class="text-yellow-500">ðŸ”–</span> Bookmarked</div>';
+      html += '<div class="text-sm text-slate-600 flex items-center gap-2"><span class="text-yellow-500">"-</span> Bookmarked</div>';
     }
     
     html += '<div class="text-xs text-slate-400 mt-2">' + new Date(item.created).toLocaleDateString() + '</div>';
