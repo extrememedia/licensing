@@ -360,23 +360,10 @@
 document.getElementById('link-register').onclick = () => { document.getElementById('login-form').style.display='none'; document.getElementById('register-form').style.display='block'; };
 document.getElementById('link-login').onclick = () => { document.getElementById('register-form').style.display='none'; document.getElementById('login-form').style.display='block'; };
 
-// Supabase - NEVER CHANGE THIS LOGIN CODE
+// Supabase
 var supabase=null, SUPABASE_URL='https://mvuvgecqxwuqfshqbtjf.supabase.co', SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im12dXZnZWNxeHd1cWZzaHFidGpmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgwODQ4MTUsImV4cCI6MjA4MzY2MDgxNX0.6OezNuwN5Ip2a_Xw_SsuxoB80nn3WP7D5dnhAEE9A9o';
-function initSupabase(){
-  if(window.supabase && window.supabase.createClient){
-    supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-    console.log('Supabase initialized');
-    checkSession();
-  } else {
-    console.error('Supabase library not loaded');
-  }
-}
-// Load Supabase library
-var supaScript=document.createElement('script');
-supaScript.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';
-supaScript.onload=function(){ console.log('Supabase script loaded'); initSupabase(); };
-supaScript.onerror=function(){ console.error('Failed to load Supabase'); };
-document.head.appendChild(supaScript);
+function initSupabase(){if(window.supabase?.createClient){supabase=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);checkSession();}}
+var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js';s.onload=initSupabase;document.head.appendChild(s);
 
 // Global State
 var currentUser=null, userProgress=null, currentCategory=null, currentChapter=null;
@@ -831,24 +818,20 @@ function getDefaultQuizzes(ch) {
 
 
 // ========== AUTHENTICATION - NEVER CHANGE WITHOUT PERMISSION ==========
+// ========== AUTHENTICATION ==========
 async function handleLogin() {
   var email = document.getElementById('login-email').value.trim();
   var pw = document.getElementById('login-password').value;
   if (!email || !pw) return showError('Please fill in all fields');
-  if (!supabase) return showError('Connecting to server... please wait and try again');
+  if (!supabase) return showError('Connecting to server...');
   hideError();
   try {
-    console.log('Attempting login for:', email);
     var r = await supabase.auth.signInWithPassword({email: email, password: pw});
     if (r.error) throw r.error;
-    console.log('Login successful');
     currentUser = r.data.user;
     await loadProgress();
     showNav('home');
-  } catch (e) { 
-    console.error('Login error:', e);
-    showError(e.message || 'Login failed'); 
-  }
+  } catch (e) { showError(e.message); }
 }
 
 async function handleRegister() {
@@ -857,21 +840,16 @@ async function handleRegister() {
   var pw = document.getElementById('reg-password').value;
   if (!name || !email || !pw) return showError('Please fill in all fields');
   if (pw.length < 6) return showError('Password must be at least 6 characters');
-  if (!supabase) return showError('Connecting to server... please wait and try again');
+  if (!supabase) return showError('Connecting to server...');
   hideError();
   try {
-    console.log('Attempting registration for:', email);
     var r = await supabase.auth.signUp({email: email, password: pw, options: {data: {name: name}}});
     if (r.error) throw r.error;
-    console.log('Registration successful');
     currentUser = r.data.user;
     userProgress = createDefaultProgress();
     await saveProgress();
     showNav('home');
-  } catch (e) { 
-    console.error('Registration error:', e);
-    showError(e.message || 'Registration failed'); 
-  }
+  } catch (e) { showError(e.message); }
 }
 
 async function handleLogout() {
@@ -882,21 +860,17 @@ async function handleLogout() {
 }
 
 function checkSession() {
-  supabase.auth.getSession().then(function(r) {
-    console.log('Session check:', r.data.session ? 'Found session' : 'No session');
+  supabase?.auth.getSession().then(r => {
     if (r.data.session) {
       currentUser = r.data.session.user;
-      loadProgress().then(function() { showNav('home'); });
+      loadProgress().then(() => showNav('home'));
     }
-  }).catch(function(e) {
-    console.error('Session check error:', e);
   });
 }
 
 function showError(msg) {
-  var el = document.getElementById('login-error');
-  el.textContent = msg;
-  el.classList.remove('hidden');
+  document.getElementById('login-error').textContent = msg;
+  document.getElementById('login-error').classList.remove('hidden');
 }
 function hideError() {
   document.getElementById('login-error').classList.add('hidden');
