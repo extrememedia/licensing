@@ -1593,8 +1593,7 @@ function paginateContent(content) {
   var charsPerPage = 2500;
   
   // Clean up the content
-  var text = content.replace(/\n/g, '
-').replace(/\t/g, ' ');
+  var text = content.replace(/\n/g, ' ').replace(/\t/g, ' ');
   
   // Split into paragraphs
   var paragraphs = text.split(/(<\/p>|<\/h[123]>|<\/div>|<\/li>|<\/ul>|<\/ol>)/gi);
