@@ -1791,8 +1791,10 @@ function showQuizResults() {
 
 // ========== READER ==========
 function openReader(startPage) {
+  console.log('DEBUG openReader called, startPage=' + startPage + ', currentChapter.id=' + currentChapter.id);
   var content = loadedContent[currentChapter.id] || currentChapter.reading || '';
-  if (!content) return;
+  console.log('DEBUG openReader content length:', content.length);
+  if (!content) { console.log('DEBUG openReader: NO CONTENT, returning'); return; }
   
   paginateContent(content);
   currentPage = startPage || userProgress[currentCategory.id]?.[currentChapter.id]?.lastPage || 1;
@@ -1823,6 +1825,8 @@ function closeReader() {
 }
 
 function paginateContent(content) {
+  console.log('DEBUG paginateContent called, content length:', content ? content.length : 'NULL');
+  console.log('DEBUG content first 200 chars:', content ? content.substring(0, 200) : 'NULL');
   contentPages = [];
   var charsPerPage = 2500;
   
@@ -1877,10 +1881,15 @@ function paginateContent(content) {
   }
   if (page.trim()) contentPages.push(page);
   if (contentPages.length === 0) contentPages = ['<p>No content available</p>'];
+  console.log('DEBUG paginateContent complete: ' + contentPages.length + ' pages created');
+  console.log('DEBUG page 1 length:', contentPages[0] ? contentPages[0].length : 0);
 }
 
 function renderReaderPage() {
+  console.log('DEBUG renderReaderPage: currentPage=' + currentPage + ', contentPages.length=' + contentPages.length);
+  console.log('DEBUG contentPages[0] first 100 chars:', contentPages[0] ? contentPages[0].substring(0, 100) : 'EMPTY');
   var pageContent = contentPages[currentPage - 1] || '';
+  console.log('DEBUG pageContent length:', pageContent.length, 'first 100:', pageContent.substring(0, 100));
   
   // Apply highlights
   annotations.highlights.forEach(h => {
