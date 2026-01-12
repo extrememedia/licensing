@@ -176,16 +176,16 @@
     .difficulty-hard { background: #fee2e2; color: #991b1b; }
   </style>
   <!-- Chapter Content Files -->
-  <script src="chapters/ch1.js"></script>
-  <script src="chapters/ch2.js"></script>
-  <script src="chapters/ch3.js"></script>
-  <script src="chapters/ch4.js"></script>
-  <script src="chapters/ch5.js"></script>
-  <script src="chapters/ch6.js"></script>
-  <script src="chapters/ch7.js"></script>
-  <script src="chapters/ch8.js"></script>
-  <script src="chapters/ch9.js"></script>
-  <script src="chapters/ch10.js"></script>
+  <script src="ch1.js"></script>
+  <script src="ch2.js"></script>
+  <script src="ch3.js"></script>
+  <script src="ch4.js"></script>
+  <script src="ch5.js"></script>
+  <script src="ch6.js"></script>
+  <script src="ch7.js"></script>
+  <script src="ch8.js"></script>
+  <script src="ch9.js"></script>
+  <script src="ch10.js"></script>
 </head>
 <body>
 <div class="app-container">
@@ -1565,7 +1565,7 @@ function renderReadTab() {
       showReadPreview(loadedContent[ch.id]);
     } else {
       var s = document.createElement('script');
-      s.src = 'chapters/' + ch.id + '.js';
+      s.src = ch.id + '.js';
       s.onload = () => {
         var v = 'FOPT_' + ch.id.toUpperCase();
         if (window[v]) { loadedContent[ch.id] = window[v].content; showReadPreview(loadedContent[ch.id]); }
