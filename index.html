@@ -9,7 +9,38 @@
   <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@300;400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; }
+    body { margin: 0; font-family: 'Inter', system-ui, sans-serif; background: #f8fafc; transition: background 0.3s, color 0.3s; }
+    
+    /* Dark Mode */
+    body.dark-mode { background: #0f172a; color: #e2e8f0; }
+    body.dark-mode .app-container { background: #0f172a; }
+    body.dark-mode .main-card { background: #1e293b; border-color: #334155; }
+    body.dark-mode .bottom-nav { background: #1e293b; border-color: #334155; }
+    body.dark-mode .nav-item { color: #94a3b8; }
+    body.dark-mode .nav-item:hover, body.dark-mode .nav-item.active { color: #3b82f6; }
+    body.dark-mode .section-header { color: #e2e8f0; }
+    body.dark-mode .chapter-item { border-color: #334155; }
+    body.dark-mode .chapter-item:hover { background: #334155; }
+    body.dark-mode .metric-card { background: #1e293b; border-color: #334155; }
+    body.dark-mode .tab-bar { background: #334155; }
+    body.dark-mode .tab-btn { color: #94a3b8; }
+    body.dark-mode .tab-btn.active { background: #1e293b; color: #e2e8f0; }
+    body.dark-mode .study-section { background: #1e293b; border-color: #334155; }
+    body.dark-mode .study-section h4 { color: #e2e8f0; }
+    body.dark-mode .study-section-content { color: #cbd5e1; }
+    body.dark-mode .note-card { background: #1e293b; }
+    body.dark-mode .bookmark-quick { background: #374151; }
+    body.dark-mode .recent-activity { background: #1e293b; }
+    body.dark-mode .quiz-option { background: #1e293b; border-color: #334155; }
+    body.dark-mode .quiz-option:hover { background: #334155; }
+    body.dark-mode .key-term { background: #374151; color: #fbbf24; }
+    body.dark-mode .scripture-box { background: #1e3a5f; border-color: #3b82f6; }
+    body.dark-mode .key-point { background: #14532d; border-color: #22c55e; }
+    body.dark-mode .discussion-q { background: #1e3a5f; }
+    body.dark-mode input, body.dark-mode select, body.dark-mode textarea { background: #1e293b; color: #e2e8f0; border-color: #334155; }
+    body.dark-mode .text-slate-600, body.dark-mode .text-slate-500 { color: #94a3b8 !important; }
+    body.dark-mode .text-slate-800, body.dark-mode .text-slate-700 { color: #e2e8f0 !important; }
+    @media (min-width: 768px) { body.dark-mode { background: #020617; } }
     
     /* Responsive app container */
     .app-container { 
@@ -60,8 +91,8 @@
     .screen.active { display: block; }
     .bottom-nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; background: white; border-top: 1px solid #e5e7eb; z-index: 100; }
     .nav-item { flex: 1; padding: 8px 4px; text-align: center; color: #64748b; cursor: pointer; transition: all 0.2s; }
-    .nav-item:hover { color: #dc2626; }
-    .nav-item.active { color: #dc2626; }
+    .nav-item:hover { color: #3b82f6; }
+    .nav-item.active { color: #3b82f6; }
     .nav-item svg { width: 24px; height: 24px; margin: 0 auto 2px; }
     @media (min-width: 768px) {
       .nav-item { padding: 12px 8px; }
@@ -145,7 +176,7 @@
     .quiz-option.correct { border-color: #10b981 !important; background: #d1fae5 !important; }
     .quiz-option.incorrect { border-color: #ef4444 !important; background: #fee2e2 !important; }
     
-    .loading-spinner { border: 3px solid #e5e7eb; border-top-color: #dc2626; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+    .loading-spinner { border: 3px solid #e5e7eb; border-top-color: #3b82f6; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     
     .note-card { background: white; border-radius: 12px; padding: 12px; margin-bottom: 8px; border-left: 3px solid #3b82f6; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
@@ -158,7 +189,7 @@
     .reading-content li { margin-bottom: 0.5rem; }
     
     /* Guidance cards */
-    .guidance-card { background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
+    .guidance-card { background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%); color: white; border-radius: 16px; padding: 20px; margin-bottom: 16px; }
     .next-step-card { background: linear-gradient(135deg, #059669 0%, #047857 100%); color: white; border-radius: 16px; padding: 16px; margin-bottom: 16px; cursor: pointer; }
     .recent-activity { background: white; border-radius: 12px; padding: 12px 16px; margin-bottom: 8px; border-left: 3px solid #6366f1; }
     .bookmark-quick { background: #fef3c7; border-radius: 10px; padding: 10px 14px; margin-bottom: 8px; cursor: pointer; }
@@ -185,40 +216,40 @@
   <div class="min-h-screen flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full p-8">
       <div class="text-center mb-8">
-        <div class="w-20 h-20 bg-gradient-to-br from-red-600 to-red-800 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <div class="w-20 h-20 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-2xl flex items-center justify-center mx-auto mb-4">
           <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
         </div>
         <h1 class="text-2xl font-bold text-slate-800">Foursquare Licensing</h1>
         <p class="text-slate-500 mt-2">University-Level Ministry Preparation</p>
       </div>
       <div id="login-form">
-        <div class="mb-4"><label class="block text-sm font-medium text-slate-700 mb-1">Email</label><input type="email" id="login-email" class="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"></div>
-        <div class="mb-6"><label class="block text-sm font-medium text-slate-700 mb-1">Password</label><input type="password" id="login-password" class="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"></div>
-        <button id="btn-login" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition">Sign In</button>
-        <p class="text-center text-sm text-slate-500 mt-4">No account? <span id="link-register" class="text-red-600 cursor-pointer font-medium">Create one</span></p>
+        <div class="mb-4"><label class="block text-sm font-medium text-slate-700 mb-1">Email</label><input type="email" id="login-email" class="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></div>
+        <div class="mb-6"><label class="block text-sm font-medium text-slate-700 mb-1">Password</label><input type="password" id="login-password" class="w-full border border-slate-300 rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"></div>
+        <button id="btn-login" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold hover:from-blue-700 hover:to-indigo-800 transition">Sign In</button>
+        <p class="text-center text-sm text-slate-500 mt-4">No account? <span id="link-register" class="text-blue-600 cursor-pointer font-medium">Create one</span></p>
       </div>
       <div id="register-form" style="display:none;">
         <div class="mb-4"><label class="block text-sm font-medium text-slate-700 mb-1">Full Name</label><input type="text" id="reg-name" class="w-full border border-slate-300 rounded-xl px-4 py-3"></div>
         <div class="mb-4"><label class="block text-sm font-medium text-slate-700 mb-1">Email</label><input type="email" id="reg-email" class="w-full border border-slate-300 rounded-xl px-4 py-3"></div>
         <div class="mb-6"><label class="block text-sm font-medium text-slate-700 mb-1">Password</label><input type="password" id="reg-password" class="w-full border border-slate-300 rounded-xl px-4 py-3"></div>
-        <button id="btn-register" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-3 rounded-xl font-semibold">Create Account</button>
-        <p class="text-center text-sm text-slate-500 mt-4">Have account? <span id="link-login" class="text-red-600 cursor-pointer font-medium">Sign in</span></p>
+        <button id="btn-register" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-3 rounded-xl font-semibold">Create Account</button>
+        <p class="text-center text-sm text-slate-500 mt-4">Have account? <span id="link-login" class="text-blue-600 cursor-pointer font-medium">Sign in</span></p>
       </div>
-      <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm"></div>
+      <div id="login-error" class="hidden mt-4 p-3 bg-red-50 border border-red-200 rounded-xl text-blue-700 text-sm"></div>
     </div>
   </div>
 </div>
 
 <!-- HOME SCREEN -->
 <div id="screen-home" class="screen">
-  <header class="bg-gradient-to-r from-red-700 to-red-800 text-white px-4 pt-12 pb-6">
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 pt-12 pb-6">
     <div class="flex items-center justify-between mb-4">
-      <div><p class="text-red-200 text-sm">Welcome back,</p><h1 class="text-xl font-bold" id="user-name">Student</h1></div>
-      <button onclick="handleLogout()" class="text-red-200 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
+      <div><p class="text-blue-200 text-sm">Welcome back,</p><h1 class="text-xl font-bold" id="user-name">Student</h1></div>
+      <button onclick="handleLogout()" class="text-blue-200 hover:text-white"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg></button>
     </div>
     <div class="bg-white/10 rounded-xl p-4">
       <div class="flex items-center justify-between">
-        <div><div class="text-3xl font-bold" id="total-progress">0%</div><div class="text-red-200 text-sm">Overall Progress</div></div>
+        <div><div class="text-3xl font-bold" id="total-progress">0%</div><div class="text-blue-200 text-sm">Overall Progress</div></div>
         <svg class="progress-ring" width="60" height="60"><circle cx="30" cy="30" r="26" stroke="rgba(255,255,255,0.2)" stroke-width="5" fill="none"/><circle id="progress-ring-circle" cx="30" cy="30" r="26" stroke="white" stroke-width="5" fill="none" stroke-dasharray="163.36" stroke-dashoffset="163.36" stroke-linecap="round"/></svg>
       </div>
     </div>
@@ -227,7 +258,7 @@
   <main class="px-4 py-4 pb-24">
     <!-- Stats Row -->
     <div class="grid grid-cols-4 gap-2 mb-4">
-      <div class="metric-card"><div class="text-xl font-bold text-red-600" id="stat-chapters">0</div><div class="text-xs text-slate-500">Read</div></div>
+      <div class="metric-card"><div class="text-xl font-bold text-blue-600" id="stat-chapters">0</div><div class="text-xs text-slate-500">Read</div></div>
       <div class="metric-card"><div class="text-xl font-bold text-green-600" id="stat-studied">0</div><div class="text-xs text-slate-500">Studied</div></div>
       <div class="metric-card"><div class="text-xl font-bold text-blue-600" id="stat-quizzes">0</div><div class="text-xs text-slate-500">Quizzes</div></div>
       <div class="metric-card"><div class="text-xl font-bold text-purple-600" id="stat-notes">0</div><div class="text-xs text-slate-500">Notes</div></div>
@@ -246,8 +277,8 @@
     <div class="main-card" id="domains-card">
       <div class="section-header flex items-center justify-between" onclick="toggleSection('domains')">
         <div class="flex items-center gap-3">
-          <div class="w-11 h-11 bg-gradient-to-br from-red-500 to-red-700 rounded-xl flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
-          <div><h2 class="font-bold text-slate-800">Licensing Domains</h2><p class="text-xs text-slate-500">5 Core Areas ¢ Required</p></div>
+          <div class="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl flex items-center justify-center"><svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div><h2 class="font-bold text-slate-800">Licensing Domains</h2><p class="text-xs text-slate-500">5 Core Areas Â¢ Required</p></div>
         </div>
         <div class="flex items-center gap-2"><div class="text-sm font-bold text-slate-600" id="domains-progress">0%</div><svg class="w-5 h-5 text-slate-400 transition-transform" id="domains-chevron" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg></div>
       </div>
@@ -295,7 +326,7 @@
   <header class="bg-white border-b px-4 py-4 pt-12">
     <h1 class="text-xl font-bold text-slate-800">My Notes & Highlights</h1>
     <div class="flex gap-2 mt-3 overflow-x-auto pb-1">
-      <button onclick="filterNotes('all')" class="notes-filter px-4 py-1.5 rounded-full text-sm font-medium bg-red-600 text-white whitespace-nowrap">All</button>
+      <button onclick="filterNotes('all')" class="notes-filter px-4 py-1.5 rounded-full text-sm font-medium bg-blue-600 text-white whitespace-nowrap">All</button>
       <button onclick="filterNotes('notes')" class="notes-filter px-4 py-1.5 rounded-full text-sm font-medium bg-slate-100 whitespace-nowrap">Notes</button>
       <button onclick="filterNotes('highlights')" class="notes-filter px-4 py-1.5 rounded-full text-sm font-medium bg-slate-100 whitespace-nowrap">Highlights</button>
       <button onclick="filterNotes('bookmarks')" class="notes-filter px-4 py-1.5 rounded-full text-sm font-medium bg-slate-100 whitespace-nowrap">Bookmarks</button>
@@ -312,36 +343,43 @@
 
 <!-- PROFILE SCREEN -->
 <div id="screen-profile" class="screen">
-  <header class="bg-gradient-to-r from-red-700 to-red-800 text-white px-4 pt-12 pb-6">
+  <header class="bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 pt-12 pb-6">
     <div class="flex items-center gap-4">
       <div class="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center text-2xl font-bold" id="profile-avatar">S</div>
-      <div><h1 class="text-xl font-bold" id="profile-name">Student</h1><p class="text-red-200 text-sm" id="profile-email"></p></div>
+      <div><h1 class="text-xl font-bold" id="profile-name">Student</h1><p class="text-blue-200 text-sm" id="profile-email"></p></div>
     </div>
   </header>
   <main class="px-4 py-4 pb-24">
     <div class="main-card p-4 mb-4">
-      <h3 class="font-bold text-slate-800 mb-4">"Š Your Statistics</h3>
+      <h3 class="font-bold mb-4">Your Statistics</h3>
       <div class="space-y-3">
         <div class="flex justify-between items-center"><span class="text-slate-600">Chapters Read</span><span class="font-bold text-lg" id="profile-chapters">0</span></div>
         <div class="flex justify-between items-center"><span class="text-slate-600">Study Guides Completed</span><span class="font-bold text-lg" id="profile-studied">0</span></div>
         <div class="flex justify-between items-center"><span class="text-slate-600">Quizzes Passed (80%+)</span><span class="font-bold text-lg" id="profile-quizzes">0</span></div>
-        <div class="flex justify-between items-center"><span class="text-slate-600">Notes & Highlights</span><span class="font-bold text-lg" id="profile-notes">0</span></div>
+        <div class="flex justify-between items-center"><span class="text-slate-600">Notes \& Highlights</span><span class="font-bold text-lg" id="profile-notes">0</span></div>
         <div class="flex justify-between items-center"><span class="text-slate-600">Bookmarks</span><span class="font-bold text-lg" id="profile-bookmarks">0</span></div>
       </div>
     </div>
     <div class="main-card p-4 mb-4">
-      <h3 class="font-bold text-slate-800 mb-4">Ž¯ Licensing Progress</h3>
+      <h3 class="font-bold mb-4">Licensing Progress</h3>
       <div class="space-y-3">
-        <div><div class="flex justify-between text-sm mb-1"><span>Domains</span><span id="profile-domains-pct">0%</span></div><div class="h-2 bg-slate-200 rounded-full"><div class="h-full bg-red-500 rounded-full transition-all" id="profile-domains-bar" style="width:0%"></div></div></div>
+        <div><div class="flex justify-between text-sm mb-1"><span>Domains</span><span id="profile-domains-pct">0%</span></div><div class="h-2 bg-slate-200 rounded-full"><div class="h-full bg-blue-500 rounded-full transition-all" id="profile-domains-bar" style="width:0%"></div></div></div>
         <div><div class="flex justify-between text-sm mb-1"><span>Required Books</span><span id="profile-books-pct">0%</span></div><div class="h-2 bg-slate-200 rounded-full"><div class="h-full bg-indigo-500 rounded-full transition-all" id="profile-books-bar" style="width:0%"></div></div></div>
       </div>
     </div>
-    <div class="main-card p-4">
-      <h3 class="font-bold text-slate-800 mb-4">âš™ï¸ Settings</h3>
+    <div class="main-card p-4 mb-4">
+      <h3 class="font-bold mb-4">Settings</h3>
       <div class="space-y-4">
+        <div class="flex justify-between items-center">
+          <span class="text-slate-600">Dark Mode</span>
+          <button id="dark-mode-toggle" onclick="toggleDarkMode()" class="w-12 h-6 rounded-full bg-slate-300 relative transition-colors">
+            <div id="dark-mode-knob" class="w-5 h-5 rounded-full bg-white absolute top-0.5 left-0.5 transition-transform shadow"></div>
+          </button>
+        </div>
         <div><label class="block text-sm font-medium text-slate-600 mb-2">TTS Voice</label><select id="voice-select" class="w-full border border-slate-300 rounded-lg px-3 py-2" onchange="saveVoicePref()"></select></div>
       </div>
     </div>
+    <button onclick="handleLogout()" class="w-full py-3 border border-slate-300 rounded-xl text-slate-600 hover:bg-slate-50">Sign Out</button>
   </main>
   <nav class="bottom-nav"><div class="flex">
     <div class="nav-item" onclick="showNav('home')"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg><div class="text-xs">Home</div></div>
@@ -374,7 +412,7 @@
 <!-- READER SCREEN -->
 <div id="screen-reader" class="screen">
   <div id="reader-container" class="reader-container theme-light font-serif">
-    <div class="fixed top-0 left-0 right-0 h-1 bg-slate-200 z-50"><div id="reading-progress-bar" class="h-full bg-red-500 transition-all" style="width:0%"></div></div>
+    <div class="fixed top-0 left-0 right-0 h-1 bg-slate-200 z-50"><div id="reading-progress-bar" class="h-full bg-blue-500 transition-all" style="width:0%"></div></div>
     <header class="fixed top-0 left-0 right-0 bg-white/95 backdrop-blur border-b z-40 px-4 py-3 flex items-center justify-between" id="reader-header" style="max-width:480px;margin:0 auto;">
       <button onclick="closeReader()" class="p-2 -ml-2 hover:bg-slate-100 rounded-lg"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg></button>
       <div class="text-center flex-1"><div class="font-medium text-sm truncate" id="reader-title-bar">Chapter</div><div class="text-xs text-slate-500" id="reader-page-indicator">Page 1/1</div></div>
@@ -388,17 +426,17 @@
       <button onclick="addHighlight('yellow')" class="w-8 h-8 rounded-full bg-yellow-300 border-2 border-yellow-400 hover:scale-110 transition"></button>
       <button onclick="addHighlight('green')" class="w-8 h-8 rounded-full bg-green-300 border-2 border-green-400 hover:scale-110 transition"></button>
       <button onclick="addHighlight('blue')" class="w-8 h-8 rounded-full bg-blue-300 border-2 border-blue-400 hover:scale-110 transition"></button>
-      <button onclick="addNoteToSelection()" class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-sm hover:scale-110 transition">"</button>
+      <button onclick="addNoteToSelection()" class="w-8 h-8 rounded-full bg-white border-2 border-slate-300 text-sm hover:scale-110 transition">"Â</button>
     </div>
     <div class="fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur border-t z-40 px-4 py-3" id="reader-footer" style="max-width:480px;margin:0 auto;">
       <div class="flex items-center justify-between">
-        <button onclick="prevPage()" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-30" id="btn-prev"><- Prev</button>
+        <button onclick="prevPage()" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-30" id="btn-prev"><-Â Prev</button>
         <div class="flex items-center gap-2"><input type="number" id="page-input" class="w-14 text-center border border-slate-300 rounded-lg py-1" min="1"><span class="text-slate-500">/ <span id="total-pages">1</span></span></div>
         <button onclick="nextPage()" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 disabled:opacity-30" id="btn-next">Next</button>
       </div>
       <div class="flex items-center justify-center gap-4 mt-3 pt-3 border-t">
         <button onclick="ttsRewind()" class="p-2 text-slate-600 hover:text-slate-900"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="11 19 2 12 11 5 11 19"/><polygon points="22 19 13 12 22 5 22 19"/></svg></button>
-        <button onclick="toggleTTS()" id="btn-tts" class="w-12 h-12 bg-red-600 text-white rounded-full flex items-center justify-center hover:bg-red-700 transition">
+        <button onclick="toggleTTS()" id="btn-tts" class="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 transition">
           <svg id="tts-play-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><polygon points="5 3 19 12 5 21 5 3"/></svg>
           <svg id="tts-pause-icon" class="hidden" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="white"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
         </button>
@@ -409,7 +447,7 @@
     <!-- Reader Settings Panel -->
     <div id="reader-settings-panel" class="fixed inset-0 bg-black/50 z-50 hidden flex items-end justify-center">
       <div class="bg-white w-full max-w-[480px] rounded-t-2xl p-6 max-h-[70vh] overflow-y-auto">
-        <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Reader Settings</h3><button onclick="toggleReaderSettings()" class="p-2 hover:bg-slate-100 rounded-lg">âœ•</button></div>
+        <div class="flex justify-between items-center mb-4"><h3 class="font-bold text-lg">Reader Settings</h3><button onclick="toggleReaderSettings()" class="p-2 hover:bg-slate-100 rounded-lg">Ã¢Å“â€¢</button></div>
         <div class="mb-6"><div class="text-sm font-medium mb-3">Theme</div><div class="flex gap-3"><button onclick="setTheme('light')" class="w-12 h-12 rounded-full bg-white border-2 border-slate-300 hover:border-slate-400"></button><button onclick="setTheme('sepia')" class="w-12 h-12 rounded-full bg-[#f4ecd8] border-2 border-slate-300 hover:border-slate-400"></button><button onclick="setTheme('dark')" class="w-12 h-12 rounded-full bg-[#1a1a1a] border-2 border-slate-300 hover:border-slate-400"></button></div></div>
         <div class="mb-6"><div class="text-sm font-medium mb-3">Font Style</div><div class="flex gap-2"><button onclick="setFont('serif')" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 font-serif">Serif</button><button onclick="setFont('sans')" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 font-sans">Sans</button></div></div>
         <div class="mb-6"><div class="text-sm font-medium mb-3">Font Size: <span id="size-display">18px</span></div><input type="range" min="14" max="28" value="18" class="w-full" id="font-size-slider" oninput="setFontSize(this.value)"></div>
@@ -424,8 +462,8 @@
   <div class="bg-white rounded-xl max-w-lg w-full p-6">
     <h3 class="font-bold text-lg mb-2">Add Note</h3>
     <div class="text-sm text-slate-500 mb-4 italic" id="note-modal-quote"></div>
-    <textarea id="note-modal-text" class="w-full border border-slate-300 rounded-lg p-3 h-32 focus:ring-2 focus:ring-red-500 focus:border-transparent" placeholder="Write your note..."></textarea>
-    <div class="flex justify-end gap-3 mt-4"><button onclick="closeNoteModal()" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">Cancel</button><button onclick="saveNote()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700">Save Note</button></div>
+    <textarea id="note-modal-text" class="w-full border border-slate-300 rounded-lg p-3 h-32 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Write your note..."></textarea>
+    <div class="flex justify-end gap-3 mt-4"><button onclick="closeNoteModal()" class="px-4 py-2 border border-slate-300 rounded-lg hover:bg-slate-50">Cancel</button><button onclick="saveNote()" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Save Note</button></div>
   </div>
 </div>
 
@@ -486,9 +524,31 @@ try{var rs=localStorage.getItem('readerSettings');if(rs)readerSettings=JSON.pars
 });
 
 // ========== LICENSING DOMAINS ==========
+// SVG Icons as strings for cleaner rendering
+var ICONS = {
+  heritage: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>',
+  identity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="5"/><path d="M3 21v-2a7 7 0 0 1 14 0v2"/></svg>',
+  doctrine: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>',
+  polity: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>',
+  practice: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M12 6v6l4 2"/></svg>',
+  book: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>',
+  person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+  globe: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>'
+};
+
+// Helper function to render icon (returns SVG or fallback)
+function renderIcon(iconKey, size) {
+  size = size || 20;
+  if (ICONS[iconKey]) {
+    return '<div style="width:' + size + 'px;height:' + size + 'px;color:white;">' + ICONS[iconKey] + '</div>';
+  }
+  return iconKey; // fallback to string if not found
+}
+
 var DOMAINS = [
   {
-    id: 'heritage', name: 'Heritage', icon: '›ï¸', color: 'from-amber-500 to-orange-600', desc: 'History of Foursquare',
+    id: 'heritage', name: 'Heritage', icon: 'heritage', color: 'from-sky-500 to-blue-600', desc: 'History of Foursquare',
     chapters: [
       {
         id: 'heritage-1', title: 'Aimee Semple McPherson: Our Founder',
@@ -499,7 +559,7 @@ var DOMAINS = [
 <h3>Early Life and Dramatic Conversion</h3>
 <p>Born Aimee Elizabeth Kennedy on October 9, 1890, near Ingersoll, Ontario, Canada, she grew up in a Christian home but began questioning her faith as a teenager. At age 17, she attended a Pentecostal revival meeting led by Robert Semple, a young Irish evangelist.</p>
 
-<div class="scripture-box">"Oh, God¦ if there be a God¦ reveal yourself to me!" " Aimee's desperate prayer at age 17 that would change the course of her life and impact millions.</div>
+<div class="scripture-box">"Oh, GodÂ¦ if there be a GodÂ¦ reveal yourself to me!" " Aimee's desperate prayer at age 17 that would change the course of her life and impact millions.</div>
 
 <p>After three days of fierce internal struggle, Aimee surrendered her life to Christ and was filled with the Holy Spirit. This dramatic conversion set the trajectory for her entire ministry.</p>
 
@@ -585,7 +645,7 @@ var DOMAINS = [
     ]
   },
   {
-    id: 'identity', name: 'Identity', icon: 'âœ¨', color: 'from-purple-500 to-violet-600', desc: 'What makes Foursquare distinctive',
+    id: 'identity', name: 'Identity', icon: 'identity', color: 'from-violet-500 to-purple-600', desc: 'What makes Foursquare distinctive',
     chapters: [
       {
         id: 'identity-1', title: 'The Foursquare Gospel: Our Name & Message',
@@ -657,7 +717,7 @@ var DOMAINS = [
     ]
   },
   {
-    id: 'doctrine', name: 'Doctrine', icon: '"-', color: 'from-blue-500 to-indigo-600', desc: 'Core beliefs',
+    id: 'doctrine', name: 'Doctrine', icon: 'doctrine', color: 'from-blue-500 to-indigo-600', desc: 'Core beliefs',
     chapters: [
       {
         id: 'doctrine-1', title: 'The Declaration of Faith',
@@ -709,7 +769,7 @@ var DOMAINS = [
     ]
   },
   {
-    id: 'polity', name: 'Polity', icon: 'âš-ï¸', color: 'from-emerald-500 to-teal-600', desc: 'Church governance',
+    id: 'polity', name: 'Polity', icon: 'polity', color: 'from-teal-500 to-cyan-600', desc: 'Church governance',
     chapters: [
       {
         id: 'polity-1', title: 'Foursquare Church Government',
@@ -761,7 +821,7 @@ var DOMAINS = [
     ]
   },
   {
-    id: 'practice', name: 'Ministry Practice', icon: '™', color: 'from-pink-500 to-rose-600', desc: 'Ordinances & Christian living',
+    id: 'practice', name: 'Ministry Practice', icon: 'practice', color: 'from-indigo-500 to-blue-600', desc: 'Ordinances & Christian living',
     chapters: [
       {
         id: 'practice-1', title: 'The Ordinances & Spirit-Filled Living',
@@ -814,7 +874,7 @@ var DOMAINS = [
 // ========== REQUIRED BOOKS ==========
 var BOOKS = [
   {
-    id: 'fopt', name: 'Foundations of Pentecostal Theology', icon: '"š', color: 'from-indigo-500 to-purple-600', desc: 'Complete Textbook',
+    id: 'fopt', name: 'Foundations of Pentecostal Theology', icon: 'book', color: 'from-blue-600 to-indigo-700', desc: 'Complete Textbook',
     chapters: [
       {
         id: 'ch1', num: 1, title: 'The Doctrine of Scripture', hasFullText: true,
@@ -897,10 +957,10 @@ var BOOKS = [
       {id:'ch10', num:10, title:'The Doctrine of Last Things', hasFullText:true, summary:'Discover eschatology"death, resurrection, rapture, tribulation, millennium, and eternal state.'}
     ]
   },
-  {id:'aimee-bio', name:'Aimee: Life Story', icon:'‘©', color:'from-rose-400 to-pink-500', desc:'Biography', comingSoon:true, chapters:[]},
-  {id:'women-ministry', name:'Women in Ministry', icon:'‘©«', color:'from-fuchsia-400 to-purple-500', desc:'Biblical position', comingSoon:true, chapters:[]},
-  {id:'disciples-nations', name:'Disciples of All Nations', icon:'Œ', color:'from-cyan-400 to-blue-500', desc:'Missions', comingSoon:true, chapters:[]},
-  {id:'keystones', name:'Foursquare Keystones', icon:'"‘', color:'from-amber-400 to-orange-500', desc:'Five key areas', comingSoon:true, chapters:[]}
+  {id:'aimee-bio', name:'Aimee: Life Story', icon:'person', color:'from-blue-400 to-indigo-500', desc:'Biography', comingSoon:true, chapters:[]},
+  {id:'women-ministry', name:'Women in Ministry', icon:'person', color:'from-violet-400 to-purple-500', desc:'Biblical position', comingSoon:true, chapters:[]},
+  {id:'disciples-nations', name:'Disciples of All Nations', icon:'globe', color:'from-cyan-400 to-blue-500', desc:'Missions', comingSoon:true, chapters:[]},
+  {id:'keystones', name:'Foursquare Keystones', icon:'star', color:'from-blue-400 to-sky-500', desc:'Five key areas', comingSoon:true, chapters:[]}
 ];
 
 // Default study guide for chapters without full study content
@@ -1241,15 +1301,15 @@ function renderGuidanceSection() {
   
   if (nextStep.isNew) {
     // New user - show welcome
-    html += '<div class="guidance-card"><div class="flex items-center gap-3 mb-3"><div class="text-3xl">Ž"</div><div><h3 class="font-bold text-lg">Welcome to Licensing!</h3><p class="text-red-100 text-sm">Start your journey to Foursquare ministry</p></div></div>';
-    html += '<p class="text-red-100 mb-4">Begin with the <strong>Heritage</strong> domain to learn about our founder, Aimee Semple McPherson, and the history of The Foursquare Church.</p>';
-    html += '<button onclick="openCategory(\'domain\',\'heritage\')" class="w-full bg-white text-red-700 py-3 rounded-xl font-semibold">Start Here</button></div>';
+    html += '<div class="guidance-card"><div class="flex items-center gap-3 mb-3"><div class="text-3xl">📚</div><div><h3 class="font-bold text-lg">Welcome to Licensing!</h3><p class="text-blue-100 text-sm">Start your journey to Foursquare ministry</p></div></div>';
+    html += '<p class="text-blue-100 mb-4">Begin with the <strong>Heritage</strong> domain to learn about our founder, Aimee Semple McPherson, and the history of The Foursquare Church.</p>';
+    html += '<button onclick="openCategory(\'domain\',\'heritage\')" class="w-full bg-white text-blue-700 py-3 rounded-xl font-semibold">Start Here</button></div>';
   } else if (nextStep.type === 'continue') {
     // Continue reading
-    html += '<div class="next-step-card" onclick="' + nextStep.action + '"><div class="flex items-center gap-3"><div class="text-2xl">' + nextStep.icon + '</div><div class="flex-1"><p class="text-green-100 text-xs uppercase font-medium">Continue Where You Left Off</p><h3 class="font-bold">' + nextStep.title + '</h3><p class="text-green-100 text-sm">' + nextStep.details + '</p></div><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+    html += '<div class="next-step-card" onclick="' + nextStep.action + '"><div class="flex items-center gap-3"><div class="text-2xl">' + renderIcon(nextStep.icon, 24) + '</div><div class="flex-1"><p class="text-green-100 text-xs uppercase font-medium">Continue Where You Left Off</p><h3 class="font-bold">' + nextStep.title + '</h3><p class="text-green-100 text-sm">' + nextStep.details + '</p></div><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
   } else if (nextStep.type === 'next') {
     // Next recommended step
-    html += '<div class="next-step-card" onclick="' + nextStep.action + '"><div class="flex items-center gap-3"><div class="text-2xl">' + nextStep.icon + '</div><div class="flex-1"><p class="text-green-100 text-xs uppercase font-medium">Your Next Step</p><h3 class="font-bold">' + nextStep.title + '</h3><p class="text-green-100 text-sm">' + nextStep.details + '</p></div><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+    html += '<div class="next-step-card" onclick="' + nextStep.action + '"><div class="flex items-center gap-3"><div class="text-2xl">' + renderIcon(nextStep.icon, 24) + '</div><div class="flex-1"><p class="text-green-100 text-xs uppercase font-medium">Your Next Step</p><h3 class="font-bold">' + nextStep.title + '</h3><p class="text-green-100 text-sm">' + nextStep.details + '</p></div><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
   }
   
   document.getElementById('guidance-section').innerHTML = html;
@@ -1278,9 +1338,9 @@ function findNextStep() {
         var p = userProgress[cat.id]?.[ch.id] || {};
         if (!p.read) {
           return {
-            type: 'continue', icon: '"-',
+            type: 'continue', icon: 'book',
             title: ch.num ? 'Chapter ' + ch.num + ': ' + ch.title : ch.title,
-            details: 'Page ' + lr.page + ' ¢ ' + cat.name,
+            details: 'Page ' + lr.page + ' - ' + cat.name,
             action: 'resumeLastReading()'
           };
         }
@@ -1299,7 +1359,7 @@ function findNextStep() {
       
       if (!p.read) {
         return {
-          type: 'next', icon: '"-',
+          type: 'next', icon: 'book',
           title: 'Read: ' + (ch.num ? 'Chapter ' + ch.num : ch.title),
           details: cat.name,
           action: "openChapter('" + (DOMAINS.includes(cat) ? 'domain' : 'book') + "','" + cat.id + "','" + ch.id + "')"
@@ -1307,24 +1367,25 @@ function findNextStep() {
       }
       if (!p.studied) {
         return {
-          type: 'next', icon: '"',
+          type: 'next', icon: 'heritage',
           title: 'Study: ' + (ch.num ? 'Chapter ' + ch.num : ch.title),
-          details: cat.name + ' ¢ Complete the study guide',
+          details: cat.name + ' - Complete the study guide',
           action: "openChapter('" + (DOMAINS.includes(cat) ? 'domain' : 'book') + "','" + cat.id + "','" + ch.id + "')"
         };
       }
       if (p.quizScore < 80) {
         return {
-          type: 'next', icon: 'âœ…',
+          type: 'next', icon: 'star',
           title: 'Quiz: ' + (ch.num ? 'Chapter ' + ch.num : ch.title),
-          details: cat.name + ' ¢ Score 80%+ to pass',
+          details: cat.name + ' - Score 80%+ to pass',
           action: "openChapter('" + (DOMAINS.includes(cat) ? 'domain' : 'book') + "','" + cat.id + "','" + ch.id + "')"
         };
       }
     }
   }
   
-  return {type: 'next', icon: 'Ž‰', title: 'All Complete!', details: 'Review any material', action: 'showNav(\'study\')'};
+  return {type: 'next', icon: 'star', title: 'All Complete!', details: 'Review any material', action: 'showNav('study')'};
+}
 }
 
 function renderQuickBookmarks() {
@@ -1334,7 +1395,7 @@ function renderQuickBookmarks() {
   }
   
   var recent = annotations.bookmarks.slice(0, 3);
-  var html = '<h3 class="text-sm font-semibold text-slate-500 uppercase mb-2">"‘ Quick Bookmarks</h3>';
+  var html = '<h3 class="text-sm font-semibold text-slate-500 uppercase mb-2">🔖 Quick Bookmarks</h3>';
   recent.forEach(b => {
     html += '<div class="bookmark-quick" onclick="goToBookmark(\'' + b.chapterId + '\',' + b.page + ')"><div class="flex items-center justify-between"><span class="font-medium text-sm">' + (b.chapterTitle || 'Chapter') + '</span><span class="text-xs text-amber-700">Page ' + b.page + '</span></div></div>';
   });
@@ -1370,9 +1431,9 @@ function renderRecentActivity() {
     return;
   }
   
-  var html = '<h3 class="text-sm font-semibold text-slate-500 uppercase mb-2">• Recent Activity</h3>';
+  var html = '<h3 class="text-sm font-semibold text-slate-500 uppercase mb-2">📋 Recent Activity</h3>';
   recentActivity.slice(0, 3).forEach(a => {
-    var icon = a.type === 'read' ? '"-' : a.type === 'study' ? '"' : a.type === 'quiz' ? 'âœ…' : '"Œ';
+    var icon = a.type === 'read' ? '"-' : a.type === 'study' ? '"Â' : a.type === 'quiz' ? 'Ã¢Å“â€¦' : '"Å’';
     var timeAgo = getTimeAgo(a.time);
     html += '<div class="recent-activity"><div class="flex items-center justify-between"><span class="font-medium text-sm">' + icon + ' ' + a.title + '</span><span class="text-xs text-slate-400">' + timeAgo + '</span></div><p class="text-xs text-slate-500 mt-1">' + a.details + '</p></div>';
   });
@@ -1400,7 +1461,7 @@ function renderDomainsSection() {
       var p = userProgress[d.id]?.[c.id] || {};
       if (p.read && p.studied && p.quizScore >= 80) done++;
     });
-    html += '<div class="chapter-item" onclick="openCategory(\'domain\',\'' + d.id + '\')"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + d.color + ' flex items-center justify-center text-xl mr-3">' + d.icon + '</div><div class="flex-1"><div class="font-medium">' + d.name + '</div><div class="text-xs text-slate-500">' + d.chapters.length + ' chapter' + (d.chapters.length > 1 ? 's' : '') + '</div></div><div class="text-sm text-slate-500 mr-2">' + done + '/' + d.chapters.length + '</div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>';
+    html += '<div class="chapter-item" onclick="openCategory(\'domain\',\'' + d.id + '\')"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + d.color + ' flex items-center justify-center text-xl mr-3">' + renderIcon(d.icon) + '</div><div class="flex-1"><div class="font-medium">' + d.name + '</div><div class="text-xs text-slate-500">' + d.chapters.length + ' chapter' + (d.chapters.length > 1 ? 's' : '') + '</div></div><div class="text-sm text-slate-500 mr-2">' + done + '/' + d.chapters.length + '</div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>';
   });
   document.getElementById('domains-content').innerHTML = html;
   document.getElementById('domains-content').classList.toggle('expanded', expandedSections.domains);
@@ -1411,14 +1472,14 @@ function renderBooksSection() {
   var html = '';
   BOOKS.forEach(b => {
     if (b.comingSoon) {
-      html += '<div class="chapter-item opacity-50"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl mr-3">' + b.icon + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">' + b.desc + '</div></div><span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full">Coming Soon</span></div>';
+      html += '<div class="chapter-item opacity-50"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl mr-3">' + renderIcon(b.icon) + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">' + b.desc + '</div></div><span class="text-xs bg-slate-100 text-slate-500 px-2 py-1 rounded-full">Coming Soon</span></div>';
     } else {
       var done = 0;
       b.chapters.forEach(c => {
         var p = userProgress[b.id]?.[c.id] || {};
         if (p.read && p.studied && p.quizScore >= 80) done++;
       });
-      html += '<div class="chapter-item" onclick="openCategory(\'book\',\'' + b.id + '\')"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl mr-3">' + b.icon + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">' + b.chapters.length + ' chapters</div></div><div class="text-sm text-slate-500 mr-2">' + done + '/' + b.chapters.length + '</div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>';
+      html += '<div class="chapter-item" onclick="openCategory(\'book\',\'' + b.id + '\')"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl mr-3">' + renderIcon(b.icon) + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">' + b.chapters.length + ' chapters</div></div><div class="text-sm text-slate-500 mr-2">' + done + '/' + b.chapters.length + '</div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div>';
     }
   });
   document.getElementById('books-content').innerHTML = html;
@@ -1431,7 +1492,7 @@ function openCategory(type, id) {
   if (!cat || cat.comingSoon) return;
   showScreen('study');
   
-  var html = '<div class="flex items-center gap-3 mb-4"><div class="w-12 h-12 rounded-xl bg-gradient-to-br ' + cat.color + ' flex items-center justify-center text-2xl">' + cat.icon + '</div><div><h2 class="font-bold text-lg">' + cat.name + '</h2><p class="text-sm text-slate-500">' + cat.chapters.length + ' chapters</p></div></div>';
+  var html = '<div class="flex items-center gap-3 mb-4"><div class="w-12 h-12 rounded-xl bg-gradient-to-br ' + cat.color + ' flex items-center justify-center text-2xl">' + renderIcon(cat.icon, 24) + '</div><div><h2 class="font-bold text-lg">' + cat.name + '</h2><p class="text-sm text-slate-500">' + cat.chapters.length + ' chapters</p></div></div>';
   
   cat.chapters.forEach(ch => {
     var p = userProgress[cat.id]?.[ch.id] || {};
@@ -1440,12 +1501,12 @@ function openCategory(type, id) {
     
     html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openChapter(\'' + type + '\',\'' + cat.id + '\',\'' + ch.id + '\')">';
     html += '<div class="flex items-center gap-3">';
-    html += allDone ? '<div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">Done</div>' : '<div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold">' + (ch.num || '¢') + '</div>';
+    html += allDone ? '<div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">Done</div>' : '<div class="w-10 h-10 bg-slate-200 rounded-full flex items-center justify-center text-slate-600 font-bold">' + (ch.num || 'Â¢') + '</div>';
     html += '<div class="flex-1"><div class="font-medium">' + title + '</div>';
     html += '<div class="flex gap-3 mt-1">';
     html += '<span class="text-xs ' + (p.read ? 'text-green-600' : 'text-slate-400') + '">"- Read</span>';
-    html += '<span class="text-xs ' + (p.studied ? 'text-green-600' : 'text-slate-400') + '">" Study</span>';
-    html += '<span class="text-xs ' + (p.quizScore >= 80 ? 'text-green-600' : p.quizScore > 0 ? 'text-amber-600' : 'text-slate-400') + '">âœ… ' + (p.quizScore > 0 ? p.quizScore + '%' : 'Quiz') + '</span>';
+    html += '<span class="text-xs ' + (p.studied ? 'text-green-600' : 'text-slate-400') + '">"Â Study</span>';
+    html += '<span class="text-xs ' + (p.quizScore >= 80 ? 'text-green-600' : p.quizScore > 0 ? 'text-amber-600' : 'text-slate-400') + '">Ã¢Å“â€¦ ' + (p.quizScore > 0 ? p.quizScore + '%' : 'Quiz') + '</span>';
     html += '</div></div>';
     html += '<svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>';
     html += '</div></div>';
@@ -1457,21 +1518,21 @@ function openCategory(type, id) {
 function renderStudyList() {
   var html = '<h2 class="font-bold text-lg mb-4">All Study Materials</h2>';
   
-  html += '<h3 class="font-medium text-slate-500 text-sm uppercase mb-3">"‹ Licensing Domains</h3>';
+  html += '<h3 class="font-medium text-slate-500 text-sm uppercase mb-3">📚 Licensing Domains</h3>';
   DOMAINS.forEach(d => {
     var done = 0;
     d.chapters.forEach(c => { var p = userProgress[d.id]?.[c.id] || {}; if (p.read && p.studied && p.quizScore >= 80) done++; });
-    html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory(\'domain\',\'' + d.id + '\')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + d.color + ' flex items-center justify-center text-xl">' + d.icon + '</div><div class="flex-1"><div class="font-medium">' + d.name + '</div><div class="text-xs text-slate-500">' + d.chapters.length + ' chapters ¢ ' + done + ' complete</div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+    html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory(\'domain\',\'' + d.id + '\')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + d.color + ' flex items-center justify-center text-xl">' + renderIcon(d.icon) + '</div><div class="flex-1"><div class="font-medium">' + d.name + '</div><div class="text-xs text-slate-500">' + d.chapters.length + ' chapters Â¢ ' + done + ' complete</div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
   });
   
-  html += '<h3 class="font-medium text-slate-500 text-sm uppercase mb-3 mt-6">"š Required Books</h3>';
+  html += '<h3 class="font-medium text-slate-500 text-sm uppercase mb-3 mt-6">"Å¡ Required Books</h3>';
   BOOKS.forEach(b => {
     if (b.comingSoon) {
-      html += '<div class="main-card p-4 mb-3 opacity-50"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl">' + b.icon + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">Coming Soon</div></div></div></div>';
+      html += '<div class="main-card p-4 mb-3 opacity-50"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl">' + renderIcon(b.icon) + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">Coming Soon</div></div></div></div>';
     } else {
       var done = 0;
       b.chapters.forEach(c => { var p = userProgress[b.id]?.[c.id] || {}; if (p.read && p.studied && p.quizScore >= 80) done++; });
-      html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory(\'book\',\'' + b.id + '\')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl">' + b.icon + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">' + b.chapters.length + ' chapters ¢ ' + done + ' complete</div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
+      html += '<div class="main-card p-4 mb-3 cursor-pointer" onclick="openCategory(\'book\',\'' + b.id + '\')"><div class="flex items-center gap-3"><div class="w-10 h-10 rounded-lg bg-gradient-to-br ' + b.color + ' flex items-center justify-center text-xl">' + renderIcon(b.icon) + '</div><div class="flex-1"><div class="font-medium">' + b.name + '</div><div class="text-xs text-slate-500">' + b.chapters.length + ' chapters Â¢ ' + done + ' complete</div></div><svg class="w-5 h-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></div></div>';
     }
   });
   
@@ -1510,13 +1571,13 @@ function renderOverviewTab() {
   var p = userProgress[currentCategory.id]?.[ch.id] || {};
   var sg = ch.studyGuide || getDefaultStudyGuide(ch);
   
-  var html = '<div class="main-card p-4 mb-4"><h3 class="font-bold text-lg mb-2">"‹ Chapter Summary</h3><p class="text-slate-600 leading-relaxed">' + (ch.summary || 'Study this chapter to learn important theological foundations.') + '</p></div>';
+  var html = '<div class="main-card p-4 mb-4"><h3 class="font-bold text-lg mb-2">📚 Chapter Summary</h3><p class="text-slate-600 leading-relaxed">' + (ch.summary || 'Study this chapter to learn important theological foundations.') + '</p></div>';
   
   // Progress card
   html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">Your Progress</h3><div class="space-y-3">';
   html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">"-</span> Reading</span>' + (p.read ? '<span class="text-green-600 font-medium">Done Complete</span>' : '<span class="text-slate-400">Not started</span>') + '</div>';
-  html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">"</span> Study Guide</span>' + (p.studied ? '<span class="text-green-600 font-medium">Done Complete</span>' : '<span class="text-slate-400">Not started</span>') + '</div>';
-  html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">âœ…</span> Quiz</span>';
+  html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">"Â</span> Study Guide</span>' + (p.studied ? '<span class="text-green-600 font-medium">Done Complete</span>' : '<span class="text-slate-400">Not started</span>') + '</div>';
+  html += '<div class="flex items-center justify-between"><span class="flex items-center gap-2"><span class="text-lg">Ã¢Å“â€¦</span> Quiz</span>';
   if (p.quizScore >= 80) html += '<span class="text-green-600 font-medium">Done Passed ' + p.quizScore + '%</span>';
   else if (p.quizScore > 0) html += '<span class="text-amber-600">' + p.quizScore + '% (need 80%)</span>';
   else html += '<span class="text-slate-400">Not taken</span>';
@@ -1524,16 +1585,16 @@ function renderOverviewTab() {
   
   // Learning objectives
   if (sg.objectives && sg.objectives.length > 0) {
-    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">Ž¯ Learning Objectives</h3><div class="space-y-2">';
+    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">🎯 Learning Objectives</h3><div class="space-y-2">';
     sg.objectives.forEach(obj => {
-      html += '<div class="flex items-start gap-2"><span class="text-green-500 mt-0.5">â-‹</span><span class="text-slate-600 text-sm">' + obj + '</span></div>';
+      html += '<div class="flex items-start gap-2"><span class="text-green-500 mt-0.5">Ã¢-â€¹</span><span class="text-slate-600 text-sm">' + obj + '</span></div>';
     });
     html += '</div></div>';
   }
   
   // Key terms
   if (sg.keyTerms && sg.keyTerms.length > 0) {
-    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">"š Key Terms</h3><div class="space-y-2">';
+    html += '<div class="main-card p-4 mb-4"><h3 class="font-bold mb-3">"Å¡ Key Terms</h3><div class="space-y-2">';
     sg.keyTerms.forEach(t => {
       if (typeof t === 'object') {
         html += '<div class="pb-2 border-b border-slate-100 last:border-0"><span class="key-term">' + t.term + '</span><span class="text-slate-600 text-sm ml-2">" ' + t.def + '</span></div>';
@@ -1554,7 +1615,7 @@ function renderOverviewTab() {
   }
   
   // Action buttons
-  html += '<div class="grid grid-cols-2 gap-3"><button onclick="switchChapterTab(\'read\')" class="py-3 bg-red-600 text-white rounded-xl font-medium">"- Read Chapter</button><button onclick="switchChapterTab(\'study\')" class="py-3 border border-red-600 text-red-600 rounded-xl font-medium">" Study Guide</button></div>';
+  html += '<div class="grid grid-cols-2 gap-3"><button onclick="switchChapterTab(\'read\')" class="py-3 bg-blue-600 text-white rounded-xl font-medium">"- Read Chapter</button><button onclick="switchChapterTab(\'study\')" class="py-3 border border-blue-600 text-blue-600 rounded-xl font-medium">"Â Study Guide</button></div>';
   
   document.getElementById('chapter-tab-overview').innerHTML = html;
 }
@@ -1594,9 +1655,9 @@ function showReadPreview(content) {
   
   var html = '<div class="main-card p-4 mb-4"><div class="text-slate-600 leading-relaxed">' + preview + '...</div></div>';
   html += '<div class="space-y-3">';
-  html += '<button onclick="openReader()" class="w-full py-3 bg-red-600 text-white rounded-xl font-medium">Open Full Reader</button>';
+  html += '<button onclick="openReader()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-medium">Open Full Reader</button>';
   if (p.lastPage > 1) {
-    html += '<button onclick="openReader(' + p.lastPage + ')" class="w-full py-3 border border-red-600 text-red-600 rounded-xl font-medium">Resume from Page ' + p.lastPage + '</button>';
+    html += '<button onclick="openReader(' + p.lastPage + ')" class="w-full py-3 border border-blue-600 text-blue-600 rounded-xl font-medium">Resume from Page ' + p.lastPage + '</button>';
   }
   html += '<button onclick="markRead()" class="w-full py-3 border border-slate-300 rounded-xl text-slate-600">' + (p.read ? 'Marked as Read' : 'Mark as Read (skip reading)') + '</button>';
   html += '</div>';
@@ -1631,15 +1692,15 @@ function renderStudySection() {
   var section = sg.sections[studyIndex];
   
   var html = '<div class="study-container">';
-  html += '<div class="flex items-center justify-between mb-4"><span class="text-sm text-slate-500">Section ' + (studyIndex + 1) + ' of ' + sg.sections.length + '</span><div class="h-2 flex-1 bg-slate-200 rounded-full mx-4"><div class="h-full bg-red-500 rounded-full transition-all" style="width:' + ((studyIndex + 1) / sg.sections.length * 100) + '%"></div></div></div>';
+  html += '<div class="flex items-center justify-between mb-4"><span class="text-sm text-slate-500">Section ' + (studyIndex + 1) + ' of ' + sg.sections.length + '</span><div class="h-2 flex-1 bg-slate-200 rounded-full mx-4"><div class="h-full bg-blue-500 rounded-full transition-all" style="width:' + ((studyIndex + 1) / sg.sections.length * 100) + '%"></div></div></div>';
   
   html += '<div class="study-section"><h4>' + section.title + '</h4><div class="study-section-content">' + section.content + '</div></div>';
   html += '</div>';
   
   // Fixed navigation at bottom
   html += '<div class="study-nav-fixed">';
-  html += '<button onclick="prevStudySection()" class="flex-1 px-6 py-3 border border-slate-300 rounded-xl font-medium ' + (studyIndex === 0 ? 'opacity-30 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 bg-white') + '" ' + (studyIndex === 0 ? 'disabled' : '') + '><- Previous</button>';
-  html += '<button onclick="nextStudySection()" class="flex-1 px-6 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700">' + (studyIndex === sg.sections.length - 1 ? 'Complete Study' : 'Next') + '</button>';
+  html += '<button onclick="prevStudySection()" class="flex-1 px-6 py-3 border border-slate-300 rounded-xl font-medium ' + (studyIndex === 0 ? 'opacity-30 cursor-not-allowed bg-slate-50' : 'hover:bg-slate-50 bg-white') + '" ' + (studyIndex === 0 ? 'disabled' : '') + '><-Â Previous</button>';
+  html += '<button onclick="nextStudySection()" class="flex-1 px-6 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700">' + (studyIndex === sg.sections.length - 1 ? 'Complete Study' : 'Next') + '</button>';
   html += '</div>';
   
   document.getElementById('chapter-tab-study').innerHTML = html;
@@ -1711,7 +1772,7 @@ function renderQuizQuestion() {
   html += '<div id="quiz-feedback" class="hidden mt-4 p-4 rounded-xl"></div>';
   html += '</div>';
   
-  html += '<button id="quiz-submit-btn" onclick="submitQuizAnswer()" class="w-full py-3 bg-red-600 text-white rounded-xl font-medium disabled:opacity-30 disabled:cursor-not-allowed" disabled>Check Answer</button>';
+  html += '<button id="quiz-submit-btn" onclick="submitQuizAnswer()" class="w-full py-3 bg-blue-600 text-white rounded-xl font-medium disabled:opacity-30 disabled:cursor-not-allowed" disabled>Check Answer</button>';
   html += '<button id="quiz-next-btn" onclick="nextQuizQuestion()" class="w-full py-3 bg-green-600 text-white rounded-xl font-medium hidden">Next Question</button>';
   
   document.getElementById('chapter-tab-quiz').innerHTML = html;
@@ -1739,7 +1800,7 @@ function submitQuizAnswer() {
   var fb = document.getElementById('quiz-feedback');
   fb.classList.remove('hidden');
   fb.className = 'mt-4 p-4 rounded-xl ' + (correct ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200');
-  fb.innerHTML = '<div class="font-bold ' + (correct ? 'text-green-800' : 'text-red-800') + '">' + (correct ? 'Done Correct!' : 'âœ- Incorrect') + '</div><div class="text-sm mt-2 ' + (correct ? 'text-green-700' : 'text-red-700') + '">' + q.explanation + '</div>';
+  fb.innerHTML = '<div class="font-bold ' + (correct ? 'text-green-800' : 'text-red-800') + '">' + (correct ? 'Done Correct!' : 'Ã¢Å“- Incorrect') + '</div><div class="text-sm mt-2 ' + (correct ? 'text-green-700' : 'text-blue-700') + '">' + q.explanation + '</div>';
   
   document.getElementById('quiz-submit-btn').classList.add('hidden');
   document.getElementById('quiz-next-btn').classList.remove('hidden');
@@ -1767,13 +1828,13 @@ function showQuizResults() {
   saveProgress();
   
   var html = '<div class="text-center py-8">';
-  html += '<div class="text-6xl mb-4">' + (passed ? 'Ž‰' : '"š') + '</div>';
+  html += '<div class="text-6xl mb-4">' + (passed ? 'Å½â€°' : '"Å¡') + '</div>';
   html += '<h2 class="text-2xl font-bold mb-2">' + (passed ? 'Congratulations!' : 'Keep Studying') + '</h2>';
   html += '<p class="text-slate-600 mb-6">' + (passed ? 'You passed with ' + pct + '%!' : 'You need 80% to pass. You scored ' + pct + '%.') + '</p>';
   
   html += '<div class="flex justify-center gap-4 mb-6">';
   html += '<div class="bg-green-50 rounded-xl p-4 min-w-[80px]"><div class="text-3xl font-bold text-green-600">' + quizScore + '</div><div class="text-sm text-green-700">Correct</div></div>';
-  html += '<div class="bg-red-50 rounded-xl p-4 min-w-[80px]"><div class="text-3xl font-bold text-red-600">' + (total - quizScore) + '</div><div class="text-sm text-red-700">Incorrect</div></div>';
+  html += '<div class="bg-red-50 rounded-xl p-4 min-w-[80px]"><div class="text-3xl font-bold text-blue-600">' + (total - quizScore) + '</div><div class="text-sm text-blue-700">Incorrect</div></div>';
   html += '</div>';
   
   if (passed) {
@@ -1782,7 +1843,7 @@ function showQuizResults() {
   
   html += '<div class="flex gap-3">';
   html += '<button onclick="renderQuizTab()" class="flex-1 py-3 border border-slate-300 rounded-xl font-medium hover:bg-slate-50">' + (passed ? 'Retake Quiz' : 'Try Again') + '</button>';
-  html += '<button onclick="switchChapterTab(\'overview\')" class="flex-1 py-3 bg-red-600 text-white rounded-xl font-medium hover:bg-red-700">Done</button>';
+  html += '<button onclick="switchChapterTab(\'overview\')" class="flex-1 py-3 bg-blue-600 text-white rounded-xl font-medium hover:bg-blue-700">Done</button>';
   html += '</div></div>';
   
   document.getElementById('chapter-tab-quiz').innerHTML = html;
@@ -1843,13 +1904,13 @@ function paginateContent(content) {
         return '<h3 class="text-lg font-bold text-slate-800 mt-6 mb-2">' + para + '</h3>';
       }
       if (/^Chapter\s+(One|Two|Three|Four|Five|Six|Seven|Eight|Nine|Ten|\d+)/i.test(para)) {
-        return '<h2 class="text-xl font-bold text-red-700 mt-4 mb-2">' + para + '</h2>';
+        return '<h2 class="text-xl font-bold text-blue-700 mt-4 mb-2">' + para + '</h2>';
       }
       if (/^(INTRODUCTION|CONCLUSION)$/i.test(para.trim())) {
         return '<h3 class="text-lg font-bold text-slate-800 mt-6 mb-2">' + para + '</h3>';
       }
       if (/^The Doctrine of/i.test(para)) {
-        return '<h2 class="text-xl font-bold text-red-700 mb-2">' + para + '</h2>';
+        return '<h2 class="text-xl font-bold text-blue-700 mb-2">' + para + '</h2>';
       }
       if (/^\d+\.\s/.test(para)) {
         return '<p class="ml-4 mb-3">' + para.replace(/\n/g, ' ') + '</p>';
@@ -2184,7 +2245,7 @@ function toggleBookmark() {
 // ========== NOTES SCREEN ==========
 function filterNotes(filter) {
   document.querySelectorAll('.notes-filter').forEach(b => {
-    b.classList.toggle('bg-red-600', b.textContent.toLowerCase().includes(filter));
+    b.classList.toggle('bg-blue-600', b.textContent.toLowerCase().includes(filter));
     b.classList.toggle('text-white', b.textContent.toLowerCase().includes(filter));
     b.classList.toggle('bg-slate-100', !b.textContent.toLowerCase().includes(filter));
   });
@@ -2204,7 +2265,7 @@ function filterNotes(filter) {
   items.sort((a, b) => new Date(b.created) - new Date(a.created));
   
   if (items.length === 0) {
-    document.getElementById('notes-list').innerHTML = '<div class="text-center py-12 text-slate-500"><div class="text-4xl mb-4">"</div><p>No ' + filter + ' yet</p><p class="text-sm mt-2">Highlight text or add notes while reading</p></div>';
+    document.getElementById('notes-list').innerHTML = '<div class="text-center py-12 text-slate-500"><div class="text-4xl mb-4">"Â</div><p>No ' + filter + ' yet</p><p class="text-sm mt-2">Highlight text or add notes while reading</p></div>';
     return;
   }
   
@@ -2245,7 +2306,7 @@ function deleteAnnotation(type, id) {
   else if (type === 'bookmark') annotations.bookmarks = annotations.bookmarks.filter(b => b.id !== id);
   
   saveProgress();
-  filterNotes(document.querySelector('.notes-filter.bg-red-600')?.textContent.toLowerCase() || 'all');
+  filterNotes(document.querySelector('.notes-filter.bg-blue-600')?.textContent.toLowerCase() || 'all');
 }
 
 // ========== PROFILE SCREEN ==========
@@ -2309,6 +2370,38 @@ function saveVoicePref() {
   readerSettings.voice = v;
   localStorage.setItem('readerSettings', JSON.stringify(readerSettings));
 }
+
+function toggleDarkMode() {
+  var isDark = document.body.classList.toggle('dark-mode');
+  localStorage.setItem('darkMode', isDark ? 'true' : 'false');
+  updateDarkModeToggle(isDark);
+}
+
+function updateDarkModeToggle(isDark) {
+  var toggle = document.getElementById('dark-mode-toggle');
+  var knob = document.getElementById('dark-mode-knob');
+  if (toggle && knob) {
+    if (isDark) {
+      toggle.classList.remove('bg-slate-300');
+      toggle.classList.add('bg-blue-500');
+      knob.style.transform = 'translateX(24px)';
+    } else {
+      toggle.classList.remove('bg-blue-500');
+      toggle.classList.add('bg-slate-300');
+      knob.style.transform = 'translateX(0)';
+    }
+  }
+}
+
+// Initialize dark mode on page load
+(function() {
+  var savedDark = localStorage.getItem('darkMode') === 'true';
+  if (savedDark) {
+    document.body.classList.add('dark-mode');
+  }
+  // Update toggle when profile renders
+  setTimeout(function() { updateDarkModeToggle(savedDark); }, 100);
+})();
 
 // ========== EVENT LISTENERS ==========
 document.getElementById('btn-login').onclick = handleLogin;
